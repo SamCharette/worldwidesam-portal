@@ -1,15 +1,13 @@
 import * as THREE from "https://unpkg.com/three@0.165.0/build/three.module.js";
 
 const apps = [
-  { name: "Hex", kind: "strategy game", code: "HX-01", url: "https://games.worldwidesam.net/hex", radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff },
-  { name: "Clawdtris", kind: "arcade stacker", code: "TR-02", url: "https://games.worldwidesam.net/tetris", radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b },
-  { name: "Circut Snap", kind: "puzzle lab", code: "CS-03", url: "https://games.worldwidesam.net/circutsnap", radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166 },
+  { name: "Hex", kind: "strategy game", code: "HX-01", url: "https://hex.worldwidesam.net", radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff },
+  { name: "Clawdtris", kind: "arcade stacker", code: "TR-02", url: "https://tetris.worldwidesam.net", radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b },
+  { name: "Circut Snap", kind: "puzzle lab", code: "CS-03", url: "https://circutsnap.worldwidesam.net", radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166 },
   { name: "Mission Control", kind: "command center", code: "MC-04", url: "https://missioncontrol.worldwidesam.net", radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf },
-  { name: "System Monitor", kind: "ops telemetry", code: "SY-05", url: "https://system.worldwidesam.net", radius: 8.1, speed: 0.05, size: 0.4, start: 4.65, color: 0xa579ff },
   { name: "RPG Catalog", kind: "library archive", code: "RP-06", url: "https://rpgs.worldwidesam.net", radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58 },
   { name: "Decisions Please", kind: "choice engine", code: "DP-07", url: "https://decisions.worldwidesam.net", radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff },
-  { name: "Ypsillon Overkill Dashboard", kind: "overkill metrics", code: "YO-08", url: "https://ypsillon.worldwidesam.net", radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b },
-  { name: "Brindlewood Bay Player Wiki", kind: "player wiki", code: "BW-09", url: "https://brindlewood.worldwidesam.net", radius: 9.55, speed: -0.037, size: 0.5, start: 2.0, color: 0xffd166 }
+  { name: "Ypsillon Overkill Dashboard", kind: "overkill metrics", code: "YO-08", url: "https://ypsillon.worldwidesam.net", radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b }
 ];
 
 const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
