@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Worldwide Sam Orbit</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="orbit-stage" aria-label="Worldwide Sam app orbit launcher">
+        <canvas id="orbitCanvas" aria-hidden="true"></canvas>
+        <div class="hud-grid" aria-hidden="true"></div>
+        <div class="vignette" aria-hidden="true"></div>
+
+        <nav class="brandbar" aria-label="Portal status">
+          <a class="brand-mark" href="https://worldwidesam.net" target="_blank" rel="noopener noreferrer" aria-label="Open worldwidesam.net in a new window">
+            <span class="brand-glyph">WS</span>
+            <span>
+              <strong>Worldwide Sam</strong>
+              <small>Orbital App Array</small>
+            </span>
+          </a>
+          <div class="status-rail" aria-label="Portal status readouts">
+            <span><b>09</b> orbiting apps</span>
+            <span><b id="clock">--:--</b> local</span>
+            <span><b>CLICK</b> a planet to launch</span>
+          </div>
+        </nav>
+
+        <header class="intro">
+          <p class="eyebrow">worldwidesam.net // public orbit map</p>
+          <h1>App Orbit</h1>
+          <p>Games, tools, dashboards, and wiki artifacts circling the Clawdia command star.</p>
+        </header>
+
+        <aside class="sun-card" aria-label="Clawdia command star">
+          <img src="assets/clawdia-mission-hero.png" alt="Cartoon Clawdia at a glowing command console">
+          <div>
+            <p class="eyebrow">Command Star</p>
+            <strong>Clawdia</strong>
+          </div>
+        </aside>
+
+        <div class="labels" id="labels" aria-label="Application links"></div>
+      </section>
+    </main>
+
+    <template id="labelTemplate">
+      <a class="planet-label" target="_blank" rel="noopener noreferrer">
+        <span class="planet-code"></span>
+        <strong class="planet-name"></strong>
+        <span class="planet-kind"></span>
+      </a>
+    </template>
+
+    <script type="module" src="app.js?v=3"></script>
+  </body>
+</html>
