@@ -229,9 +229,9 @@ h1 {
 .planet-label {
   --tone: var(--cyan);
   position: absolute;
-  min-width: 172px;
-  max-width: 230px;
-  padding: 12px 14px;
+  min-width: 128px;
+  max-width: 210px;
+  padding: 10px 12px;
   color: var(--tone);
   pointer-events: auto;
   transform: translate(-50%, -50%);
@@ -262,16 +262,10 @@ h1 {
 
 .planet-name {
   display: block;
-  margin: 7px 0 4px;
+  margin: 6px 0 0;
   color: var(--ink);
-  font-size: clamp(1rem, 1.25vw, 1.28rem);
+  font-size: clamp(0.98rem, 1.08vw, 1.16rem);
   line-height: 1.02;
-}
-
-.planet-kind {
-  display: block;
-  color: var(--muted);
-  font-size: 0.86rem;
 }
 
 .planet-label:nth-child(6n + 1) { --tone: var(--cyan); }
@@ -286,7 +280,7 @@ h1 {
   z-index: 18;
   right: clamp(18px, 4vw, 58px);
   top: 50%;
-  width: min(360px, calc(100vw - 36px));
+  width: min(390px, calc(100vw - 36px));
   padding: 22px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius);
@@ -350,11 +344,46 @@ h1 {
   text-transform: uppercase;
 }
 
+.planet-card .card-domain {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
 .planet-card #cardSummary {
   margin-top: 16px;
   color: #dce2ed;
   font-size: 1rem;
   line-height: 1.5;
+}
+
+.card-highlights {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-highlights li {
+  position: relative;
+  padding-left: 16px;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.38;
+}
+
+.card-highlights li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 14px rgba(86, 245, 191, 0.72);
+  transform: translateY(-50%);
 }
 
 .planet-card a {

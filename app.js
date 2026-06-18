@@ -1,13 +1,13 @@
 import * as THREE from "https://unpkg.com/three@0.165.0/build/three.module.js";
 
 const apps = [
-  { name: "Hex", kind: "strategy game", code: "HX-01", url: "https://hex.worldwidesam.net", radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff, summary: "A compact strategy game space for hex-grid experiments and tactical play." },
-  { name: "Clawdtris", kind: "arcade stacker", code: "TR-02", url: "https://tetris.worldwidesam.net", radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b, summary: "A bright block-stacking arcade build with quick restarts and score-chasing energy." },
-  { name: "Circut Snap", kind: "puzzle lab", code: "CS-03", url: "https://circutsnap.worldwidesam.net", radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166, summary: "A circuit-flavored puzzle lab for snapping together logic, patterns, and tiny sparks of order." },
-  { name: "Mission Control", kind: "command center", code: "MC-04", url: "https://missioncontrol.worldwidesam.net", radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf, summary: "The operational dashboard for Clawdia-facing status, tools, and command-center experiments." },
-  { name: "RPG Catalog", kind: "library archive", code: "RP-06", url: "https://rpgs.worldwidesam.net", radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58, summary: "A public archive surface for RPG library and catalog artifacts." },
-  { name: "Decisions Please", kind: "choice engine", code: "DP-07", url: "https://decisions.worldwidesam.net", radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff, summary: "A lightweight decision helper for turning options into an actual next move." },
-  { name: "Ypsillon Overkill Dashboard", kind: "overkill metrics", code: "YO-08", url: "https://ypsillon.worldwidesam.net", radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics." }
+  { name: "Hex", kind: "strategy game", code: "HX-01", url: "https://hex.worldwidesam.net", radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff, summary: "A compact strategy game space for hex-grid experiments and tactical play.", highlights: ["Hex-grid board interactions", "Fast tactical experiments", "Public game prototype"] },
+  { name: "Clawdtris", kind: "arcade stacker", code: "TR-02", url: "https://tetris.worldwidesam.net", radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b, summary: "A bright block-stacking arcade build with quick restarts and score-chasing energy.", highlights: ["Classic falling-block rhythm", "Immediate restart loop", "Keyboard-first arcade feel"] },
+  { name: "Circuit Snap", kind: "puzzle lab", code: "CS-03", url: "https://circutsnap.worldwidesam.net", radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166, summary: "A circuit-flavored puzzle lab for snapping together logic, patterns, and tiny sparks of order.", highlights: ["Logic puzzle experiments", "Circuit-board visual language", "Small, focused challenge loops"] },
+  { name: "Mission Control", kind: "command center", code: "MC-04", url: "https://missioncontrol.worldwidesam.net", radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf, summary: "The operational dashboard for Clawdia-facing status, tools, and command-center experiments.", highlights: ["Assistant status surfaces", "Workspace tools and readouts", "Command-center UI experiments"] },
+  { name: "RPG Catalog", kind: "library archive", code: "RP-06", url: "https://rpgs.worldwidesam.net", radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58, summary: "A public archive surface for RPG library and catalog artifacts.", highlights: ["Collection browsing", "Archive-oriented presentation", "Public library artifacts"] },
+  { name: "Decisions Please", kind: "choice engine", code: "DP-07", url: "https://decisions.worldwidesam.net", radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff, summary: "A lightweight decision helper for turning options into an actual next move.", highlights: ["Option comparison", "Small decision workflows", "Fast answer-oriented interface"] },
+  { name: "Ypsillon Overkill Dashboard", kind: "overkill metrics", code: "YO-08", url: "https://ypsillon.worldwidesam.net", radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] }
 ];
 
 const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -22,7 +22,9 @@ const cardClose = document.querySelector("#cardClose");
 const cardCode = document.querySelector("#cardCode");
 const cardName = document.querySelector("#cardName");
 const cardKind = document.querySelector("#cardKind");
+const cardDomain = document.querySelector("#cardDomain");
 const cardSummary = document.querySelector("#cardSummary");
+const cardHighlights = document.querySelector("#cardHighlights");
 const cardLink = document.querySelector("#cardLink");
 
 function updateClock() {
@@ -158,7 +160,7 @@ function makePlanetTexture(app) {
 
     for (let y = 0; y < size; y += 4) {
       const wave = Math.sin(y * 0.05 + random() * 4) * 18;
-      const alpha = 0.05 + random() * 0.12;
+      const alpha = 0.08 + random() * 0.16;
       context.fillStyle = y % 16 === 0 ? `rgba(255,255,255,${alpha})` : `rgba(0,0,0,${alpha})`;
       context.fillRect(wave, y, size, 3);
     }
@@ -167,9 +169,9 @@ function makePlanetTexture(app) {
       const x = random() * size;
       const y = random() * size;
       const radius = 8 + random() * 34;
-      const shade = random() > 0.48 ? colorStyle(app.color, 0.36) : colorStyle(app.color, -0.34);
+      const shade = random() > 0.48 ? colorStyle(app.color, 0.5) : colorStyle(app.color, -0.52);
       const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, `${shade}a8`);
+      gradient.addColorStop(0, `${shade}d6`);
       gradient.addColorStop(1, `${shade}00`);
       context.fillStyle = gradient;
       context.beginPath();
@@ -181,12 +183,12 @@ function makePlanetTexture(app) {
       const x = random() * size;
       const y = random() * size;
       const radius = 2 + random() * 8;
-      context.strokeStyle = "rgba(255,255,255,0.16)";
+      context.strokeStyle = "rgba(255,255,255,0.24)";
       context.lineWidth = 1;
       context.beginPath();
       context.arc(x, y, radius, 0, Math.PI * 2);
       context.stroke();
-      context.fillStyle = "rgba(0,0,0,0.12)";
+      context.fillStyle = "rgba(0,0,0,0.2)";
       context.beginPath();
       context.arc(x + radius * 0.22, y + radius * 0.18, radius * 0.72, 0, Math.PI * 2);
       context.fill();
@@ -327,9 +329,9 @@ function makePlanet(app) {
       color: 0xffffff,
       map: makePlanetTexture(app),
       emissive: app.color,
-      emissiveIntensity: 0.16,
-      roughness: 0.72,
-      metalness: 0.08
+      emissiveIntensity: 0.08,
+      roughness: 0.84,
+      metalness: 0.02
     })
   );
   planet.userData.app = app;
@@ -340,7 +342,7 @@ function makePlanet(app) {
     new THREE.MeshBasicMaterial({
       color: app.color,
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.08,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     })
@@ -352,7 +354,6 @@ function makePlanet(app) {
   label.setAttribute("aria-label", `Open ${app.name} in a new window`);
   label.querySelector(".planet-code").textContent = app.code;
   label.querySelector(".planet-name").textContent = app.name;
-  label.querySelector(".planet-kind").textContent = app.kind;
   labels.append(label);
 
   const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -465,7 +466,13 @@ function showPlanetCard(item) {
   cardCode.textContent = app.code;
   cardName.textContent = app.name;
   cardKind.textContent = app.kind;
+  cardDomain.textContent = new URL(app.url).hostname;
   cardSummary.textContent = app.summary;
+  cardHighlights.replaceChildren(...app.highlights.map((highlight) => {
+    const item = document.createElement("li");
+    item.textContent = highlight;
+    return item;
+  }));
   cardLink.href = app.url;
   cardLink.setAttribute("aria-label", `Visit ${app.name} in a new window`);
   planetCard.classList.add("is-open");
