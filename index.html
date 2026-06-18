@@ -25,7 +25,8 @@
           <div class="status-rail" aria-label="Portal status readouts">
             <span><b>07</b> orbiting apps</span>
             <span><b id="clock">--:--</b> local</span>
-            <span><b>CLICK</b> a planet to launch</span>
+            <span><b>PLANET</b> inspect</span>
+            <span><b>LABEL</b> launch</span>
           </div>
         </nav>
 
@@ -43,7 +44,17 @@
           </div>
         </aside>
 
+        <svg class="label-lines" id="labelLines" aria-hidden="true"></svg>
         <div class="labels" id="labels" aria-label="Application links"></div>
+
+        <aside class="planet-card" id="planetCard" aria-live="polite" aria-hidden="true">
+          <button class="card-close" id="cardClose" type="button" aria-label="Return to orbit view">&times;</button>
+          <p class="eyebrow" id="cardCode"></p>
+          <h2 id="cardName"></h2>
+          <p id="cardKind"></p>
+          <p id="cardSummary"></p>
+          <a id="cardLink" target="_blank" rel="noopener noreferrer">Visit Site</a>
+        </aside>
       </section>
     </main>
 
@@ -55,6 +66,6 @@
       </a>
     </template>
 
-    <script type="module" src="app.js?v=7"></script>
+    <script type="module" src="app.js?v=8"></script>
   </body>
 </html>

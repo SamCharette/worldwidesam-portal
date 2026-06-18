@@ -39,7 +39,8 @@ a {
 .orbit-stage,
 #orbitCanvas,
 .hud-grid,
-.vignette {
+.vignette,
+.label-lines {
   position: fixed;
   inset: 0;
 }
@@ -212,6 +213,19 @@ h1 {
   pointer-events: none;
 }
 
+.label-lines {
+  z-index: 7;
+  pointer-events: none;
+}
+
+.label-line {
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0;
+  filter: drop-shadow(0 0 8px currentColor);
+  transition: opacity 180ms ease;
+}
+
 .planet-label {
   --tone: var(--cyan);
   position: absolute;
@@ -239,7 +253,8 @@ h1 {
 }
 
 .planet-label:hover,
-.planet-label:focus-visible {
+.planet-label:focus-visible,
+.planet-label.is-active {
   z-index: 20;
   border-color: currentColor;
   outline: none;
@@ -266,6 +281,96 @@ h1 {
 .planet-label:nth-child(6n + 5) { --tone: var(--violet); }
 .planet-label:nth-child(6n + 6) { --tone: var(--orange); }
 
+.planet-card {
+  position: fixed;
+  z-index: 18;
+  right: clamp(18px, 4vw, 58px);
+  top: 50%;
+  width: min(360px, calc(100vw - 36px));
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius);
+  background: rgba(8, 11, 19, 0.76);
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-44%) translateX(18px);
+  transition: opacity 180ms ease, transform 180ms ease, border-color 180ms ease;
+}
+
+.planet-card.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0);
+}
+
+.card-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.card-close:hover,
+.card-close:focus-visible,
+.planet-card a:hover,
+.planet-card a:focus-visible {
+  border-color: var(--mint);
+  outline: none;
+}
+
+.planet-card h2 {
+  margin: 10px 38px 8px 0;
+  color: var(--ink);
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.planet-card p {
+  margin: 0;
+}
+
+.planet-card #cardKind {
+  color: var(--gold);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.planet-card #cardSummary {
+  margin-top: 16px;
+  color: #dce2ed;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.planet-card a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 20px;
+  padding: 0 16px;
+  border: 1px solid rgba(86, 245, 191, 0.42);
+  border-radius: var(--radius);
+  background: rgba(86, 245, 191, 0.12);
+  color: var(--ink);
+  font-weight: 850;
+}
+
 @media (max-width: 860px) {
   body {
     overflow-y: auto;
@@ -277,6 +382,12 @@ h1 {
   .hud-grid,
   .vignette {
     position: fixed;
+  }
+
+  .vignette {
+    background:
+      radial-gradient(circle at 50% 38%, rgba(7, 8, 13, 0.72) 0%, rgba(7, 8, 13, 0.82) 48%, rgba(5, 7, 12, 0.98) 100%),
+      linear-gradient(90deg, rgba(7, 8, 13, 0.96), transparent 32%, transparent 68%, rgba(7, 8, 13, 0.96));
   }
 
   .brandbar {
@@ -330,6 +441,10 @@ h1 {
     pointer-events: auto;
   }
 
+  .label-lines {
+    display: none;
+  }
+
   .planet-label {
     position: relative;
     left: auto !important;
@@ -338,10 +453,28 @@ h1 {
     max-width: none;
     transform: none !important;
   }
+
+  .planet-card {
+    position: fixed;
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+    transform: translateY(18px);
+  }
+
+  .planet-card.is-open {
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .planet-label {
+  .planet-label,
+  .label-line,
+  .planet-card {
     transition: none;
   }
 }
