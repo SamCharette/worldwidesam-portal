@@ -19,6 +19,7 @@ const canvas = document.querySelector("#orbitCanvas");
 const labels = document.querySelector("#labels");
 const labelLines = document.querySelector("#labelLines");
 const template = document.querySelector("#labelTemplate");
+const appCount = document.querySelector("#appCount");
 const clock = document.querySelector("#clock");
 const planetCard = document.querySelector("#planetCard");
 const cardClose = document.querySelector("#cardClose");
@@ -39,6 +40,7 @@ function updateClock() {
 
 updateClock();
 setInterval(updateClock, 30_000);
+appCount.textContent = String(apps.length).padStart(2, "0");
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
