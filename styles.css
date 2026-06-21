@@ -18,6 +18,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   min-height: 100%;
@@ -70,8 +74,8 @@ a {
 .vignette {
   pointer-events: none;
   background:
-    radial-gradient(circle at 50% 52%, rgba(7, 8, 13, 0.46) 0%, rgba(7, 8, 13, 0.52) 44%, rgba(5, 7, 12, 0.78) 100%),
-    linear-gradient(90deg, rgba(7, 8, 13, 0.9), transparent 24%, transparent 76%, rgba(7, 8, 13, 0.86));
+    radial-gradient(circle at 50% 52%, rgba(7, 8, 13, 0.18) 0%, rgba(7, 8, 13, 0.26) 44%, rgba(5, 7, 12, 0.62) 100%),
+    linear-gradient(90deg, rgba(7, 8, 13, 0.78), transparent 24%, transparent 76%, rgba(7, 8, 13, 0.72));
 }
 
 .brandbar,
@@ -206,6 +210,36 @@ h1 {
   font-size: 1.08rem;
 }
 
+.solar-back {
+  position: fixed;
+  z-index: 12;
+  left: 50%;
+  bottom: clamp(18px, 4vw, 48px);
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(86, 245, 191, 0.42);
+  border-radius: var(--radius);
+  background: rgba(8, 11, 19, 0.72);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+  transform: translateX(-50%);
+  backdrop-filter: blur(16px);
+}
+
+.solar-back:hover,
+.solar-back:focus-visible {
+  border-color: var(--mint);
+  outline: none;
+}
+
+.system-focus .intro,
+.system-focus .sun-card {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .labels {
   position: fixed;
   inset: 0;
@@ -222,7 +256,6 @@ h1 {
   stroke-width: 1.5;
   stroke-linecap: round;
   opacity: 0;
-  filter: drop-shadow(0 0 8px currentColor);
   transition: opacity 180ms ease;
 }
 
@@ -239,17 +272,9 @@ h1 {
   will-change: transform, opacity;
 }
 
-.planet-label::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -14px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 24px currentColor;
-  transform: translateY(-50%);
+.planet-label[role="button"] {
+  cursor: pointer;
+  min-width: 128px;
 }
 
 .planet-label:hover,

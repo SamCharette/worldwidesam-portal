@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#07080d">
     <title>Worldwide Sam Orbit</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=13">
   </head>
   <body>
     <main class="shell">
@@ -25,16 +25,18 @@
           <div class="status-rail" aria-label="Portal status readouts">
             <span><b id="appCount">--</b> orbiting apps</span>
             <span><b id="clock">--:--</b> local</span>
-            <span><b>PLANET</b> inspect</span>
-            <span><b>LABEL</b> launch</span>
+            <span><b>PLANET</b> focus</span>
+            <span><b>MOON</b> launch</span>
           </div>
         </nav>
 
         <header class="intro">
           <p class="eyebrow">worldwidesam.net // public orbit map</p>
           <h1>App Orbit</h1>
-          <p>Games, tools, dashboards, and wiki artifacts circling the Clawdia command star.</p>
+          <p>Choose a category planet, then launch the sites orbiting it.</p>
         </header>
+
+        <button class="solar-back" id="solarBack" type="button" hidden>Back to Solar System</button>
 
         <aside class="sun-card" aria-label="Clawdia command star">
           <img src="assets/clawdia-mission-hero.png" alt="Cartoon Clawdia at a glowing command console">
@@ -67,6 +69,6 @@
       </a>
     </template>
 
-    <script type="module" src="app.js?v=11"></script>
+    <script type="module" src="app.js?v=13"></script>
   </body>
 </html>

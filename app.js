@@ -1,17 +1,25 @@
 import * as THREE from "https://unpkg.com/three@0.165.0/build/three.module.js";
 
 const apps = [
-  { name: "Hex", kind: "strategy game", code: "HX-01", publicUrl: "https://hex.worldwidesam.net", localPort: 5173, radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff, summary: "A compact strategy game space for hex-grid experiments and tactical play.", highlights: ["Hex-grid board interactions", "Fast tactical experiments", "Public game prototype"] },
-  { name: "Clawdtris", kind: "arcade stacker", code: "TR-02", publicUrl: "https://tetris.worldwidesam.net", localPort: 4316, radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b, summary: "A bright block-stacking arcade build with quick restarts and score-chasing energy.", highlights: ["Classic falling-block rhythm", "Immediate restart loop", "Keyboard-first arcade feel"] },
-  { name: "Circuit Snap", kind: "puzzle lab", code: "CS-03", publicUrl: "https://circutsnap.worldwidesam.net", localPort: 4317, radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166, summary: "A circuit-flavored puzzle lab for snapping together logic, patterns, and tiny sparks of order.", highlights: ["Logic puzzle experiments", "Circuit-board visual language", "Small, focused challenge loops"] },
-  { name: "Mission Control", kind: "command center", code: "MC-04", publicUrl: "https://missioncontrol.worldwidesam.net", localPort: 8124, radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf, summary: "The operational dashboard for Clawdia-facing status, tools, and command-center experiments.", highlights: ["Assistant status surfaces", "Workspace tools and readouts", "Command-center UI experiments"] },
-  { name: "RPG Catalog", kind: "library archive", code: "RP-06", publicUrl: "https://rpgs.worldwidesam.net", localPort: 8099, radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58, summary: "A public archive surface for RPG library and catalog artifacts.", highlights: ["Collection browsing", "Archive-oriented presentation", "Public library artifacts"] },
-  { name: "Decisions Please", kind: "choice engine", code: "DP-07", publicUrl: "https://decisions.worldwidesam.net", localPort: 5178, radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff, summary: "A lightweight decision helper for turning options into an actual next move.", highlights: ["Option comparison", "Small decision workflows", "Fast answer-oriented interface"] },
-  { name: "Ypsillon Overkill Dashboard", kind: "overkill metrics", code: "YO-08", publicUrl: "https://ypsillon.worldwidesam.net", localPort: 4315, radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] },
-  { name: "Orbital Slingshot", kind: "gravity toy", code: "OS-09", publicUrl: "https://slingshot.worldwidesam.net/", localPort: 4320, radius: 8.35, speed: 0.052, size: 0.4, start: 4.6, color: 0x8df0a6, summary: "A drag-and-release gravity slingshot toy with curved trajectories, target rings, and flashy probe trails.", highlights: ["Drag to aim and release", "Visible gravity-bent trajectories", "Standalone local service on port 4320"] },
-  { name: "Marvel Champions Runner", kind: "table helper", code: "MR-10", publicUrl: "https://marvel.worldwidesam.net/", localPort: 4321, radius: 9.7, speed: -0.038, size: 0.44, start: 2.1, color: 0x2f7dff, summary: "A standalone Marvel Champions villain runner for keeping encounter flow, threat, health, and setup readable at the table.", highlights: ["New Game, Setup, Play, Board, Reference, and Guide tabs", "Browser-local table state", "Standalone local service on port 4321"] },
-  { name: "Foundry VTT", kind: "virtual tabletop", code: "FV-11", publicUrl: "https://foundry.worldwidesam.net/", localPort: 30000, radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] }
+  { name: "Hex", category: "games", kind: "strategy game", code: "HX-01", publicUrl: "https://hex.worldwidesam.net", localPort: 5173, radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff, summary: "A compact strategy game space for hex-grid experiments and tactical play.", highlights: ["Hex-grid board interactions", "Fast tactical experiments", "Public game prototype"] },
+  { name: "Clawdtris", category: "games", kind: "arcade stacker", code: "TR-02", publicUrl: "https://tetris.worldwidesam.net", localPort: 4316, radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b, summary: "A bright block-stacking arcade build with quick restarts and score-chasing energy.", highlights: ["Classic falling-block rhythm", "Immediate restart loop", "Keyboard-first arcade feel"] },
+  { name: "Circuit Snap", category: "games", kind: "puzzle lab", code: "CS-03", publicUrl: "https://circutsnap.worldwidesam.net", localPort: 4317, radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166, summary: "A circuit-flavored puzzle lab for snapping together logic, patterns, and tiny sparks of order.", highlights: ["Logic puzzle experiments", "Circuit-board visual language", "Small, focused challenge loops"] },
+  { name: "Mission Control", category: "tools", kind: "command center", code: "MC-04", publicUrl: "https://missioncontrol.worldwidesam.net", localPort: 8124, radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf, summary: "The operational dashboard for Clawdia-facing status, tools, and command-center experiments.", highlights: ["Assistant status surfaces", "Workspace tools and readouts", "Command-center UI experiments"] },
+  { name: "RPG Catalog", category: "tabletop", kind: "library archive", code: "RP-06", publicUrl: "https://rpgs.worldwidesam.net", localPort: 8099, radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58, summary: "A public archive surface for RPG library and catalog artifacts.", highlights: ["Collection browsing", "Archive-oriented presentation", "Public library artifacts"] },
+  { name: "Decisions Please", category: "tools", kind: "choice engine", code: "DP-07", publicUrl: "https://decisions.worldwidesam.net", localPort: 5178, radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff, summary: "A lightweight decision helper for turning options into an actual next move.", highlights: ["Option comparison", "Small decision workflows", "Fast answer-oriented interface"] },
+  { name: "Ypsillon Overkill Dashboard", category: "tools", kind: "overkill metrics", code: "YO-08", publicUrl: "https://ypsillon.worldwidesam.net", localPort: 4315, radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] },
+  { name: "Orbital Slingshot", category: "games", kind: "gravity toy", code: "OS-09", publicUrl: "https://slingshot.worldwidesam.net/", localPort: 4320, radius: 8.35, speed: 0.052, size: 0.4, start: 4.6, color: 0x8df0a6, summary: "A drag-and-release gravity slingshot toy with curved trajectories, target rings, and flashy probe trails.", highlights: ["Drag to aim and release", "Visible gravity-bent trajectories", "Standalone local service on port 4320"] },
+  { name: "Marvel Champions Runner", category: "tabletop", kind: "table helper", code: "MR-10", publicUrl: "https://marvel.worldwidesam.net/", localPort: 4321, radius: 9.7, speed: -0.038, size: 0.44, start: 2.1, color: 0x2f7dff, summary: "A standalone Marvel Champions villain runner for keeping encounter flow, threat, health, and setup readable at the table.", highlights: ["New Game, Setup, Play, Board, Reference, and Guide tabs", "Browser-local table state", "Standalone local service on port 4321"] },
+  { name: "Foundry VTT", category: "tabletop", kind: "virtual tabletop", code: "FV-11", publicUrl: "https://foundry.worldwidesam.net/", localPort: 30000, radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] }
 ];
+
+const systems = [
+  { id: "games", name: "Games", kind: "playable experiments", code: "GM", radius: 6.4, speed: 0.052, size: 0.56, start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, and gravity toys.", highlights: ["Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot"] },
+  { id: "tools", name: "Tools", kind: "utility surfaces", code: "TL", radius: 6.8, speed: -0.041, size: 0.52, start: 2.75, color: 0x5f7b42, summary: "Dashboards and helper apps.", highlights: ["Mission Control", "Decisions Please", "Ypsillon Overkill Dashboard"] },
+  { id: "tabletop", name: "Tabletop", kind: "RPG and table helpers", code: "TT", radius: 8.4, speed: 0.034, size: 0.58, start: 4.75, color: 0xae793c, summary: "RPG library, VTT, and campaign/table tools.", highlights: ["RPG Catalog", "Marvel Champions Runner", "Foundry VTT"] }
+];
+
+const systemById = new Map(systems.map((system) => [system.id, system]));
 
 const publicPortalHosts = new Set(["worldwidesam.net", "www.worldwidesam.net", "landing.worldwidesam.net"]);
 const currentHostname = window.location.hostname;
@@ -39,6 +47,7 @@ const canvas = document.querySelector("#orbitCanvas");
 const labels = document.querySelector("#labels");
 const labelLines = document.querySelector("#labelLines");
 const template = document.querySelector("#labelTemplate");
+const solarBack = document.querySelector("#solarBack");
 const appCount = document.querySelector("#appCount");
 const clock = document.querySelector("#clock");
 const planetCard = document.querySelector("#planetCard");
@@ -69,18 +78,29 @@ renderer.setClearColor(0x07080d, 1);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x07080d);
-scene.fog = new THREE.Fog(0x07080d, 12, 34);
+scene.fog = new THREE.Fog(0x07080d, 24, 58);
 
 const camera = new THREE.PerspectiveCamera(44, 1, 0.1, 100);
 camera.position.set(0, 7.4, 13.5);
 camera.lookAt(0, 0, 0);
 
-const ambient = new THREE.AmbientLight(0x8fb8ff, 0.72);
+const ambient = new THREE.AmbientLight(0xc7d5ff, 0.96);
 scene.add(ambient);
 
-const sunLight = new THREE.PointLight(0xffa64d, 2.4, 18, 2);
+const sunLight = new THREE.PointLight(0xffb15f, 4.2, 24, 2);
 sunLight.position.set(0, 0, 0);
 scene.add(sunLight);
+
+const planetFillLight = new THREE.DirectionalLight(0xf4f8ff, 2.45);
+planetFillLight.position.set(4.5, 7.2, 11.5);
+scene.add(planetFillLight);
+
+const planetSideLight = new THREE.DirectionalLight(0xaed6ff, 1.15);
+planetSideLight.position.set(-7, 4.4, 5.5);
+scene.add(planetSideLight);
+
+const planetOverheadLight = new THREE.HemisphereLight(0xdde8ff, 0x1c2318, 0.58);
+scene.add(planetOverheadLight);
 
 const sunGroup = new THREE.Group();
 scene.add(sunGroup);
@@ -124,6 +144,24 @@ function colorStyle(hexColor, amount = 0) {
   }
 
   return `#${color.getHexString()}`;
+}
+
+function terrainForBody(body) {
+  return {
+    "GM": "ocean",
+    "TL": "jungle",
+    "TT": "desert",
+    "HX-01": "ice",
+    "TR-02": "storm",
+    "CS-03": "desert",
+    "MC-04": "ocean",
+    "RP-06": "rust",
+    "DP-07": "marble",
+    "YO-08": "lava",
+    "OS-09": "jungle",
+    "MR-10": "cobalt",
+    "FV-11": "violet"
+  }[body.code] || "crater";
 }
 
 function makeSunTexture() {
@@ -176,44 +214,189 @@ function makeSunTexture() {
   });
 }
 
-function makePlanetTexture(app) {
-  const random = seededRandom(app.code);
+function makePlanetTexture(body) {
+  const random = seededRandom(body.code);
+  const terrain = terrainForBody(body);
   return makeCanvasTexture(256, (context, size) => {
-    const base = colorStyle(app.color, -0.06);
+    if (body.code === "GM") {
+      const ocean = context.createLinearGradient(0, 0, size, size);
+      ocean.addColorStop(0, "#2db4d6");
+      ocean.addColorStop(0.42, "#126aa0");
+      ocean.addColorStop(1, "#07345f");
+      context.fillStyle = ocean;
+      context.fillRect(0, 0, size, size);
+
+      for (let shelf = 0; shelf < 18; shelf += 1) {
+        context.fillStyle = shelf % 3 === 0 ? "rgba(212, 242, 235, 0.74)" : "rgba(64, 143, 115, 0.82)";
+        context.beginPath();
+        const x = random() * size;
+        const y = random() * size;
+        const width = 26 + random() * 74;
+        const height = 8 + random() * 28;
+        context.ellipse(x, y, width, height, random() * Math.PI, 0, Math.PI * 2);
+        context.fill();
+      }
+
+      for (let cap = 0; cap < 9; cap += 1) {
+        context.fillStyle = "rgba(236, 250, 255, 0.88)";
+        context.beginPath();
+        context.ellipse(random() * size, random() > 0.5 ? random() * 36 : size - random() * 36, 18 + random() * 40, 4 + random() * 14, random() * Math.PI, 0, Math.PI * 2);
+        context.fill();
+      }
+      return;
+    }
+
+    if (body.code === "TL") {
+      const land = context.createLinearGradient(0, 0, size, size);
+      land.addColorStop(0, "#9faf55");
+      land.addColorStop(0.5, "#348348");
+      land.addColorStop(1, "#674324");
+      context.fillStyle = land;
+      context.fillRect(0, 0, size, size);
+
+      for (let patch = 0; patch < 34; patch += 1) {
+        context.fillStyle = random() > 0.45 ? "rgba(28, 92, 45, 0.88)" : "rgba(121, 89, 45, 0.82)";
+        context.beginPath();
+        context.ellipse(random() * size, random() * size, 14 + random() * 44, 8 + random() * 25, random() * Math.PI, 0, Math.PI * 2);
+        context.fill();
+      }
+
+      for (let ridge = 0; ridge < 20; ridge += 1) {
+        context.strokeStyle = "rgba(226, 216, 150, 0.38)";
+        context.lineWidth = 1 + random() * 2;
+        context.beginPath();
+        let x = random() * size;
+        let y = random() * size;
+        context.moveTo(x, y);
+        for (let step = 0; step < 5; step += 1) {
+          x += random() * 40 - 20;
+          y += random() * 32 - 16;
+          context.lineTo(x, y);
+        }
+        context.stroke();
+      }
+      return;
+    }
+
+    if (body.code === "TT") {
+      const desert = context.createLinearGradient(0, 0, size, size);
+      desert.addColorStop(0, "#e3b566");
+      desert.addColorStop(0.48, "#b9783a");
+      desert.addColorStop(1, "#704728");
+      context.fillStyle = desert;
+      context.fillRect(0, 0, size, size);
+
+      for (let band = 0; band < 26; band += 1) {
+        context.strokeStyle = band % 2 ? "rgba(245, 199, 112, 0.56)" : "rgba(82, 54, 34, 0.5)";
+        context.lineWidth = 3 + random() * 8;
+        context.beginPath();
+        const y = (band / 26) * size + random() * 16;
+        for (let x = -20; x <= size + 20; x += 22) {
+          const wave = Math.sin(x * 0.035 + band) * (8 + random() * 12);
+          if (x === -20) {
+            context.moveTo(x, y + wave);
+          } else {
+            context.lineTo(x, y + wave);
+          }
+        }
+        context.stroke();
+      }
+
+      for (let crater = 0; crater < 20; crater += 1) {
+        const x = random() * size;
+        const y = random() * size;
+        const radius = 3 + random() * 10;
+        context.fillStyle = "rgba(50, 34, 24, 0.42)";
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fill();
+        context.strokeStyle = "rgba(238, 188, 107, 0.5)";
+        context.lineWidth = 1;
+        context.stroke();
+      }
+      return;
+    }
+
+    const base = colorStyle(body.color, terrain === "ice" || terrain === "marble" ? 0.28 : -0.24);
     context.fillStyle = base;
     context.fillRect(0, 0, size, size);
 
-    for (let y = 0; y < size; y += 4) {
-      const wave = Math.sin(y * 0.05 + random() * 4) * 18;
-      const alpha = 0.08 + random() * 0.16;
-      context.fillStyle = y % 16 === 0 ? `rgba(255,255,255,${alpha})` : `rgba(0,0,0,${alpha})`;
-      context.fillRect(wave, y, size, 3);
-    }
-
-    for (let patch = 0; patch < 28; patch += 1) {
-      const x = random() * size;
-      const y = random() * size;
-      const radius = 8 + random() * 34;
-      const shade = random() > 0.48 ? colorStyle(app.color, 0.5) : colorStyle(app.color, -0.52);
-      const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, `${shade}d6`);
-      gradient.addColorStop(1, `${shade}00`);
+    const drawBand = (y, height, lightness, alpha = 0.7) => {
+      const gradient = context.createLinearGradient(0, y - height, size, y + height);
+      gradient.addColorStop(0, `${colorStyle(body.color, -0.6)}00`);
+      gradient.addColorStop(0.5, `${colorStyle(body.color, lightness)}${Math.round(alpha * 255).toString(16).padStart(2, "0")}`);
+      gradient.addColorStop(1, `${colorStyle(body.color, -0.6)}00`);
       context.fillStyle = gradient;
       context.beginPath();
-      context.ellipse(x, y, radius * (0.55 + random()), radius * (0.28 + random() * 0.6), random() * Math.PI, 0, Math.PI * 2);
+      context.ellipse(size / 2, y, size * (0.34 + random() * 0.46), height, random() * 0.18 - 0.09, 0, Math.PI * 2);
       context.fill();
+    };
+
+    if (["storm", "cobalt", "violet"].includes(terrain)) {
+      for (let band = 0; band < 22; band += 1) {
+        const y = (band / 22) * size + random() * 10;
+        drawBand(y, 4 + random() * 14, band % 3 === 0 ? 0.28 : -0.42, 0.42 + random() * 0.28);
+      }
+    } else if (terrain === "lava") {
+      context.fillStyle = "#1a1014";
+      context.fillRect(0, 0, size, size);
+      for (let crack = 0; crack < 28; crack += 1) {
+        context.strokeStyle = random() > 0.45 ? "rgba(255, 118, 44, 0.82)" : "rgba(255, 214, 92, 0.56)";
+        context.lineWidth = 1 + random() * 3;
+        context.beginPath();
+        let x = random() * size;
+        let y = random() * size;
+        context.moveTo(x, y);
+        for (let step = 0; step < 5; step += 1) {
+          x += random() * 34 - 17;
+          y += random() * 34 - 17;
+          context.lineTo(x, y);
+        }
+        context.stroke();
+      }
+    } else if (terrain === "ice" || terrain === "marble") {
+      for (let vein = 0; vein < 42; vein += 1) {
+        context.strokeStyle = terrain === "ice" ? "rgba(31, 95, 128, 0.34)" : "rgba(60, 48, 82, 0.28)";
+        context.lineWidth = 1;
+        context.beginPath();
+        let x = random() * size;
+        let y = random() * size;
+        context.moveTo(x, y);
+        for (let step = 0; step < 4; step += 1) {
+          x += random() * 46 - 23;
+          y += random() * 24 - 12;
+          context.lineTo(x, y);
+        }
+        context.stroke();
+      }
+    } else {
+      for (let patch = 0; patch < 48; patch += 1) {
+        const x = random() * size;
+        const y = random() * size;
+        const radius = 8 + random() * 44;
+        const lightness = terrain === "desert" ? (random() > 0.5 ? 0.26 : -0.34) : (random() > 0.48 ? 0.34 : -0.56);
+        const shade = colorStyle(body.color, lightness);
+        const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, `${shade}b0`);
+        gradient.addColorStop(1, `${shade}00`);
+        context.fillStyle = gradient;
+        context.beginPath();
+        context.ellipse(x, y, radius * (0.5 + random()), radius * (0.24 + random() * 0.52), random() * Math.PI, 0, Math.PI * 2);
+        context.fill();
+      }
     }
 
-    for (let crater = 0; crater < 18; crater += 1) {
+    const craterCount = ["desert", "rust", "crater"].includes(terrain) ? 24 : 8;
+    for (let crater = 0; crater < craterCount; crater += 1) {
       const x = random() * size;
       const y = random() * size;
       const radius = 2 + random() * 8;
-      context.strokeStyle = "rgba(255,255,255,0.24)";
+      context.strokeStyle = "rgba(255,255,255,0.14)";
       context.lineWidth = 1;
       context.beginPath();
       context.arc(x, y, radius, 0, Math.PI * 2);
       context.stroke();
-      context.fillStyle = "rgba(0,0,0,0.2)";
+      context.fillStyle = "rgba(0,0,0,0.24)";
       context.beginPath();
       context.arc(x + radius * 0.22, y + radius * 0.18, radius * 0.72, 0, Math.PI * 2);
       context.fill();
@@ -329,6 +512,8 @@ const cameraTarget = new THREE.Vector3();
 const desiredCameraPosition = new THREE.Vector3();
 const desiredCameraTarget = new THREE.Vector3();
 let activePlanet = null;
+let activeSystem = null;
+let focusedSystemCore = null;
 let orbitTime = 0;
 
 function makeOrbit(radius, color) {
@@ -341,55 +526,141 @@ function makeOrbit(radius, color) {
   orbitRoot.add(line);
 }
 
-function makePlanet(app) {
-  makeOrbit(app.radius, app.color);
+function appsForSystem(systemId) {
+  return apps.filter((app) => app.category === systemId);
+}
+
+function orbitBodies() {
+  if (!activeSystem) {
+    return systems.map((system) => ({
+      type: "system",
+      data: system,
+      radius: system.radius,
+      speed: system.speed,
+      size: system.size,
+      start: system.start,
+      color: system.color
+    }));
+  }
+
+  const systemApps = appsForSystem(activeSystem.id);
+  return systemApps.map((app, index) => ({
+    type: "app",
+    data: app,
+    radius: 1.65 + index * 0.72,
+    speed: (index % 2 ? -0.06 : 0.068) * (1 - index * 0.035),
+    size: Math.max(0.12, Math.min(0.18, app.size * 0.38)),
+    start: 0.45 + (index / systemApps.length) * Math.PI * 2,
+    color: app.color
+  }));
+}
+
+function makeFocusedSystemCore() {
+  if (!activeSystem) return;
+
+  const coreGroup = new THREE.Group();
+  orbitRoot.add(coreGroup);
+  const coreSize = 1.18;
+
+  const core = new THREE.Mesh(
+    new THREE.SphereGeometry(coreSize, 56, 56),
+    new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      map: makePlanetTexture(activeSystem),
+      emissive: 0x000000,
+      emissiveIntensity: 0,
+      roughness: 0.96,
+      metalness: 0.01
+    })
+  );
+  coreGroup.add(core);
+
+  focusedSystemCore = { group: coreGroup, core };
+}
+
+function clearOrbitBodies() {
+  planets.splice(0, planets.length);
+  focusedSystemCore = null;
+  orbitRoot.clear();
+  labels.replaceChildren();
+  labelLines.replaceChildren();
+}
+
+function makePlanet(body) {
+  makeOrbit(body.radius, body.color);
 
   const group = new THREE.Group();
-  group.userData.app = app;
+  group.userData.body = body;
   orbitRoot.add(group);
 
   const planet = new THREE.Mesh(
-    new THREE.SphereGeometry(app.size, 36, 36),
+    new THREE.SphereGeometry(body.size, 44, 44),
     new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      map: makePlanetTexture(app),
-      emissive: app.color,
-      emissiveIntensity: 0.08,
-      roughness: 0.84,
-      metalness: 0.02
+      map: makePlanetTexture(body.data),
+      emissive: 0x000000,
+      emissiveIntensity: 0,
+      roughness: 0.95,
+      metalness: 0.01
     })
   );
-  planet.userData.app = app;
+  planet.userData.body = body;
   group.add(planet);
 
-  const glow = new THREE.Mesh(
-    new THREE.SphereGeometry(app.size * 1.55, 32, 32),
-    new THREE.MeshBasicMaterial({
-      color: app.color,
-      transparent: true,
-      opacity: 0.08,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    })
-  );
-  group.add(glow);
-
   const label = template.content.firstElementChild.cloneNode(true);
-  label.href = appUrl(app);
-  label.setAttribute("aria-label", `Open ${app.name} in a new window`);
-  label.querySelector(".planet-code").textContent = app.code;
-  label.querySelector(".planet-name").textContent = app.name;
+
+  if (body.type === "app") {
+    label.href = appUrl(body.data);
+    label.setAttribute("aria-label", `Open ${body.data.name} in a new window`);
+  } else {
+    label.removeAttribute("href");
+    label.setAttribute("role", "button");
+    label.setAttribute("tabindex", "0");
+    label.setAttribute("aria-label", `Focus ${body.data.name} planet`);
+    label.addEventListener("click", (event) => {
+      event.preventDefault();
+      focusSystem(body.data.id);
+    });
+    label.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        focusSystem(body.data.id);
+      }
+    });
+  }
+  label.querySelector(".planet-code").textContent = body.data.code;
+  label.querySelector(".planet-name").textContent = body.data.name;
   labels.append(label);
 
   const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
   line.classList.add("label-line");
-  line.setAttribute("stroke", `#${app.color.toString(16).padStart(6, "0")}`);
+  line.setAttribute("stroke", `#${body.color.toString(16).padStart(6, "0")}`);
   labelLines.append(line);
 
-  planets.push({ app, group, planet, label, line });
+  planets.push({ body, group, planet, label, line });
 }
 
-apps.forEach(makePlanet);
+function renderOrbitBodies() {
+  closePlanetCard();
+  clearOrbitBodies();
+  sunGroup.visible = !activeSystem;
+  solarBack.hidden = !activeSystem;
+  document.body.classList.toggle("system-focus", Boolean(activeSystem));
+  if (activeSystem) {
+    makeFocusedSystemCore();
+  }
+  orbitBodies().forEach(makePlanet);
+}
+
+function focusSystem(systemId) {
+  activeSystem = systemById.get(systemId) || null;
+  renderOrbitBodies();
+}
+
+function returnToSolarSystem() {
+  activeSystem = null;
+  renderOrbitBodies();
+}
 
 function resize() {
   const width = window.innerWidth;
@@ -416,14 +687,18 @@ function updatePlanetPositions(delta) {
   }
 
   for (const item of planets) {
-    const app = item.app;
-    const angle = app.start + (isReducedMotion ? 0 : orbitTime * app.speed);
-    const x = Math.cos(angle) * app.radius;
-    const z = Math.sin(angle) * app.radius * 0.62;
-    const y = Math.sin(angle * 1.8 + app.radius) * 0.22;
+    const body = item.body;
+    const angle = body.start + (isReducedMotion ? 0 : orbitTime * body.speed);
+    const x = Math.cos(angle) * body.radius;
+    const z = Math.sin(angle) * body.radius * 0.62;
+    const y = Math.sin(angle * 1.8 + body.radius) * 0.22;
 
     item.group.position.set(x, y, z);
-    item.planet.rotation.y += isReducedMotion ? 0 : 0.008;
+    item.planet.rotation.y += isReducedMotion ? 0 : 0.0065;
+  }
+
+  if (focusedSystemCore && !isReducedMotion) {
+    focusedSystemCore.core.rotation.y += 0.004;
   }
 }
 
@@ -447,21 +722,24 @@ function updateLabels() {
     const planetY = (planetPoint.y * -0.5 + 0.5) * height;
     vector.copy(planetPoint);
     const labelSide = planetX > width * 0.5 ? 1 : -1;
-    let x = planetX + labelSide * THREE.MathUtils.clamp(width * 0.085, 84, 132);
+    const labelDistance = activeSystem
+      ? THREE.MathUtils.clamp(width * 0.12, 128, 190)
+      : THREE.MathUtils.clamp(width * 0.18, 220, 300);
+    let x = planetX + labelSide * labelDistance;
     const y = planetY + THREE.MathUtils.clamp((0.5 - vector.y) * 32, -28, 28);
     const visible = vector.z < 1 && x > -150 && x < width + 150 && y > -80 && y < height + 80;
     const depth = THREE.MathUtils.clamp(1.12 - vector.z * 0.18, 0.58, 1);
     if (introGuard && x < introGuard && y > height * 0.2 && y < height * 0.76) {
       x = introGuard;
     }
+    x = THREE.MathUtils.clamp(x, 150, width - 150);
 
     item.label.style.left = `${x}px`;
     item.label.style.top = `${y}px`;
     item.label.style.opacity = visible && !activePlanet ? String(depth) : "0";
     item.label.style.transform = `translate(-50%, -50%) scale(${depth})`;
     item.label.classList.toggle("is-active", item === activePlanet);
-
-    const lineEndX = x - labelSide * 86 * depth;
+    const lineEndX = x - labelSide * 104 * depth;
     item.line.setAttribute("x1", String(planetX));
     item.line.setAttribute("y1", String(planetY));
     item.line.setAttribute("x2", String(lineEndX));
@@ -474,6 +752,9 @@ function updateCamera() {
   if (activePlanet) {
     desiredCameraTarget.copy(activePlanet.group.position);
     desiredCameraPosition.copy(activePlanet.group.position).add(new THREE.Vector3(0.4, 1.9, 3.1));
+  } else if (activeSystem) {
+    desiredCameraTarget.set(0, 0, 0);
+    desiredCameraPosition.set(isSmallScreen ? 0 : 0.9, isSmallScreen ? 8.4 : 5.5, isSmallScreen ? 15.8 : 9.5);
   } else {
     desiredCameraTarget.set(0, 0, 0);
     desiredCameraPosition.copy(baseCameraPosition);
@@ -486,8 +767,9 @@ function updateCamera() {
 }
 
 function showPlanetCard(item) {
+  if (item.body.type !== "app") return;
   activePlanet = item;
-  const { app } = item;
+  const app = item.body.data;
   const url = appUrl(app);
   cardCode.textContent = app.code;
   cardName.textContent = app.name;
@@ -548,9 +830,13 @@ function openPlanetFromPointer(event) {
   raycaster.setFromCamera(pointer, camera);
   const intersections = raycaster.intersectObjects(planets.map((item) => item.planet), false);
 
-  if (intersections[0]?.object.userData.app) {
-    const item = planets.find((planetItem) => planetItem.app === intersections[0].object.userData.app);
-    if (item) {
+  if (intersections[0]?.object.userData.body) {
+    const body = intersections[0].object.userData.body;
+    const item = planets.find((planetItem) => planetItem.body === body);
+    if (!item) return;
+    if (body.type === "system") {
+      focusSystem(body.data.id);
+    } else {
       showPlanetCard(item);
     }
   }
@@ -560,10 +846,14 @@ window.addEventListener("resize", resize);
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && activePlanet) {
     closePlanetCard();
+  } else if (event.key === "Escape" && activeSystem) {
+    returnToSolarSystem();
   }
 });
 canvas.addEventListener("click", openPlanetFromPointer);
 cardClose.addEventListener("click", closePlanetCard);
+solarBack.addEventListener("click", returnToSolarSystem);
 resize();
 cameraTarget.set(0, 0, 0);
+renderOrbitBodies();
 animate();
