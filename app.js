@@ -1,17 +1,37 @@
 import * as THREE from "https://unpkg.com/three@0.165.0/build/three.module.js";
 
 const apps = [
-  { name: "Hex", kind: "strategy game", code: "HX-01", url: "https://hex.worldwidesam.net", radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff, summary: "A compact strategy game space for hex-grid experiments and tactical play.", highlights: ["Hex-grid board interactions", "Fast tactical experiments", "Public game prototype"] },
-  { name: "Clawdtris", kind: "arcade stacker", code: "TR-02", url: "https://tetris.worldwidesam.net", radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b, summary: "A bright block-stacking arcade build with quick restarts and score-chasing energy.", highlights: ["Classic falling-block rhythm", "Immediate restart loop", "Keyboard-first arcade feel"] },
-  { name: "Circuit Snap", kind: "puzzle lab", code: "CS-03", url: "https://circutsnap.worldwidesam.net", radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166, summary: "A circuit-flavored puzzle lab for snapping together logic, patterns, and tiny sparks of order.", highlights: ["Logic puzzle experiments", "Circuit-board visual language", "Small, focused challenge loops"] },
-  { name: "Mission Control", kind: "command center", code: "MC-04", url: "https://missioncontrol.worldwidesam.net", radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf, summary: "The operational dashboard for Clawdia-facing status, tools, and command-center experiments.", highlights: ["Assistant status surfaces", "Workspace tools and readouts", "Command-center UI experiments"] },
-  { name: "RPG Catalog", kind: "library archive", code: "RP-06", url: "https://rpgs.worldwidesam.net", radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58, summary: "A public archive surface for RPG library and catalog artifacts.", highlights: ["Collection browsing", "Archive-oriented presentation", "Public library artifacts"] },
-  { name: "Decisions Please", kind: "choice engine", code: "DP-07", url: "https://decisions.worldwidesam.net", radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff, summary: "A lightweight decision helper for turning options into an actual next move.", highlights: ["Option comparison", "Small decision workflows", "Fast answer-oriented interface"] },
-  { name: "Ypsillon Overkill Dashboard", kind: "overkill metrics", code: "YO-08", url: "https://ypsillon.worldwidesam.net", radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] },
-  { name: "Orbital Slingshot", kind: "gravity toy", code: "OS-09", url: "https://slingshot.worldwidesam.net/", radius: 8.35, speed: 0.052, size: 0.4, start: 4.6, color: 0x8df0a6, summary: "A drag-and-release gravity slingshot toy with curved trajectories, target rings, and flashy probe trails.", highlights: ["Drag to aim and release", "Visible gravity-bent trajectories", "Standalone local service on port 4320"] },
-  { name: "Marvel Champions Runner", kind: "table helper", code: "MR-10", url: "https://marvel.worldwidesam.net/", radius: 9.7, speed: -0.038, size: 0.44, start: 2.1, color: 0x2f7dff, summary: "A standalone Marvel Champions villain runner for keeping encounter flow, threat, health, and setup readable at the table.", highlights: ["New Game, Setup, Play, Board, Reference, and Guide tabs", "Browser-local table state", "Standalone local service on port 4321"] },
-  { name: "Foundry VTT", kind: "virtual tabletop", code: "FV-11", url: "https://foundry.worldwidesam.net/", radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] }
+  { name: "Hex", kind: "strategy game", code: "HX-01", publicUrl: "https://hex.worldwidesam.net", localPort: 5173, radius: 4.5, speed: 0.1, size: 0.34, start: 0.1, color: 0x4ee7ff, summary: "A compact strategy game space for hex-grid experiments and tactical play.", highlights: ["Hex-grid board interactions", "Fast tactical experiments", "Public game prototype"] },
+  { name: "Clawdtris", kind: "arcade stacker", code: "TR-02", publicUrl: "https://tetris.worldwidesam.net", localPort: 4316, radius: 5.45, speed: 0.082, size: 0.42, start: 1.4, color: 0xff4f8b, summary: "A bright block-stacking arcade build with quick restarts and score-chasing energy.", highlights: ["Classic falling-block rhythm", "Immediate restart loop", "Keyboard-first arcade feel"] },
+  { name: "Circuit Snap", kind: "puzzle lab", code: "CS-03", publicUrl: "https://circutsnap.worldwidesam.net", localPort: 4317, radius: 6.35, speed: 0.07, size: 0.38, start: 2.6, color: 0xffd166, summary: "A circuit-flavored puzzle lab for snapping together logic, patterns, and tiny sparks of order.", highlights: ["Logic puzzle experiments", "Circuit-board visual language", "Small, focused challenge loops"] },
+  { name: "Mission Control", kind: "command center", code: "MC-04", publicUrl: "https://missioncontrol.worldwidesam.net", localPort: 8124, radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf, summary: "The operational dashboard for Clawdia-facing status, tools, and command-center experiments.", highlights: ["Assistant status surfaces", "Workspace tools and readouts", "Command-center UI experiments"] },
+  { name: "RPG Catalog", kind: "library archive", code: "RP-06", publicUrl: "https://rpgs.worldwidesam.net", localPort: 8099, radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58, summary: "A public archive surface for RPG library and catalog artifacts.", highlights: ["Collection browsing", "Archive-oriented presentation", "Public library artifacts"] },
+  { name: "Decisions Please", kind: "choice engine", code: "DP-07", publicUrl: "https://decisions.worldwidesam.net", localPort: 5178, radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff, summary: "A lightweight decision helper for turning options into an actual next move.", highlights: ["Option comparison", "Small decision workflows", "Fast answer-oriented interface"] },
+  { name: "Ypsillon Overkill Dashboard", kind: "overkill metrics", code: "YO-08", publicUrl: "https://ypsillon.worldwidesam.net", localPort: 4315, radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] },
+  { name: "Orbital Slingshot", kind: "gravity toy", code: "OS-09", publicUrl: "https://slingshot.worldwidesam.net/", localPort: 4320, radius: 8.35, speed: 0.052, size: 0.4, start: 4.6, color: 0x8df0a6, summary: "A drag-and-release gravity slingshot toy with curved trajectories, target rings, and flashy probe trails.", highlights: ["Drag to aim and release", "Visible gravity-bent trajectories", "Standalone local service on port 4320"] },
+  { name: "Marvel Champions Runner", kind: "table helper", code: "MR-10", publicUrl: "https://marvel.worldwidesam.net/", localPort: 4321, radius: 9.7, speed: -0.038, size: 0.44, start: 2.1, color: 0x2f7dff, summary: "A standalone Marvel Champions villain runner for keeping encounter flow, threat, health, and setup readable at the table.", highlights: ["New Game, Setup, Play, Board, Reference, and Guide tabs", "Browser-local table state", "Standalone local service on port 4321"] },
+  { name: "Foundry VTT", kind: "virtual tabletop", code: "FV-11", publicUrl: "https://foundry.worldwidesam.net/", localPort: 30000, radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] }
 ];
+
+const publicPortalHosts = new Set(["worldwidesam.net", "www.worldwidesam.net", "landing.worldwidesam.net"]);
+const currentHostname = window.location.hostname;
+const isPublicPortal = publicPortalHosts.has(currentHostname);
+
+function localHostForLinks() {
+  if (currentHostname === "localhost" || currentHostname === "127.0.0.1" || currentHostname === "::1") {
+    return "127.0.0.1";
+  }
+
+  return currentHostname;
+}
+
+function appUrl(app) {
+  if (isPublicPortal || !app.localPort) {
+    return app.publicUrl;
+  }
+
+  return `http://${localHostForLinks()}:${app.localPort}/`;
+}
 
 const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isSmallScreen = window.matchMedia("(max-width: 860px)").matches;
@@ -355,7 +375,7 @@ function makePlanet(app) {
   group.add(glow);
 
   const label = template.content.firstElementChild.cloneNode(true);
-  label.href = app.url;
+  label.href = appUrl(app);
   label.setAttribute("aria-label", `Open ${app.name} in a new window`);
   label.querySelector(".planet-code").textContent = app.code;
   label.querySelector(".planet-name").textContent = app.name;
@@ -468,17 +488,18 @@ function updateCamera() {
 function showPlanetCard(item) {
   activePlanet = item;
   const { app } = item;
+  const url = appUrl(app);
   cardCode.textContent = app.code;
   cardName.textContent = app.name;
   cardKind.textContent = app.kind;
-  cardDomain.textContent = new URL(app.url).hostname;
+  cardDomain.textContent = new URL(url).host;
   cardSummary.textContent = app.summary;
   cardHighlights.replaceChildren(...app.highlights.map((highlight) => {
     const item = document.createElement("li");
     item.textContent = highlight;
     return item;
   }));
-  cardLink.href = app.url;
+  cardLink.href = url;
   cardLink.setAttribute("aria-label", `Visit ${app.name} in a new window`);
   planetCard.classList.add("is-open");
   planetCard.setAttribute("aria-hidden", "false");

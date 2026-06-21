@@ -13,5 +13,5 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent
     handler = lambda *args, **kwargs: NoCacheHandler(*args, directory=str(root), **kwargs)
-    server = ThreadingHTTPServer(("127.0.0.1", 4178), handler)
+    server = ThreadingHTTPServer(("0.0.0.0", 4178), handler)
     server.serve_forever()
