@@ -7,16 +7,24 @@ const apps = [
   { name: "Mission Control", category: "tools", kind: "command center", code: "MC-04", publicUrl: "https://missioncontrol.worldwidesam.net", localPort: 8124, radius: 7.2, speed: 0.058, size: 0.48, start: 3.6, color: 0x56f5bf, summary: "The operational dashboard for Clawdia-facing status, tools, and command-center experiments.", highlights: ["Assistant status surfaces", "Workspace tools and readouts", "Command-center UI experiments"] },
   { name: "RPG Catalog", category: "tabletop", kind: "library archive", code: "RP-06", publicUrl: "https://rpgs.worldwidesam.net", localPort: 8099, radius: 9.0, speed: 0.043, size: 0.46, start: 5.5, color: 0xff8a58, summary: "A public archive surface for RPG library and catalog artifacts.", highlights: ["Collection browsing", "Archive-oriented presentation", "Public library artifacts"] },
   { name: "Decisions Please", category: "tools", kind: "choice engine", code: "DP-07", publicUrl: "https://decisions.worldwidesam.net", localPort: 5178, radius: 5.95, speed: -0.064, size: 0.36, start: 5.9, color: 0x4ee7ff, summary: "A lightweight decision helper for turning options into an actual next move.", highlights: ["Option comparison", "Small decision workflows", "Fast answer-oriented interface"] },
-  { name: "Ypsillon Overkill Dashboard", category: "tools", kind: "overkill metrics", code: "YO-08", publicUrl: "https://ypsillon.worldwidesam.net", localPort: 4315, radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] },
+  { name: "Ypsillon Overkill Dashboard", category: "tabletop", kind: "overkill metrics", code: "YO-08", publicUrl: "https://ypsillon.worldwidesam.net", localPort: 4315, radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] },
   { name: "Orbital Slingshot", category: "games", kind: "gravity toy", code: "OS-09", publicUrl: "https://slingshot.worldwidesam.net/", localPort: 4320, radius: 8.35, speed: 0.052, size: 0.4, start: 4.6, color: 0x8df0a6, summary: "A drag-and-release gravity slingshot toy with curved trajectories, target rings, and flashy probe trails.", highlights: ["Drag to aim and release", "Visible gravity-bent trajectories", "Standalone local service on port 4320"] },
   { name: "Marvel Champions Runner", category: "tabletop", kind: "table helper", code: "MR-10", publicUrl: "https://marvel.worldwidesam.net/", localPort: 4321, radius: 9.7, speed: -0.038, size: 0.44, start: 2.1, color: 0x2f7dff, summary: "A standalone Marvel Champions villain runner for keeping encounter flow, threat, health, and setup readable at the table.", highlights: ["New Game, Setup, Play, Board, Reference, and Guide tabs", "Browser-local table state", "Standalone local service on port 4321"] },
   { name: "Foundry VTT", category: "tabletop", kind: "virtual tabletop", code: "FV-11", publicUrl: "https://foundry.worldwidesam.net/", localPort: 30000, radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] }
 ];
 
+function siteCountForCategory(category) {
+  return apps.filter((app) => app.category === category).length;
+}
+
+function systemPlanetSize(category) {
+  return THREE.MathUtils.clamp(0.38 + siteCountForCategory(category) * 0.065, 0.48, 0.68);
+}
+
 const systems = [
-  { id: "games", name: "Games", kind: "playable experiments", code: "GM", radius: 6.4, speed: 0.052, size: 0.56, start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, and gravity toys.", highlights: ["Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot"] },
-  { id: "tools", name: "Tools", kind: "utility surfaces", code: "TL", radius: 6.8, speed: -0.041, size: 0.52, start: 2.75, color: 0x5f7b42, summary: "Dashboards and helper apps.", highlights: ["Mission Control", "Decisions Please", "Ypsillon Overkill Dashboard"] },
-  { id: "tabletop", name: "Tabletop", kind: "RPG and table helpers", code: "TT", radius: 8.4, speed: 0.034, size: 0.58, start: 4.75, color: 0xae793c, summary: "RPG library, VTT, and campaign/table tools.", highlights: ["RPG Catalog", "Marvel Champions Runner", "Foundry VTT"] }
+  { id: "games", name: "Games", kind: "playable experiments", code: "GM", radius: 5.8, speed: 0.052, size: systemPlanetSize("games"), start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, and gravity toys.", highlights: ["Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot"] },
+  { id: "tools", name: "Tools", kind: "utility surfaces", code: "TL", radius: 8.0, speed: -0.041, size: systemPlanetSize("tools"), start: 2.75, color: 0x5f7b42, summary: "Dashboards and helper apps.", highlights: ["Mission Control", "Decisions Please"] },
+  { id: "tabletop", name: "Tabletop", kind: "RPG and table helpers", code: "TT", radius: 10.2, speed: 0.034, size: systemPlanetSize("tabletop"), start: 4.75, color: 0xae793c, summary: "RPG library, VTT, and campaign/table tools.", highlights: ["RPG Catalog", "Ypsillon Overkill Dashboard", "Marvel Champions Runner", "Foundry VTT"] }
 ];
 
 const systemById = new Map(systems.map((system) => [system.id, system]));
@@ -522,7 +530,6 @@ function makeOrbit(radius, color) {
   const geometry = new THREE.BufferGeometry().setFromPoints(points);
   const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.24 });
   const line = new THREE.LineLoop(geometry, material);
-  line.rotation.x = -0.08;
   orbitRoot.add(line);
 }
 
@@ -691,7 +698,7 @@ function updatePlanetPositions(delta) {
     const angle = body.start + (isReducedMotion ? 0 : orbitTime * body.speed);
     const x = Math.cos(angle) * body.radius;
     const z = Math.sin(angle) * body.radius * 0.62;
-    const y = Math.sin(angle * 1.8 + body.radius) * 0.22;
+    const y = body.type === "system" ? 0 : Math.sin(angle * 1.8 + body.radius) * 0.22;
 
     item.group.position.set(x, y, z);
     item.planet.rotation.y += isReducedMotion ? 0 : 0.0065;
@@ -707,7 +714,7 @@ function updateLabels() {
   const height = window.innerHeight;
   const vector = new THREE.Vector3();
   const planetPoint = new THREE.Vector3();
-  const introGuard = width > 1100 ? 700 : 0;
+  const planetRadiusPoint = new THREE.Vector3();
   labelLines.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
   for (const item of planets) {
@@ -721,25 +728,43 @@ function updateLabels() {
     const planetX = (planetPoint.x * 0.5 + 0.5) * width;
     const planetY = (planetPoint.y * -0.5 + 0.5) * height;
     vector.copy(planetPoint);
-    const labelSide = planetX > width * 0.5 ? 1 : -1;
+    planetRadiusPoint.copy(item.group.position);
+    planetRadiusPoint.x += item.body.size;
+    planetRadiusPoint.project(camera);
+    const planetScreenRadius = Math.abs((planetRadiusPoint.x * 0.5 + 0.5) * width - planetX);
+    const depth = THREE.MathUtils.clamp(1.12 - vector.z * 0.18, 0.58, 1);
+    const labelWidth = item.label.offsetWidth || 160;
+    const labelHeight = item.label.offsetHeight || 62;
+    const labelHalfWidth = (labelWidth * depth) / 2;
+    const labelHalfHeight = (labelHeight * depth) / 2;
+    const preferredSide = planetX > width * 0.5 ? 1 : -1;
     const labelDistance = activeSystem
       ? THREE.MathUtils.clamp(width * 0.12, 128, 190)
       : THREE.MathUtils.clamp(width * 0.18, 220, 300);
-    let x = planetX + labelSide * labelDistance;
-    const y = planetY + THREE.MathUtils.clamp((0.5 - vector.y) * 32, -28, 28);
-    const visible = vector.z < 1 && x > -150 && x < width + 150 && y > -80 && y < height + 80;
-    const depth = THREE.MathUtils.clamp(1.12 - vector.z * 0.18, 0.58, 1);
-    if (introGuard && x < introGuard && y > height * 0.2 && y < height * 0.76) {
-      x = introGuard;
+    const minClearance = planetScreenRadius + labelHalfWidth + 26;
+    const distance = Math.max(labelDistance, minClearance);
+    const minX = labelHalfWidth + 18;
+    const maxX = width - labelHalfWidth - 18;
+    const placeOnSide = (side) => THREE.MathUtils.clamp(planetX + side * distance, minX, maxX);
+    let x = placeOnSide(preferredSide);
+    const alternateX = placeOnSide(-preferredSide);
+    if (Math.abs(x - planetX) < minClearance && Math.abs(alternateX - planetX) > Math.abs(x - planetX)) {
+      x = alternateX;
     }
-    x = THREE.MathUtils.clamp(x, 150, width - 150);
+    const y = THREE.MathUtils.clamp(
+      planetY + THREE.MathUtils.clamp((0.5 - vector.y) * 32, -28, 28),
+      labelHalfHeight + 18,
+      height - labelHalfHeight - 18
+    );
+    const visible = vector.z < 1 && x > -150 && x < width + 150 && y > -80 && y < height + 80;
+    const actualSide = x >= planetX ? 1 : -1;
 
     item.label.style.left = `${x}px`;
     item.label.style.top = `${y}px`;
     item.label.style.opacity = visible && !activePlanet ? String(depth) : "0";
     item.label.style.transform = `translate(-50%, -50%) scale(${depth})`;
     item.label.classList.toggle("is-active", item === activePlanet);
-    const lineEndX = x - labelSide * 104 * depth;
+    const lineEndX = x - actualSide * (labelHalfWidth + 8);
     item.line.setAttribute("x1", String(planetX));
     item.line.setAttribute("y1", String(planetY));
     item.line.setAttribute("x2", String(lineEndX));

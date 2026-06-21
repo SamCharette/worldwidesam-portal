@@ -79,7 +79,6 @@ a {
 }
 
 .brandbar,
-.brand-mark,
 .status-rail,
 .sun-card {
   display: flex;
@@ -92,32 +91,10 @@ a {
   top: 24px;
   left: 24px;
   right: 24px;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 20px;
 }
 
-.brand-mark {
-  gap: 12px;
-}
-
-.brand-glyph {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: var(--radius);
-  background: linear-gradient(135deg, rgba(255, 79, 139, 0.96), rgba(78, 231, 255, 0.9));
-  color: #05070b;
-  font-weight: 950;
-}
-
-.brand-mark strong {
-  display: block;
-  font-size: 1rem;
-}
-
-.brand-mark small,
 .status-rail,
 .sun-card {
   color: var(--muted);
@@ -151,11 +128,10 @@ a {
 
 .intro {
   position: fixed;
-  z-index: 9;
-  left: clamp(20px, 5vw, 76px);
-  top: 50%;
-  width: min(330px, calc(100vw - 40px));
-  transform: translateY(-50%);
+  z-index: 11;
+  left: 24px;
+  top: 26px;
+  width: min(360px, calc(100vw - 48px));
   pointer-events: none;
 }
 
@@ -170,17 +146,17 @@ a {
 }
 
 h1 {
-  margin: 12px 0 16px;
-  font-size: clamp(3.1rem, 6.4vw, 6rem);
-  line-height: 0.9;
+  margin: 8px 0 10px;
+  font-size: clamp(2.1rem, 3.8vw, 3.9rem);
+  line-height: 0.94;
   letter-spacing: 0;
 }
 
 .intro p:last-child {
   margin: 0;
   color: #dce2ed;
-  font-size: clamp(1rem, 1.5vw, 1.2rem);
-  line-height: 1.5;
+  font-size: clamp(0.92rem, 1.1vw, 1.05rem);
+  line-height: 1.38;
 }
 
 .sun-card {
@@ -234,7 +210,6 @@ h1 {
   outline: none;
 }
 
-.system-focus .intro,
 .system-focus .sun-card {
   opacity: 0;
   pointer-events: none;
@@ -468,12 +443,12 @@ h1 {
     left: auto;
     top: auto;
     width: auto;
-    padding: 58vh 12px 18px;
+    padding: 14px 12px 18px;
     transform: none;
   }
 
   h1 {
-    font-size: clamp(3rem, 17vw, 5rem);
+    font-size: clamp(2.4rem, 13vw, 4rem);
   }
 
   .sun-card {
