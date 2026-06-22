@@ -10,7 +10,8 @@ const apps = [
   { name: "Ypsillon Overkill Dashboard", category: "tabletop", kind: "overkill metrics", code: "YO-08", publicUrl: "https://ypsillon.worldwidesam.net", localPort: 4315, radius: 7.65, speed: -0.045, size: 0.5, start: 0.75, color: 0xff4f8b, summary: "A dashboard for delightfully excessive Ypsillon tracking and metrics.", highlights: ["Metric-heavy dashboard surface", "Overkill tracking experiments", "Dense operational readouts"] },
   { name: "Orbital Slingshot", category: "games", kind: "gravity toy", code: "OS-09", publicUrl: "https://slingshot.worldwidesam.net/", localPort: 4320, radius: 8.35, speed: 0.052, size: 0.4, start: 4.6, color: 0x8df0a6, summary: "A drag-and-release gravity slingshot toy with curved trajectories, target rings, and flashy probe trails.", highlights: ["Drag to aim and release", "Visible gravity-bent trajectories", "Standalone local service on port 4320"] },
   { name: "Marvel Champions Runner", category: "tabletop", kind: "table helper", code: "MR-10", publicUrl: "https://marvel.worldwidesam.net/", localPort: 4321, radius: 9.7, speed: -0.038, size: 0.44, start: 2.1, color: 0x2f7dff, summary: "A standalone Marvel Champions villain runner for keeping encounter flow, threat, health, and setup readable at the table.", highlights: ["New Game, Setup, Play, Board, Reference, and Guide tabs", "Browser-local table state", "Standalone local service on port 4321"] },
-  { name: "Foundry VTT", category: "tabletop", kind: "virtual tabletop", code: "FV-11", publicUrl: "https://foundry.worldwidesam.net/", localPort: 30000, radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] }
+  { name: "Foundry VTT", category: "tabletop", kind: "virtual tabletop", code: "FV-11", publicUrl: "https://foundry.worldwidesam.net/", localPort: 30000, radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] },
+  { name: "One Bullet Dungeon", category: "games", kind: "arcade dungeon", code: "OB-12", publicUrl: "https://onebullet.worldwidesam.net/", localPort: 4322, radius: 9.25, speed: -0.046, size: 0.42, start: 5.45, color: 0xd7ff58, summary: "A tiny top-down dungeon shooter where every shot is a commitment because the lone projectile has to be physically recovered.", highlights: ["One projectile, no magic recall", "Bounce, recover, and clear rooms", "Standalone local service on port 4322"] }
 ];
 
 function siteCountForCategory(category) {
@@ -22,7 +23,7 @@ function systemPlanetSize(category) {
 }
 
 const systems = [
-  { id: "games", name: "Games", kind: "playable experiments", code: "GM", radius: 5.8, speed: 0.052, size: systemPlanetSize("games"), start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, and gravity toys.", highlights: ["Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot"] },
+  { id: "games", name: "Games", kind: "playable experiments", code: "GM", radius: 5.8, speed: 0.052, size: systemPlanetSize("games"), start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, and gravity toys.", highlights: ["Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot", "One Bullet Dungeon"] },
   { id: "tools", name: "Tools", kind: "utility surfaces", code: "TL", radius: 8.0, speed: -0.041, size: systemPlanetSize("tools"), start: 2.75, color: 0x5f7b42, summary: "Dashboards and helper apps.", highlights: ["Mission Control", "Decisions Please"] },
   { id: "tabletop", name: "Tabletop", kind: "RPG and table helpers", code: "TT", radius: 10.2, speed: 0.034, size: systemPlanetSize("tabletop"), start: 4.75, color: 0xae793c, summary: "RPG library, VTT, and campaign/table tools.", highlights: ["RPG Catalog", "Ypsillon Overkill Dashboard", "Marvel Champions Runner", "Foundry VTT"] }
 ];
@@ -168,7 +169,8 @@ function terrainForBody(body) {
     "YO-08": "lava",
     "OS-09": "jungle",
     "MR-10": "cobalt",
-    "FV-11": "violet"
+    "FV-11": "violet",
+    "OB-12": "crater"
   }[body.code] || "crater";
 }
 
