@@ -11,7 +11,8 @@ const apps = [
   { name: "Orbital Slingshot", category: "games", kind: "gravity toy", code: "OS-09", publicUrl: "https://slingshot.worldwidesam.net/", localPort: 4320, radius: 8.35, speed: 0.052, size: 0.4, start: 4.6, color: 0x8df0a6, summary: "A drag-and-release gravity slingshot toy with curved trajectories, target rings, and flashy probe trails.", highlights: ["Drag to aim and release", "Visible gravity-bent trajectories", "Standalone local service on port 4320"] },
   { name: "Marvel Champions Runner", category: "tabletop", kind: "table helper", code: "MR-10", publicUrl: "https://marvel.worldwidesam.net/", localPort: 4321, radius: 9.7, speed: -0.038, size: 0.44, start: 2.1, color: 0x2f7dff, summary: "A standalone Marvel Champions villain runner for keeping encounter flow, threat, health, and setup readable at the table.", highlights: ["New Game, Setup, Play, Board, Reference, and Guide tabs", "Browser-local table state", "Standalone local service on port 4321"] },
   { name: "Foundry VTT", category: "tabletop", kind: "virtual tabletop", code: "FV-11", publicUrl: "https://foundry.worldwidesam.net/", localPort: 30000, radius: 10.45, speed: 0.032, size: 0.5, start: 3.15, color: 0xb38cff, summary: "The full virtual tabletop for sessions, maps, character sheets, journals, dice, and campaign prep.", highlights: ["Live session tabletop", "Maps, sheets, journals, and dice", "Foundry service on port 30000"] },
-  { name: "One Bullet Dungeon", category: "games", kind: "arcade dungeon", code: "OB-12", publicUrl: "https://onebullet.worldwidesam.net/", localPort: 4322, radius: 9.25, speed: -0.046, size: 0.42, start: 5.45, color: 0xd7ff58, summary: "A tiny top-down dungeon shooter where every shot is a commitment because the lone projectile has to be physically recovered.", highlights: ["One projectile, no magic recall", "Bounce, recover, and clear rooms", "Standalone local service on port 4322"] }
+  { name: "One Bullet Dungeon", category: "games", kind: "arcade dungeon", code: "OB-12", publicUrl: "https://onebullet.worldwidesam.net/", localPort: 4322, radius: 9.25, speed: -0.046, size: 0.42, start: 5.45, color: 0xd7ff58, summary: "A tiny top-down dungeon shooter where every shot is a commitment because the lone projectile has to be physically recovered.", highlights: ["One projectile, no magic recall", "Bounce, recover, and clear rooms", "Standalone local service on port 4322"] },
+  { name: "EEMS", category: "work", kind: "workplace modernization", code: "EE-13", publicUrl: "https://eems.worldwidesam.net/", localPort: 5291, radius: 5.85, speed: 0.055, size: 0.44, start: 1.35, color: 0x88a6ff, summary: "The ASP.NET Core rebuild of the workplace energy and emissions management system.", highlights: ["MVC and Razor replacement app", "Accounts read-parity slice", "Local development service on port 5291"] }
 ];
 
 function siteCountForCategory(category) {
@@ -25,7 +26,8 @@ function systemPlanetSize(category) {
 const systems = [
   { id: "games", name: "Games", kind: "playable experiments", code: "GM", radius: 5.8, speed: 0.052, size: systemPlanetSize("games"), start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, and gravity toys.", highlights: ["Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot", "One Bullet Dungeon"] },
   { id: "tools", name: "Tools", kind: "utility surfaces", code: "TL", radius: 8.0, speed: -0.041, size: systemPlanetSize("tools"), start: 2.75, color: 0x5f7b42, summary: "Dashboards and helper apps.", highlights: ["Mission Control", "Decisions Please"] },
-  { id: "tabletop", name: "Tabletop", kind: "RPG and table helpers", code: "TT", radius: 10.2, speed: 0.034, size: systemPlanetSize("tabletop"), start: 4.75, color: 0xae793c, summary: "RPG library, VTT, and campaign/table tools.", highlights: ["RPG Catalog", "Ypsillon Overkill Dashboard", "Marvel Champions Runner", "Foundry VTT"] }
+  { id: "tabletop", name: "Tabletop", kind: "RPG and table helpers", code: "TT", radius: 10.2, speed: 0.034, size: systemPlanetSize("tabletop"), start: 4.75, color: 0xae793c, summary: "RPG library, VTT, and campaign/table tools.", highlights: ["RPG Catalog", "Ypsillon Overkill Dashboard", "Marvel Champions Runner", "Foundry VTT"] },
+  { id: "work", name: "Work", kind: "workplace apps", code: "WK", radius: 12.05, speed: -0.028, size: systemPlanetSize("work"), start: 1.72, color: 0x6579b8, summary: "Workplace systems and modernization projects.", highlights: ["EEMS"] }
 ];
 
 const systemById = new Map(systems.map((system) => [system.id, system]));
@@ -160,6 +162,7 @@ function terrainForBody(body) {
     "GM": "ocean",
     "TL": "jungle",
     "TT": "desert",
+    "WK": "cobalt",
     "HX-01": "ice",
     "TR-02": "storm",
     "CS-03": "desert",
@@ -170,7 +173,8 @@ function terrainForBody(body) {
     "OS-09": "jungle",
     "MR-10": "cobalt",
     "FV-11": "violet",
-    "OB-12": "crater"
+    "OB-12": "crater",
+    "EE-13": "marble"
   }[body.code] || "crater";
 }
 
