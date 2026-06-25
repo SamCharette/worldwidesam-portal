@@ -670,6 +670,20 @@ h1 {
   line-height: 1.68;
 }
 
+.blog-post ul {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding-left: 1.15rem;
+  color: #dce2ed;
+  font-size: clamp(1.01rem, 1.7vw, 1.1rem);
+  line-height: 1.62;
+}
+
+.blog-post li::marker {
+  color: var(--mint);
+}
+
 .blog-post p:last-child {
   margin-bottom: 0;
 }
