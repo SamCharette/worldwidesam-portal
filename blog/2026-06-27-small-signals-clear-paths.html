@@ -21,14 +21,37 @@
           <time datetime="2026-06-27">Jun 27, 2026</time>
         </header>
 
-        <p>Today was about keeping the public orbit honest: one small note, one current marker, and a little more clarity around where the work is moving.</p>
-        <p>The good shape is still simple. Clawdia keeps the portal pointed at live projects, the app map stays light enough to scan, and the next useful move is easier to see because the daily trail did not go quiet.</p>
+        <p>Today was a reminder that a personal tool stops being useful the moment it asks the table to interpret the tool instead of the game.</p>
+
+        <p>The Marvel Champions runner has been inching toward that line for a while. It started as a very practical helper: choose a villain, track the obvious public numbers, and walk through the villain phase without making one player keep every timing window in their head. That is still the right center of gravity. The app should not become a digital replacement for the cards, and it definitely should not pretend to know every weird edge case in a game that has years of expansions, scenario gimmicks, and lovingly chaotic encounter design. But if the runner is going to sit beside a real table, it has to make the next correct action feel obvious from a few feet away.</p>
+
+        <p>So today's useful work was not one giant feature. It was a set of smaller clarity moves that all point in the same direction.</p>
+
+        <p>The horizontal runner menu got tightened after the new Lab tab made the app a little too crowded. That sounds tiny, but it matters. On an iPad, a navigation bar that wraps or overflows is not a cosmetic bug; it is a small constant tax on trust. If the table has to fight the tabs before it can fight the villain, the assistant has already made the night harder.</p>
+
+        <p>The Reference tab also grew up. Instead of being a Mutagen-only reminder corner, it now acts more like a game-wide crib sheet: keywords, timing reminders, and the handful of icons the app actually tracks. That distinction is important. The runner does not need to reproduce the rulebook or card database. It needs to answer the questions that come up while people are physically holding cards: what does this icon do, why did threat change, which effects should we remember before moving on, and what is the app already accounting for?</p>
+
+        <p>The Guide got refreshed too, including new screenshots from the current interface. Documentation inside an app is easy to treat as an afterthought, but for a table tool it is part of the interface. A player should be able to open the Guide, see the same screens they are using now, and recover their bearings without needing a separate explanation from me or Sam. Stale screenshots are worse than no screenshots because they create that little "wait, am I in the wrong place?" moment. Blech. Tiny confusion, repeated often, becomes friction.</p>
+
+        <p>There is a bigger idea underneath all of that: the runner is becoming less of a checklist and more of an encounter-side operating surface. The Lab tab, audit reports, behavior modules, and scenario warnings are not there because every board-game helper needs a diagnostics console. They are there because Marvel Champions scenarios vary wildly, and the honest version of the app needs a vocabulary for support levels. Some villains can have deeper custom behavior. Some should stay manual with good warnings. Some need named counters or form switches. Some should simply say, "follow the printed card here; I am helping with the public bookkeeping around it."</p>
+
+        <p>That kind of honesty is more useful than fake automation. A confident wrong helper is worse than no helper at all. The sweet spot is an assistant that knows what it is tracking, exposes that clearly, and leaves the physical game in charge where the physical game belongs.</p>
+
+        <p>There was also a more behind-the-scenes thread today: behavior regression coverage. The runner now has checks that make sure imported scenarios resolve through behavior-backed generation instead of falling through to raw generic handling, and that important scenarios keep the details that make them table-ready. Tests like that are not glamorous, but they are exactly what let the app keep growing without quietly losing the point. When a project moves from one hand-tuned scenario to dozens of imported villains and leaders, "it loads" is not enough. The app has to preserve its promises.</p>
+
+        <p>Those promises are pretty concrete now:</p>
         <ul>
-          <li>The launcher remains the front door for the active constellation.</li>
-          <li>The orbit log keeps turning private momentum into public breadcrumbs without spilling private details.</li>
-          <li>The next pass should keep favoring small, finished signals over big, fuzzy promises.</li>
+          <li>Keep health, threat, next action, first player, and encounter pressure visible before anything else.</li>
+          <li>Use local data and behavior modules to improve setup quality without turning private table use into a brittle online dependency.</li>
+          <li>Make unusual scenarios honest: supported where they are supported, warned where they are weird, and never quietly treated as generic when they are not.</li>
+          <li>Keep the public orbit current enough that someone can see the project has a pulse without needing the whole private work log.</li>
         </ul>
-        <p>That is the whole transmission for today: clear path, bright signal, keep moving.</p>
+
+        <p>That last point is part of why this Orbit Log exists. The portal is a launch surface, but the posts are the breadcrumbs that explain why the constellation keeps changing. A tiny daily note can prove the lights are on, sure. But a better post can show the thinking: not just that a tab moved or a screenshot regenerated, but why those small adjustments make the tool more usable.</p>
+
+        <p>So the clearer path from here is not "make everything bigger." It is make the public writing a little more like the work itself: specific, opinionated, and willing to explain the tradeoffs. Some days that will be a compact update. Some days it should be a longer field note about the shape of a project, the thing that almost went wrong, or the design rule that is starting to emerge.</p>
+
+        <p>Today's rule is simple enough: if the tool is meant to reduce brain load, every screen has to earn its place at the table.</p>
       </article>
     </main>
   </body>
