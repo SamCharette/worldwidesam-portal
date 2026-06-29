@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Review Loops and Table Tools - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>Review Loops and Table Tools</h1>
+          <time datetime="2026-06-29">Jun 29, 2026</time>
+        </header>
+
+        <p>Yesterday had two very different kinds of momentum: the tidy, stubborn rhythm of review loops, and the much more tactile joy of making a tabletop tool behave like it belongs at the table.</p>
+
+        <p>EEMS spent a lot of the day in hardening mode. Not the shiny "look, a new screen" kind of work, but the sort that decides whether a modernization can survive contact with real use: grouped totals instead of wasteful reads, safer import cleanup, better server-side validation, clearer status messages, masked API-key handling, steadier weather and vehicle reporting, and small HTML fixes that make the admin surfaces more honest.</p>
+
+        <p>The useful pattern was repetition. A review comment came in, the fix got made, the build and test suite ran, and the next round got requested. Again, and again, and again. That can sound tedious from the outside, but it is one of the better signs a project is getting real. Every pass tightened a tiny edge: no full server paths leaking into status text, no cleanup wandering outside its lane, no report-section number pretending there is always one more slot, no date fields drifting into maybe-land when the workflow needs a real date.</p>
+
+        <p>Marvel Champions Runner kept moving through live-play friction too. Rhino, Klaw, Mutagen Formula, Ultron, and Risky Business all got more attention as actual play surfaces instead of abstract scenarios. The app is getting better at the awkward little jobs: clamping health correctly, auto-applying side-scheme icons, giving attachments lifecycle hints, surfacing minion pressure reminders, and making counters like drones, madness, infamy, and Goblin minion pressure easier to keep in front of the player.</p>
+
+        <p>That project's compass still feels right: the cards are the source of truth, and the runner should carry the bookkeeping that makes the physical game easier to enjoy. The best fixes were not grand gestures. They were small signals in exactly the place a player is already looking.</p>
+
+        <p>The most table-flavored win of the day was Daggerheart support for Item Piles in Foundry. The problem was wonderfully practical: merchants and loot needed to understand Daggerheart items, quantities, currencies, and prices without forcing a separate shop UI into the middle of play. The solution became a small installable module with Daggerheart-aware item quantities, bundled price data, a GM price manager, world-level overrides, and enough layout polish that the settings screen stopped fighting Foundry's own styling.</p>
+
+        <p>There were a couple of classic toolmaker moments in there. A sword dropped into a merchant at zero price, so the module learned how to stamp prices onto items as they arrive. A price manager opened into a giant blank parchment panel, so the template and styles got reshaped until the search field, note, and rows behaved like a usable control instead of a cramped utility panel. By the end, the module had a public install path and a release zip, which is a nice little arc: local annoyance to reusable table kit in one day.</p>
+
+        <p>So the day was less about one big launch and more about making several tools harder to knock off course. EEMS got more careful. Marvel Runner got more playable. Daggerheart merchants got usable. That is a good Sunday orbit: fewer sharp edges, more useful buttons, and a little more confidence that the next session will spend its energy on the game instead of the machinery around it.</p>
+      </article>
+    </main>
+  </body>
+</html>
