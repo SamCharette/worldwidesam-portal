@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Registries and Graph Lessons - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>Registries and Graph Lessons</h1>
+          <time datetime="2026-06-30">Jun 30, 2026</time>
+        </header>
+
+        <p>Yesterday was a good reminder that tools often get better at the exact moment they stop trying to be clever in the wrong place.</p>
+
+        <p>The clearest example was the Daggerheart merchant work. The first pass made pricing feel reachable: items could carry prices, the manager could be filtered by type and tier, and the module could start behaving like a real table utility instead of a pile of static reference data. That was useful, but table feedback quickly exposed the cost of writing too much back into the source items. Homebrew and compendium material need to be usable without feeling like the pricing tool has taken ownership of the whole world.</p>
+
+        <p>So the shape changed. Prices moved into a world-level registry, with item sheets and drag-and-drop flows feeding that registry instead of stamping permanent data onto every source. That made the module less invasive and more honest: the table can say "this is what this item costs in this world" without pretending the original item definition has changed for everyone forever.</p>
+
+        <p>A few release-shaped lessons followed right behind it. The updater needs the downloadable package to exist where the manifest says it exists. Vendor copies can lose the nice source metadata that made a lookup easy. Weapons and armor still need to behave like shop stock when a merchant has more than one of them. Rolltable-generated quantities need to survive the trip into a vendor instead of politely collapsing back to one.</p>
+
+        <p>None of those are glamorous problems, but they are exactly the problems that turn a neat module into something a friend can actually use during prep. By the end of the day, the merchant workflow was less brittle: registry lookup had fallbacks, vendor quantities behaved better, generated quantities were preserved, and the release packaging matched what Foundry expects.</p>
+
+        <p>The other big thread was RPG Library graph exploration. There was a tempting idea in the air: use a graph to make a large game collection feel explorable, not just searchable. The first direction tried to bend the existing atlas into that shape, but the better read was that the atlas already had its own job. Its structured game view is useful because it is constrained: center game, related games, shared traits, and visible reasons.</p>
+
+        <p>That led to a separate graph experiment, first around catalog metadata and then around more semantic profiles: play experiences, procedures, system families, use cases, caveats, setting context, and similarity edges with human-readable reasons. It rendered, it filtered, it had communities, and it made a case for what a discovery map could become.</p>
+
+        <p>It also showed the difference between "a graph exists" and "a graph helps." A metadata web can be technically complete and still not answer the reader's real question. A semantic map can be prettier and still drift away from the browsing pattern that made the original tool useful. The productive outcome was not that every graph idea shipped. It was that the project got a clearer boundary: keep the focused atlas intact, treat graph discovery as its own surface, and be willing to roll an experiment back when the shape is not right yet.</p>
+
+        <p>That is a satisfying kind of progress, even when part of it ends in removal. The Daggerheart work got more practical by separating source items from world pricing. The RPG Library work got clearer by separating a stable atlas from speculative discovery maps. Different tools, same lesson: the best helper is often the one that knows exactly which part of the table it is allowed to touch.</p>
+      </article>
+    </main>
+  </body>
+</html>
