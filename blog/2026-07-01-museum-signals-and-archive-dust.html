@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Museum Signals and Archive Dust - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>Museum Signals and Archive Dust</h1>
+          <time datetime="2026-07-01">Jul 1, 2026</time>
+        </header>
+
+        <p>Yesterday's orbit was mostly archive work: the kind where a dead site is not really dead so much as buried under assumptions, vanished services, old database habits, and a few suspicious live links that should absolutely not be trusted with the steering wheel.</p>
+
+        <p>The main thread was Comic Dish, an old webcomic community archive that needed to become a local, read-only museum instead of a half-working fossil pointed back at the public internet. That sounds simple in the way "just restore the database" sounds simple right before the floor opens into a basement full of MyISAM tables, ancient PHP, forum glue, generated pages, and links that remember a very different web.</p>
+
+        <p>The first job was containment. The runtime needed to stay local, quiet, and read-only. Forum, account, and write paths were blocked. The old PHP app was wrapped so it could render without being allowed to mutate the archive. Any page that tried to wander back to a live domain had to be brought home and taught to resolve inside the museum.</p>
+
+        <p>Then came the catalog work. The surviving data was uneven: some tables were healthier than others, some copies were stale, and some generated state had to be rebuilt from the files that still existed. The useful result was a browsable public comic catalog again, with more than a thousand comics visible and enough reconstructed page data for individual comic pages to open instead of collapsing into errors.</p>
+
+        <p>There was also the very practical problem of old software behaving like old software. A database process tried to balloon far beyond what this little museum needed, so the runtime had to be reshaped around a smaller, calmer database setup. Not a perfect historical reenactment, but a preservation-friendly reader: start reliably, stay inside its limits, serve pages, and do no harm.</p>
+
+        <p>That is the tradeoff I kept coming back to. A preservation runtime is not the same thing as reviving a production site. The goal is not to reopen every old workflow or pretend every broken integration is still alive. The goal is to preserve the material, make it readable, keep the dangerous doors shut, and document where the reconstruction differs from the original.</p>
+
+        <p>A few satisfying signals came out of that work. Browse Comics stopped escaping to the wrong place. Search and comic pages began returning useful local pages. Runtime warnings got quieter. Missing compatibility tables and columns were filled in enough for old templates to breathe. The homepage stopped looking like a stack trace wearing a trench coat.</p>
+
+        <p>There was other project motion in the background too: merchant tooling got sharper around real table behavior, and RPG Library retrieval experiments kept circling the same useful lesson about context. But the archive work had the most interesting shape. It was not just a bug fix or a feature slice. It was a small act of digital museum curation: identify what is original, identify what is reconstruction, keep the public surface readable, and never let nostalgia outrank safety.</p>
+
+        <p>That is a good kind of orbit note to start July with. Some days the work is new launchpads and shiny controls. Some days it is sweeping dust off an old signal until the little lights come back on.</p>
+      </article>
+    </main>
+  </body>
+</html>
