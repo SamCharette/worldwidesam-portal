@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>OCR Lanes and Restore Drills - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>OCR Lanes and Restore Drills</h1>
+          <time datetime="2026-07-03">Jul 3, 2026</time>
+        </header>
+
+        <p>Yesterday was a systems day in the best sense: not one giant launch, but a set of small, sturdy answers to questions that would otherwise keep buzzing around the room. Can the old webcomic archive be understood without poking unsafe pieces? Can the local workspace actually be restored if something goes sideways? Can image-only RPG PDFs become useful search material? Can a five-minute update feel like a tiny exhibit instead of a sleepy slide deck?</p>
+
+        <p>The Comic Dish archive work shifted from restoration into explanation. After the read-only museum had become more useful, the next question was why the old system had gone bad in the first place. The useful answer was not a dramatic smoking gun. It was a pattern: writable web folders, ancient PHP assumptions, and attacker-planted scripts had made the old hosting model far too easy to abuse. That is not cheerful archaeology, but it is helpful archaeology. It turns a vague "something happened years ago" into a clearer preservation rule: copy first, isolate the runtime, recover only what is useful, and keep old executable surfaces behind glass.</p>
+
+        <p>That lesson paired neatly with the backup work. The restore kit got written down as a real runbook instead of a folk tale, with a current-state snapshot, disaster scenarios, and enough structure that future Sam does not have to solve the same puzzle while annoyed. The important part is boring on purpose: versioned backups, database dumps, restore notes, and occasional small drills. A backup that requires heroic memory is just a suspense novel with better file names.</p>
+
+        <p>RPG Library had the most table-facing progress. Search got smarter about messy catalog language: terms like FitD, PbtA, 40k, ghost hunting, and related aliases now land closer to the games Sam actually means. That is the kind of quiet metadata work that makes a collection feel less like a warehouse and more like a shelf with a helpful librarian nearby.</p>
+
+        <p>The bigger RPG Library experiment was OCR for image-only PDFs. A first spike sorted the problem into lanes instead of pretending one button could fix every scan. Clean printed pages are good candidates for classic OCR. Noisy layouts and decorative borders need quality gates. Handwritten or heavily stylized one-pagers need special handling instead of being shoved through the same machine and called done. Then the production path landed: a repeatable OCR import that keeps its output separate from the existing text extractor, so new chunks can improve search and wiki coverage without trampling older records.</p>
+
+        <p>That first pass brought several previously quiet games into the searchable library, including chunky classic books and a couple of tiny one-page favorites. The practical win is simple: more of the collection can now answer questions with source-backed chunks and focused wiki pages. The philosophical win is better: the library learned how to say "this scan is useful," "this scan needs care," and "this scan should not pollute search yet." Tiny judgment muscles. Very important.</p>
+
+        <p>There was also a presentation build with a little showmanship. Instead of a normal five-minute deck, the Monday update became a vertical scroller: timer, progress rail, presenter controls, screenshots, artifact sections, and a story about local knowledge systems, ingestion pipelines, browser-level testing, EEMS modernization, and legacy recovery. The goal was not just "look what got built." It was "here is the working pattern you can reuse." Much better. Fewer bullet points standing around in conference-room lighting.</p>
+
+        <p>EEMS got a useful correction too. The next meaningful work is not another fresh setup pass just because setup sounds productive. The repo already builds. The real uncertainty is model and schema parity against the existing database, then proving the rebuilt app behaves correctly with real data. That is a sharper target, and sharper targets save whole afternoons.</p>
+
+        <p>And because a day of restore kits, OCR lanes, and old PHP hazards deserves one neon spark, a tiny light-cycle game appeared in the local projects shelf. One screen, one arena, glowing trails, three simple opponents, collisions, scoring, pause/reset, and touch steering. Not a platform. Not a forever project. Just a compact morale toy with enough polish to feel like a finished little thing.</p>
+
+        <p>The thread through all of it was judgment at the boundary. Do not run unsafe old code in the open. Do not trust a backup until restore has a path. Do not OCR everything just because the tool exists. Do not do setup work when the real risk lives in data parity. Build the tiny game tiny. Make the presentation useful to the room. That is a good orbit: bright, specific, and pointed at the next honest step.</p>
+      </article>
+    </main>
+  </body>
+</html>
