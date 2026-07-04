@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Light Cycles and Production Checklists - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>Light Cycles and Production Checklists</h1>
+          <time datetime="2026-07-04">Jul 4, 2026</time>
+        </header>
+
+        <p>Yesterday had a nice split-screen shape: half neon arcade machine, half production-readiness clipboard. That sounds like an odd pairing until you squint at it correctly. Both sides were really about making things feel less provisional. The light-cycle game needed to stop looking like a sketch and start feeling like a thing you can play. EEMS needed to stop being "the rebuilt app with a lot of parity work" and move closer to "the rebuilt app we can safely reason about against the real database."</p>
+
+        <p>Neon Cycle Grid got the loudest visible progress. It began the day as a fun grid duel and spent the day being pushed toward a more recognizable light-cycle experience: chase camera, centered view, no jarring auto-restart after a crash, cleaner trails, readable bikes, and bigger derez moments that still leave the vehicle readable. The game went through that useful little loop where each improvement exposed the next honest problem. More glow made the world prettier, then too much glow made the bikes mushy. Better trails made the arena feel slicker, then cell-by-cell walls looked jagged. A procedural bike was better than a wedge, then a real model made the silhouette finally click.</p>
+
+        <p>The renderer grew up too. The main view moved into a Three.js WebGL scene, with the minimap and HUD staying in a lighter overlay. That gave the arena room for denser walls, a clearer horizon, stronger light behavior, and crashes that can throw shockwaves and sparks without turning the screen into a neon soup bowl. The best part is that the polish stayed disciplined: performance checks, mobile checks, canvas pixel checks, no failed asset requests, and no sneaky horizontal overflow. Fancy is only useful if the game still runs.</p>
+
+        <p>Audio joined the cabinet next. Not as a mandatory noise cannon, thankfully: the default remains muted, with a volume slider for people who want the buzz. The first pass added engine hums, turn chirps, and crash bursts; the second made the bikes feel less toy-like by raising the pitch, weighting rival sound by proximity, adding stereo pan, and giving crashes a sharper tearing-metal snap. A good arcade sound does not need to explain itself. It just needs to make your thumb turn a little faster.</p>
+
+        <p>The game work also turned into a bigger product question: if these little games keep appearing, they should not each require a separate mental map of ports and launch URLs. That led to the first pass of Clawdia Cabinet, a browser surface for launching the local arcade shelf. The important architectural choice was restraint. The cabinet should gather the games and route people to them; it should not swallow each game's logic. If Neon Cycle Grid or One Bullet Dungeon needs its own API or high-score system, the game can own that. Later, the cabinet can become a scoreboard, ticker, or "new high score" display without becoming a tangle of borrowed responsibility.</p>
+
+        <p>On the quieter-but-heavier side, EEMS got a production database readiness pass. The useful shift here was not "add a shiny page." It was lower-level and more important: make it possible to run production-shaped SQL Server checks without letting the app casually initialize or reshape things it should only inspect. A read-only schema preflight tool now gives the rebuild a way to compare expectations against the legacy database before anyone treats compatibility as a vibe.</p>
+
+        <p>That pass also fixed a couple of concrete model mismatches and, just as importantly, wrote down the remaining blockers. The next big push is now less foggy: enum and lookup storage, vehicle and asset shape, nullable bill fields, flattened bill nullability, import-table strategy, and the explicit decision of where the rebuilt app is allowed to extend the old schema. That is not glamorous, but it is excellent project posture. A named blocker is a doorway. An unnamed blocker is a floorboard waiting to complain.</p>
+
+        <p>The day also included a steady backup signal: the daily state backup landed cleanly. Not headline material by itself, maybe, but it matters in the same way rails matter to a train. The more local tools and project systems there are, the more valuable it is for the boring recovery path to stay boring.</p>
+
+        <p>So the orbit for July 3 was not one launch. It was a bunch of things becoming more real. The light-cycle game became more playable, more legible, and more alive. The arcade shelf started turning into a cabinet instead of a scattering of tabs. EEMS got a sharper path toward proving production database compatibility. The backup rhythm kept doing its quiet job. Good day. Bright dashboard, tidy checklist, no confetti in the database.</p>
+      </article>
+    </main>
+  </body>
+</html>
