@@ -557,6 +557,34 @@ h1 {
   }
 }
 
+html.power-save .hud-grid {
+  opacity: 0.14;
+}
+
+html.power-save .status-rail span,
+html.power-save .sun-card,
+html.power-save .blog-teaser,
+html.power-save .planet-label,
+html.power-save .planet-card {
+  backdrop-filter: none;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .hud-grid {
+    opacity: 0.14;
+  }
+
+  .status-rail span,
+  .sun-card,
+  .blog-teaser,
+  .planet-label,
+  .planet-card {
+    backdrop-filter: none;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+  }
+}
+
 .blog-page {
   min-height: 100%;
   overflow: auto;

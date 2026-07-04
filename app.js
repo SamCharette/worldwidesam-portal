@@ -53,8 +53,18 @@ function appUrl(app) {
   return `http://${localHostForLinks()}:${app.localPort}/`;
 }
 
-const isReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const isSmallScreen = window.matchMedia("(max-width: 860px)").matches;
+const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const smallScreenQuery = window.matchMedia("(max-width: 860px)");
+const coarsePointerQuery = window.matchMedia("(pointer: coarse)");
+const isReducedMotion = reducedMotionQuery.matches;
+const prefersPowerSaver = isReducedMotion || smallScreenQuery.matches || coarsePointerQuery.matches || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+const maxPixelRatio = prefersPowerSaver ? 1 : 1.5;
+const targetFrameRate = isReducedMotion ? 10 : prefersPowerSaver ? 24 : 30;
+const targetFrameInterval = 1000 / targetFrameRate;
+const labelFrameInterval = prefersPowerSaver ? 160 : 100;
+const sunSegments = prefersPowerSaver ? 36 : 56;
+const planetSegments = prefersPowerSaver ? 28 : 40;
+document.documentElement.classList.toggle("power-save", prefersPowerSaver);
 const canvas = document.querySelector("#orbitCanvas");
 const labels = document.querySelector("#labels");
 const labelLines = document.querySelector("#labelLines");
@@ -83,8 +93,13 @@ updateClock();
 setInterval(updateClock, 30_000);
 appCount.textContent = String(apps.length).padStart(2, "0");
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const renderer = new THREE.WebGLRenderer({
+  canvas,
+  antialias: !prefersPowerSaver,
+  alpha: false,
+  powerPreference: "low-power"
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, maxPixelRatio));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setClearColor(0x07080d, 1);
 
@@ -436,7 +451,7 @@ function makeFlareTexture() {
 }
 
 const sun = new THREE.Mesh(
-  new THREE.SphereGeometry(1.48, 64, 64),
+  new THREE.SphereGeometry(1.48, sunSegments, sunSegments),
   new THREE.MeshBasicMaterial({
     color: 0xffffff,
     map: makeSunTexture()
@@ -445,7 +460,7 @@ const sun = new THREE.Mesh(
 sunGroup.add(sun);
 
 const sunGlow = new THREE.Mesh(
-  new THREE.SphereGeometry(1.72, 64, 64),
+  new THREE.SphereGeometry(1.72, sunSegments, sunSegments),
   new THREE.MeshBasicMaterial({
     color: 0xff9f45,
     transparent: true,
@@ -457,7 +472,7 @@ const sunGlow = new THREE.Mesh(
 sunGroup.add(sunGlow);
 
 const sunCorona = new THREE.Mesh(
-  new THREE.SphereGeometry(2.05, 64, 64),
+  new THREE.SphereGeometry(2.05, sunSegments, sunSegments),
   new THREE.MeshBasicMaterial({
     color: 0xff6d24,
     transparent: true,
@@ -487,7 +502,7 @@ for (let index = 0; index < 10; index += 1) {
 }
 
 const sunRim = new THREE.Mesh(
-  new THREE.SphereGeometry(1.56, 64, 64),
+  new THREE.SphereGeometry(1.56, sunSegments, sunSegments),
   new THREE.MeshBasicMaterial({
     color: 0xfff0a8,
     transparent: true,
@@ -530,6 +545,9 @@ let activePlanet = null;
 let activeSystem = null;
 let focusedSystemCore = null;
 let orbitTime = 0;
+let labelsDirty = true;
+let lastLabelUpdate = 0;
+let animationFrameId = 0;
 
 function makeOrbit(radius, color) {
   const curve = new THREE.EllipseCurve(0, 0, radius, radius * 0.62, 0, Math.PI * 2);
@@ -577,7 +595,7 @@ function makeFocusedSystemCore() {
   const coreSize = 1.18;
 
   const core = new THREE.Mesh(
-    new THREE.SphereGeometry(coreSize, 56, 56),
+    new THREE.SphereGeometry(coreSize, planetSegments, planetSegments),
     new THREE.MeshStandardMaterial({
       color: 0xffffff,
       map: makePlanetTexture(activeSystem),
@@ -608,7 +626,7 @@ function makePlanet(body) {
   orbitRoot.add(group);
 
   const planet = new THREE.Mesh(
-    new THREE.SphereGeometry(body.size, 44, 44),
+    new THREE.SphereGeometry(body.size, planetSegments, planetSegments),
     new THREE.MeshStandardMaterial({
       color: 0xffffff,
       map: makePlanetTexture(body.data),
@@ -651,7 +669,14 @@ function makePlanet(body) {
   line.setAttribute("stroke", `#${body.color.toString(16).padStart(6, "0")}`);
   labelLines.append(line);
 
-  planets.push({ body, group, planet, label, line });
+  planets.push({ body, group, planet, label, line, labelWidth: 160, labelHeight: 62 });
+}
+
+function measureLabels() {
+  for (const item of planets) {
+    item.labelWidth = item.label.offsetWidth || 160;
+    item.labelHeight = item.label.offsetHeight || 62;
+  }
 }
 
 function renderOrbitBodies() {
@@ -664,6 +689,8 @@ function renderOrbitBodies() {
     makeFocusedSystemCore();
   }
   orbitBodies().forEach(makePlanet);
+  measureLabels();
+  labelsDirty = true;
 }
 
 function focusSystem(systemId) {
@@ -693,6 +720,8 @@ function resize() {
   baseCameraPosition.copy(camera.position);
   camera.updateProjectionMatrix();
   camera.lookAt(0, 0, 0);
+  measureLabels();
+  labelsDirty = true;
 }
 
 function updatePlanetPositions(delta) {
@@ -722,6 +751,7 @@ function updateLabels() {
   const vector = new THREE.Vector3();
   const planetPoint = new THREE.Vector3();
   const planetRadiusPoint = new THREE.Vector3();
+  const isSmallScreen = smallScreenQuery.matches;
   labelLines.setAttribute("viewBox", `0 0 ${width} ${height}`);
 
   for (const item of planets) {
@@ -740,8 +770,8 @@ function updateLabels() {
     planetRadiusPoint.project(camera);
     const planetScreenRadius = Math.abs((planetRadiusPoint.x * 0.5 + 0.5) * width - planetX);
     const depth = THREE.MathUtils.clamp(1.12 - vector.z * 0.18, 0.58, 1);
-    const labelWidth = item.label.offsetWidth || 160;
-    const labelHeight = item.label.offsetHeight || 62;
+    const labelWidth = item.labelWidth;
+    const labelHeight = item.labelHeight;
     const labelHalfWidth = (labelWidth * depth) / 2;
     const labelHalfHeight = (labelHeight * depth) / 2;
     const preferredSide = planetX > width * 0.5 ? 1 : -1;
@@ -786,7 +816,7 @@ function updateCamera() {
     desiredCameraPosition.copy(activePlanet.group.position).add(new THREE.Vector3(0.4, 1.9, 3.1));
   } else if (activeSystem) {
     desiredCameraTarget.set(0, 0, 0);
-    desiredCameraPosition.set(isSmallScreen ? 0 : 0.9, isSmallScreen ? 8.4 : 5.5, isSmallScreen ? 15.8 : 9.5);
+    desiredCameraPosition.set(smallScreenQuery.matches ? 0 : 0.9, smallScreenQuery.matches ? 8.4 : 5.5, smallScreenQuery.matches ? 15.8 : 9.5);
   } else {
     desiredCameraTarget.set(0, 0, 0);
     desiredCameraPosition.copy(baseCameraPosition);
@@ -801,6 +831,7 @@ function updateCamera() {
 function showPlanetCard(item) {
   if (item.body.type !== "app") return;
   activePlanet = item;
+  labelsDirty = true;
   const app = item.body.data;
   const url = appUrl(app);
   cardCode.textContent = app.code;
@@ -821,14 +852,28 @@ function showPlanetCard(item) {
 
 function closePlanetCard() {
   activePlanet = null;
+  labelsDirty = true;
   planetCard.classList.remove("is-open");
   planetCard.setAttribute("aria-hidden", "true");
 }
 
 let previousTime = 0;
+let previousFrameTime = 0;
 function animate(now = 0) {
+  if (document.hidden) {
+    animationFrameId = 0;
+    return;
+  }
+
+  if (previousFrameTime && now - previousFrameTime < targetFrameInterval) {
+    animationFrameId = requestAnimationFrame(animate);
+    return;
+  }
+
+  const frameDelta = previousFrameTime ? Math.min(now - previousFrameTime, 120) : 0;
+  previousFrameTime = now;
   const time = now / 1000;
-  const delta = previousTime ? time - previousTime : 0;
+  const delta = previousTime ? frameDelta / 1000 : 0;
   previousTime = time;
   updatePlanetPositions(delta);
 
@@ -851,8 +896,20 @@ function animate(now = 0) {
 
   updateCamera();
   renderer.render(scene, camera);
-  updateLabels();
-  requestAnimationFrame(animate);
+  if (labelsDirty || now - lastLabelUpdate >= labelFrameInterval) {
+    updateLabels();
+    labelsDirty = false;
+    lastLabelUpdate = now;
+  }
+  animationFrameId = requestAnimationFrame(animate);
+}
+
+function startAnimation() {
+  if (animationFrameId) return;
+  previousTime = 0;
+  previousFrameTime = 0;
+  lastLabelUpdate = 0;
+  animationFrameId = requestAnimationFrame(animate);
 }
 
 function openPlanetFromPointer(event) {
@@ -875,6 +932,14 @@ function openPlanetFromPointer(event) {
 }
 
 window.addEventListener("resize", resize);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = 0;
+  } else {
+    startAnimation();
+  }
+});
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && activePlanet) {
     closePlanetCard();
@@ -888,4 +953,4 @@ solarBack.addEventListener("click", returnToSolarSystem);
 resize();
 cameraTarget.set(0, 0, 0);
 renderOrbitBodies();
-animate();
+startAnimation();
