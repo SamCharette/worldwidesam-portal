@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verdant Sector Terminal Map</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="terminal-shell">
+    <header class="command-bar" aria-label="Terminal controls">
+      <div class="identity-block">
+        <p class="eyebrow">REGIONAL CARTOGRAPHY TERMINAL</p>
+        <h1>Verdant Sector</h1>
+      </div>
+
+      <div class="meter-strip" aria-label="Map status">
+        <span><b id="visibleCount">14</b> sites</span>
+        <span><b id="threatMeter">LOW</b> threat</span>
+        <span><b id="zoomReadout">100%</b> zoom</span>
+      </div>
+    </header>
+
+    <section class="app-grid">
+      <aside class="left-panel" aria-label="Map tools">
+        <label class="search-label" for="searchInput">Search registry</label>
+        <input id="searchInput" class="search-input" type="search" autocomplete="off" placeholder="Name, tag, hazard">
+
+        <fieldset class="filter-group">
+          <legend>Site class</legend>
+          <button class="filter-button active" type="button" data-filter="all">All</button>
+          <button class="filter-button" type="button" data-filter="settlement">Settlements</button>
+          <button class="filter-button" type="button" data-filter="utility">Utilities</button>
+          <button class="filter-button" type="button" data-filter="hazard">Hazards</button>
+          <button class="filter-button" type="button" data-filter="military">Military</button>
+        </fieldset>
+
+        <div class="tool-group" aria-label="Map controls">
+          <button id="zoomIn" class="tool-button" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+          <button id="zoomOut" class="tool-button" type="button" title="Zoom out" aria-label="Zoom out">-</button>
+          <button id="resetView" class="tool-button wide" type="button">Reset</button>
+          <button id="routeScan" class="tool-button wide" type="button">Route scan</button>
+        </div>
+
+        <ol id="siteList" class="site-list" aria-label="Visible locations"></ol>
+      </aside>
+
+      <section class="map-console" aria-label="Interactive terminal map">
+        <div class="screen-bezel">
+          <div class="screen">
+            <div id="mapStage" class="map-stage">
+              <img src="assets/wasteland-map.png" alt="Monochrome regional wasteland map" draggable="false">
+              <svg id="routeLayer" class="route-layer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+              <div id="markerLayer" class="marker-layer" aria-label="Map markers"></div>
+            </div>
+            <div class="scanline" aria-hidden="true"></div>
+            <div class="vignette" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="detail-panel" aria-label="Selected location details">
+        <div class="status-row">
+          <span id="siteCode" class="site-code">VS-01</span>
+          <span id="siteClass" class="site-class">Settlement</span>
+        </div>
+
+        <h2 id="siteName">Ash Loop</h2>
+        <p id="siteSummary">
+          A ring of salvage shacks around a broken highway exchange.
+        </p>
+
+        <dl class="site-facts">
+          <div>
+            <dt>Signal</dt>
+            <dd id="siteSignal">Clear</dd>
+          </div>
+          <div>
+            <dt>Threat</dt>
+            <dd id="siteThreat">Low</dd>
+          </div>
+          <div>
+            <dt>Useful find</dt>
+            <dd id="siteFind">Water filters, tire armor, map gossip.</dd>
+          </div>
+          <div>
+            <dt>GM hook</dt>
+            <dd id="siteHook">A caravan vanished after buying every Geiger counter in town.</dd>
+          </div>
+        </dl>
+
+        <div class="tag-bank" id="tagBank" aria-label="Tags"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
