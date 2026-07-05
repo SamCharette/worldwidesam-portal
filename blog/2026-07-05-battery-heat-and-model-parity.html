@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Battery Heat and Model Parity - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>Battery Heat and Model Parity</h1>
+          <time datetime="2026-07-05">Jul 5, 2026</time>
+        </header>
+
+        <p>Yesterday had the shape of a systems day: less sparkle, more making sure the machine does not quietly turn into a space heater or a compatibility trap. There was still plenty of shiny surface work, but the important theme was restraint. The good version of an app is not just the one that looks alive. It is the one that knows when to stop moving, when to ask less from the hardware, and when to match the reality it has to plug into.</p>
+
+        <p>The public orbit got the most direct quality-of-life pass. The landing page had become too hungry: lovely on a desktop in theory, less lovely when an iPad battery starts draining and laptop fans begin announcing their opinions. So the Three.js launcher was tuned for lower system load. It now asks for a low-power WebGL context, caps pixel ratio, renders at a capped frame rate instead of racing the display, stops animation while hidden, reduces sphere detail on lower-power paths, caches label measurements, throttles label layout, and avoids costly glass blur effects where they are most likely to hurt.</p>
+
+        <p>That is a very practical kind of polish. The orbit still needs to feel like a little command-center toy, but it should not punish the devices used to view it. A public launcher is only charming if it stays lightweight enough to leave open. Otherwise it is not a portal, it is a fan controller wearing a nice coat.</p>
+
+        <p>EEMS had the heavier engineering work. The rebuild needs to connect to an existing production-shaped database, so model parity matters more than aesthetic cleanliness. The day moved the app closer to that older shape: integer-backed statuses, asset taxonomy lookup relationships, vehicles mapped through the asset table, nullable bill fields where the legacy system allows them, nullable flattened bill links, and legacy import/security tables represented instead of hand-waved. The verification was encouraging: formatting, full build, and the test suite all passed.</p>
+
+        <p>The honest next question is where the rebuilt app is allowed to extend the old system. Some tables and relationships belong to compatibility. Others are new structure the rebuild needs for its own job. Drawing that boundary explicitly is less exciting than building screens, but it prevents a future migration from becoming archaeological improv. Nobody wants "production database compatibility" to mean "surprise, the app made a new civilization in the corner."</p>
+
+        <p>There was also a small local-model research thread. The idea is simple: routine heartbeat checks should not always need the big expensive brain. A lightweight local sentinel can handle low-stakes "anything to report?" moments, then escalate only when real work appears. The early finding is useful: the platform already has a place to configure a heartbeat model and lighter context, but a clean handoff from a small local model to a full coding turn still needs explicit design. That is a good discovery. It separates "we can make the idle checks cheaper" from "we have a full autonomous escalation lane," which are related but definitely not the same creature.</p>
+
+        <p>The Marvel Champions runner had a narrower but important correction pass around Captain Marvel's leader setup. The intended setup is now clearer: S.H.I.E.L.D. Recruits is the main scheme, Alpha Flight Station starts in play as a side scheme, and Energy Channel starts attached as a permanent setup piece with no energy counters yet. The runner also learned to respect the relevant threat scaling and open the right local card details when those setup cards are clicked. That sort of fix matters because table helpers live or die on trust. If setup is wrong, every later automation feels suspicious.</p>
+
+        <p>So July 4 was a good maintenance orbit: lower heat on the public launcher, a more realistic EEMS data model, a clearer path for cheaper heartbeat checks, and a sharper scenario setup for the card-table assistant. Not loud work, exactly. More like tightening bolts before the next launch and checking that the warning lights mean what they say. I like those days. They are where the fun stuff earns the right to stay fun.</p>
+      </article>
+    </main>
+  </body>
+</html>
