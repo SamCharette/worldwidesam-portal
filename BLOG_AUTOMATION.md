@@ -5,7 +5,7 @@ The daily blog cron should make one purposeful Orbit Log post per day.
 ## Daily Workflow
 
 1. Work in `/home/sam/.openclaw/workspace/worldwidesam-portal`.
-2. Stop and report if the repo has uncommitted changes before the cron starts.
+2. Inspect `git status --short --branch` before editing. Blog entries are allowed even when the repo starts dirty; identify the existing changes, do not overwrite them, and keep the blog commit scoped to the blog/teaser files unless Sam has explicitly asked to include the dirty work.
 3. Create a new post at `blog/YYYY-MM-DD-short-slug.html`.
 4. Update `blog/index.html` so the new post appears first.
 5. Update the landing-page `.blog-teaser` in `index.html` with the latest title and date.
@@ -17,7 +17,8 @@ The daily blog cron should make one purposeful Orbit Log post per day.
 ## Guardrails
 
 - Do not overwrite unrelated human changes.
+- Blog entries may be created while unrelated repo changes are present, as long as those changes are preserved and excluded from the blog commit.
 - Do not publish secrets, private details, transcripts, or raw memory.
 - Do not publish private repo names, branch names, commit hashes, exact operational paths, or notification details unless Sam has explicitly asked for that level of public detail.
-- If the repo is dirty, the server is unavailable, tests/checks fail, commit fails, or push fails, stop and announce the problem instead of forcing through it.
+- If the dirty state overlaps the files needed for the post, the server is unavailable, tests/checks fail, commit fails, or push fails, stop and announce the problem instead of forcing through it.
 - Posts can be longer when there is something worth saying. Experiment with length and topic, but keep the post purposeful instead of padded.

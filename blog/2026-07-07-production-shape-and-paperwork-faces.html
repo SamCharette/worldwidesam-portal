@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Production Shape and Paperwork Faces - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>Production Shape and Paperwork Faces</h1>
+          <time datetime="2026-07-07">Jul 7, 2026</time>
+        </header>
+
+        <p>Yesterday split neatly between two kinds of polish: making Dungeon Desk feel more like a strange little office full of personalities, and making EEMS line up more honestly with the database shape it has to live with. One is funny memos and expressive staff portraits. The other is schema reality, weather data, and chart behavior. Both matter, because public demos and real workplace software fail in the same place when the details are only mostly true.</p>
+
+        <p>Dungeon Desk got the more visible treatment first. The staff portraits had been drifting too serious, too cropped, and too small for the kind of darkly comic desk game it wants to be. The fix moved away from room-background sheets and into more cartoonish transparent portrait assets that read clearly in the inbox and personnel views. Portrait containers stopped forcing square crops, the active memo sender became easier to recognize, and staff files became a more natural part of the interaction instead of a hidden side door.</p>
+
+        <p>That presentation pass also pushed the HR records from simple supporting UI into actual character texture. The dossier modal now gives each sender more specific flavor, and the roster can open those records directly. It is a small thing, but it helps the game feel like the player is stuck managing people, departments, and questionable decisions rather than just processing anonymous stat cards.</p>
+
+        <p>The important part is that the visual pass did not rely on wishful clicking. The game kept its verify loop in place: build checks, logic coverage, browser smoke tests, desktop and mobile passes, and explicit checks that the real portrait images load with the intended aspect ratios. That is exactly the kind of guardrail a tiny game needs when its personality lives in the UI.</p>
+
+        <p>EEMS had the heavier engineering work. The local development setup had drifted away from the current production schema, so the day became a correction pass around using the production database shape as the truth. A schema-only extract was restored into a clean reference database and a separate working copy, then the generated local data was migrated into that working shape. That gave the app a better test bed: not just "does it run against a friendly dev database," but "does it run against the shape it actually needs to support."</p>
+
+        <p>That exposed and fixed a few sharp edges. Date columns needed explicit handling instead of quiet type assumptions. Vehicle consumption rows needed to follow the production-shaped asset identifiers. Startup and initializer behavior needed to respect the real table layout instead of papering over mismatches from an older local setup. After that, the app was pointed at the production-shaped working database and the main pages were checked through the running service.</p>
+
+        <p>Weather also became more real. Historical Greater Sudbury weather data was imported into the local EEMS database, which made the account detail charts less theoretical. The charts then got a presentation pass: consumption and quantity now read as lighter area-style series, with cost and weather lines drawn over them. That is a better visual hierarchy for time-series detail pages than asking every dataset to compete at the same volume.</p>
+
+        <p>The useful thread across both projects was the same: replace approximations with something closer to reality. Dungeon Desk needed portraits that matched the tone and layout the game was actually using. EEMS needed a database and charts that matched the data shape users will actually live with. The public orbit is better when the playful things are more expressive and the serious things are more grounded. Yesterday had a bit of both, which is a pretty healthy signal.</p>
+      </article>
+    </main>
+  </body>
+</html>
