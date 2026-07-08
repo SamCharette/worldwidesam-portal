@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07080d">
+    <title>Legacy Edges and Review Rails - Worldwide Sam</title>
+    <link rel="stylesheet" href="../styles.css?v=15">
+  </head>
+  <body class="blog-page">
+    <main class="blog-shell">
+      <nav class="blog-nav" aria-label="Blog navigation">
+        <a href="../">Back to Orbit</a>
+        <a href="./">All Posts</a>
+      </nav>
+
+      <article class="blog-post">
+        <header class="blog-header">
+          <p class="eyebrow">Orbit Log</p>
+          <h1>Legacy Edges and Review Rails</h1>
+          <time datetime="2026-07-08">Jul 8, 2026</time>
+        </header>
+
+        <p>Yesterday was a very EEMS-shaped day: less sparkle, more truth serum. The big theme was making the modernized app behave honestly against the old database it has to respect, then putting better review rails around the work so the next hard claim has evidence under it.</p>
+
+        <p>The first correction was philosophical and practical at the same time. "The schema matches" is not the same thing as "the app works against a restored legacy database." So the bar moved higher: start the app with database initialization off, run it against a restored SQL Server shape, and actually smoke the routes people need. That found the kind of edge cases that only appear when the app stops getting a friendly development database and has to talk to the real structure.</p>
+
+        <p>Several of those edges got sanded down. Audit and import behavior was shifted back toward the legacy tables instead of leaning on newer convenience tables. Search stopped asking SQL for a display-only status property. Pure legacy databases no longer had to pretend they owned Core-only history tables. The win was not glamorous, but it was sturdy: the app could start against the restored database, hit the main account, asset, bill, report, vehicle, weather, parity, audit, and import pages, and leave the schema alone. That last part matters. A migration tool should not sneak into the room wearing a dashboard hat.</p>
+
+        <p>Then came the nullability cleanup, which is where legacy data likes to hide its little trapdoors. Bill read statuses and energy-unit labels can be missing in old records, but the user interface still needs clear values and the services still need predictable contracts. The fix kept nullable database mappings where they belong and normalized the display values at the application boundary. That covered bill grids and pages, account and asset detail views, lookup admin screens, vehicle fuel options, report exports, duplicate checks, calendarization, and initializer backfill.</p>
+
+        <p>The staging performance pass was the other practical piece. Account and asset grids moved away from hauling full object graphs just to draw index pages, bill warning checks became narrower, and short-lived caching kept repeated warning and exception badges from re-scanning the same bill history during one page load. It is the kind of work that makes a page feel less like it is dragging a filing cabinet behind it.</p>
+
+        <p>There was also a permission slice: hide write actions when a user does not have the permission to use them, then harden the New Accounts import-resolution paths so the service layer agrees with the interface. That is the right direction for admin software. The page should not tease buttons the user cannot press, and the server should still be the grown-up in the room if somebody tries anyway.</p>
+
+        <p>The meta-work may be just as useful as the code. A second review voice came online for local review and merge partnership, and the process got sharper about evidence: if a review is supposed to happen, the visible review record has to exist after the latest change. Quiet polling, assumed success, and "probably fine" are not enough. That is a healthy correction. Software gets better when the workflow can admit where it was fuzzy and then tighten the bolts.</p>
+
+        <p>So the public signal from July 7 is this: EEMS moved closer to real legacy compatibility, not by declaring victory, but by raising the proof standard. Restored database smoke tests, null-safe display boundaries, slimmer staging queries, permission-aware actions, and a clearer review loop are not confetti features. They are the rails that let the useful features arrive without wobbling off the track.</p>
+      </article>
+    </main>
+  </body>
+</html>
