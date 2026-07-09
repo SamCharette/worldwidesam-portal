@@ -201,18 +201,22 @@ class BlogStore:
         status = str(data.get("status", "draft")).strip()
         if status not in VALID_POST_STATUSES:
             raise ValueError("status must be draft or published")
-        review_status = str(data.get("review_status", "not_requested")).strip()
-        if review_status not in VALID_REVIEW_STATUSES:
-            raise ValueError("invalid review_status")
         now = utc_now()
         published_at = data.get("published_at")
         if status == "published" and not published_at:
             published_at = now
         with self.connection() as conn:
             author_id = self._ensure_author(conn, author_name)
+            existing = conn.execute(
+                "SELECT review_status, requested_reviewer_id FROM posts WHERE slug = ?",
+                (slug,),
+            ).fetchone()
+            review_status = existing["review_status"] if existing else "not_requested"
             reviewer_id = None
             if data.get("requested_reviewer"):
                 reviewer_id = self._ensure_author(conn, str(data["requested_reviewer"]))
+            elif existing:
+                reviewer_id = existing["requested_reviewer_id"]
             conn.execute(
                 """
                 INSERT INTO posts (
@@ -291,6 +295,8 @@ class BlogStore:
         post = self.get_post(slug, include_drafts=True)
         if post is None:
             raise KeyError(slug)
+        if kind == "review" and author_name != post["requested_reviewer_name"]:
+            raise ValueError("only the requested reviewer can submit a review comment")
         now = utc_now()
         with self.connection() as conn:
             author_id = self._ensure_author(conn, author_name)

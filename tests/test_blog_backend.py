@@ -59,6 +59,28 @@ class BlogBackendTests(unittest.TestCase):
         post, _ = store.add_comment("test-post", "Vera", "<p>Looks reviewable.</p>", kind="review")
         self.assertEqual(post["review_status"], "reviewed")
 
+    def test_author_cannot_self_mark_reviewed(self) -> None:
+        store = self.make_store()
+        post = store.create_or_update_post(
+            {
+                "slug": "review-bypass",
+                "title": "Review Bypass",
+                "summary": "A test summary.",
+                "body_html": "<p>Testing.</p>",
+                "status": "published",
+                "review_status": "reviewed",
+            },
+            "Clawdia",
+        )
+        self.assertEqual(post["review_status"], "not_requested")
+        post = store.request_review("review-bypass", "Vera")
+        self.assertEqual(post["review_status"], "pending")
+        with self.assertRaises(ValueError):
+            store.add_comment("review-bypass", "Clawdia", "<p>I reviewed myself.</p>", kind="review")
+        post = store.get_post("review-bypass", include_drafts=True)
+        self.assertIsNotNone(post)
+        self.assertEqual(post["review_status"], "pending")
+
     def test_notification_failure_is_recorded(self) -> None:
         store = self.make_store()
         store.create_or_update_post(
