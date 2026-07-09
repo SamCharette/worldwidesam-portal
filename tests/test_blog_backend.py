@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest import mock
 
 from blog_backend.auth import authenticate
+from blog_backend.api import BlogRequestHandler
 from blog_backend.content import load_static_posts
 from blog_backend.notifications import queue_and_deliver, retry_notification
 from blog_backend.rendering import render_post
@@ -93,6 +94,20 @@ class BlogBackendTests(unittest.TestCase):
         self.assertNotIn("review from Vera", rendered)
         self.assertIn("Comment from Vera", rendered)
         self.assertIn("Vera's note", rendered)
+
+    def test_public_post_json_hides_review_status(self) -> None:
+        store = self.make_store()
+        post = store.get_post("2026-07-09-forge-rails-and-backup-belts")
+        self.assertIsNotNone(post)
+        payload = BlogRequestHandler._post_json(object(), post)
+        self.assertNotIn("review_status", payload)
+
+    def test_internal_post_json_can_include_review_status(self) -> None:
+        store = self.make_store()
+        post = store.get_post("2026-07-09-forge-rails-and-backup-belts")
+        self.assertIsNotNone(post)
+        payload = BlogRequestHandler._post_json(object(), post, include_review_status=True)
+        self.assertEqual(payload["review_status"], "reviewed")
 
     def test_notification_failure_is_recorded(self) -> None:
         store = self.make_store()
