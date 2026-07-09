@@ -1,17 +1,21 @@
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from __future__ import annotations
+
+from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-
-class NoCacheHandler(SimpleHTTPRequestHandler):
-    def end_headers(self):
-        self.send_header("Cache-Control", "no-store, max-age=0")
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
-        super().end_headers()
+from blog_backend.api import BlogRequestHandler
+from blog_backend.storage import BlogStore
 
 
 if __name__ == "__main__":
     root = Path(__file__).resolve().parent
-    handler = lambda *args, **kwargs: NoCacheHandler(*args, directory=str(root), **kwargs)
-    server = ThreadingHTTPServer(("0.0.0.0", 4178), handler)
+    store = BlogStore(root)
+    store.initialize()
+    class Handler(BlogRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=str(root), **kwargs)
+
+    Handler.root = root
+    Handler.store = store
+    server = ThreadingHTTPServer(("0.0.0.0", 4178), Handler)
     server.serve_forever()
