@@ -35,17 +35,21 @@ def date_attr(value: str | None) -> str:
     return (value or "")[:10]
 
 
-def review_label(post: Row) -> str:
-    status = post["review_status"]
-    keys = post.keys()
-    reviewer = post["requested_reviewer_name"] if "requested_reviewer_name" in keys else None
-    if status == "reviewed":
-        return "Reviewed"
-    if status == "pending":
-        return f"Review pending{f' from {reviewer}' if reviewer else ''}"
-    if status == "unavailable":
-        return "Review unavailable"
-    return "Review not requested"
+def comment_label(comment: Row) -> str:
+    if comment["kind"] == "review":
+        return f"Comment from {comment['author_name']}"
+    return f"{comment['kind'].capitalize()} from {comment['author_name']}"
+
+
+def comment_body(comment: Row) -> str:
+    body = str(comment["body_html"])
+    if comment["kind"] != "review":
+        return body
+    return (
+        body.replace("reviewer-note", "participant-note")
+        .replace('aria-label="Reviewer note from Vera"', 'aria-label="Comment from Vera"')
+        .replace("Vera's reviewer note", "Vera's note")
+    )
 
 
 def render_index(posts: list[Row]) -> str:
@@ -56,7 +60,7 @@ def render_index(posts: list[Row]) -> str:
           <time datetime="{html.escape(date_attr(post['published_at']))}">{html.escape(display_date(post['published_at']))}</time>
           <h2><a href="/blog/{html.escape(post['slug'])}.html">{html.escape(post['title'])}</a></h2>
           <p>{html.escape(post['summary'])}</p>
-          <p class="post-meta">By {html.escape(post['author_name'])} · {html.escape(post['review_status'].replace('_', ' '))}</p>
+          <p class="post-meta">By {html.escape(post['author_name'])}</p>
         </article>"""
         )
     body = f"""    <main class="blog-shell">
@@ -80,8 +84,8 @@ def render_index(posts: list[Row]) -> str:
 def render_post(post: Row, comments: list[Row]) -> str:
     comment_html = "\n".join(
         f"""        <article class="comment">
-          <p class="eyebrow">{html.escape(comment['kind'])} from {html.escape(comment['author_name'])}</p>
-          <div>{comment['body_html']}</div>
+          <p class="eyebrow">{html.escape(comment_label(comment))}</p>
+          <div>{comment_body(comment)}</div>
         </article>"""
         for comment in comments
     )
@@ -98,18 +102,13 @@ def render_post(post: Row, comments: list[Row]) -> str:
           <p class="eyebrow">Orbit Log</p>
           <h1>{html.escape(post['title'])}</h1>
           <time datetime="{html.escape(date_attr(post['published_at']))}">{html.escape(display_date(post['published_at']))}</time>
-          <p class="post-meta">By {html.escape(post['author_name'])} · {html.escape(review_label(post))}</p>
+          <p class="post-meta">By {html.escape(post['author_name'])}</p>
         </header>
 
 {post['body_html']}
 
-        <section class="review-state" aria-label="Review state">
-          <p class="eyebrow">Review State</p>
-          <p>{html.escape(review_label(post))}</p>
-        </section>
-
-        <section class="comments" aria-label="Comments and reviews">
-          <h2>Comments and Reviews</h2>
+        <section class="comments" aria-label="Comments">
+          <h2>Comments</h2>
 {comment_html}
         </section>
       </article>
