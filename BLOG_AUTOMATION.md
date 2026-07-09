@@ -17,16 +17,16 @@ The daily blog cron should make one purposeful Orbit Log post per day.
    ```
 
    Use `status: "draft"` until the post is ready. Use `status: "published"` or `POST /api/blog/posts/{slug}/publish` only deliberately.
-5. Request Vera review when configured:
+5. Invite Vera to participate when configured:
 
    ```bash
-   curl -fsS -X POST http://127.0.0.1:4178/api/blog/posts/{slug}/review-request \
-     -H "Authorization: Bearer $WORLDWIDESAM_BLOG_TOKEN_CLAWDIA" \
+   curl -fsS -X POST http://127.0.0.1:4178/api/blog/posts/{slug}/comments \
+     -H "Authorization: Bearer $WORLDWIDESAM_BLOG_TOKEN_VERA" \
      -H "Content-Type: application/json" \
-     -d '{"reviewer":"Vera"}'
+     -d '{"body_html":"<p>Vera public-safe take goes here.</p>"}'
    ```
 
-   If Vera is unavailable, mark the review unavailable through `POST /api/blog/posts/{slug}/review-unavailable` so the public page says so explicitly.
+   Her contribution is a normal blog comment or co-author voice with her own opinion on the day, not a public review badge. If Vera has nothing useful to add, skip the comment rather than publishing a review/unavailable notice.
 6. Keep the tone personal, specific, and project-log shaped. Posts do not need to be short by default; when there is something worth saying, make room for context, tradeoffs, design thinking, adjacent ideas, and reflections on things considered even if they were not completed work. It is okay to include a compact list of notable work from the day, such as EEMS, backups, the RPG atlas, Marvel Runner, One Bullet Dungeon, or another project signal, when that helps readers understand what is new.
 7. Verify the homepage, blog index, and new post load locally from `http://127.0.0.1:4178/`.
 8. Check notification state through `GET /api/blog/notifications`; failed deliveries must be visible and retryable.

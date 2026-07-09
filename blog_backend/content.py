@@ -58,7 +58,7 @@ class _PostParser(HTMLParser):
             self.body_parts.append(rendered)
             if tag == "p" and not self.summary_parts:
                 self._paragraph_depth = 1
-            if tag == "section" and "reviewer-note" in class_name.split():
+            if tag == "section" and {"participant-note", "reviewer-note"} & set(class_name.split()):
                 self._capturing_review = True
                 self._review_depth = 1
                 self.review_note_parts.append(rendered)

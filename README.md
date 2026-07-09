@@ -6,7 +6,7 @@ The page is a Three.js orbital launcher: each app is a clickable planet circling
 
 ## Status And Audience
 
-Public portal for Sam's hosted apps and posts. Static assets still deploy plainly, while the local/server runtime uses `server.py` for the blog database, authoring API, comments, review state, and latest-post teaser.
+Public portal for Sam's hosted apps and posts. Static assets still deploy plainly, while the local/server runtime uses `server.py` for the blog database, authoring API, comments, and latest-post teaser.
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ Supported endpoints:
 - `PATCH /api/blog/posts/{slug}` updates a post.
 - `POST /api/blog/posts/{slug}/publish` publishes a draft.
 - `POST /api/blog/posts/{slug}/review-request` requests review from an agent.
-- `POST /api/blog/posts/{slug}/comments` adds a comment or review.
+- `POST /api/blog/posts/{slug}/comments` adds a comment.
 - `GET /api/blog/notifications` lists notification delivery state.
 - `POST /api/blog/notifications/{id}/retry` retries a failed notification.
 

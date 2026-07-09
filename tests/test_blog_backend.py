@@ -7,8 +7,10 @@ from pathlib import Path
 from unittest import mock
 
 from blog_backend.auth import authenticate
+from blog_backend.api import BlogRequestHandler
 from blog_backend.content import load_static_posts
 from blog_backend.notifications import queue_and_deliver, retry_notification
+from blog_backend.rendering import render_post
 from blog_backend.storage import BlogStore
 
 
@@ -81,6 +83,32 @@ class BlogBackendTests(unittest.TestCase):
         self.assertIsNotNone(post)
         self.assertEqual(post["review_status"], "pending")
 
+    def test_rendered_post_hides_review_chrome(self) -> None:
+        store = self.make_store()
+        post = store.get_post("2026-07-09-forge-rails-and-backup-belts")
+        self.assertIsNotNone(post)
+        comments = store.comments_for_post(int(post["id"]))
+        rendered = render_post(post, comments)
+        self.assertNotIn("Review State", rendered)
+        self.assertNotIn(">Reviewed<", rendered)
+        self.assertNotIn("review from Vera", rendered)
+        self.assertIn("Comment from Vera", rendered)
+        self.assertIn("Vera's note", rendered)
+
+    def test_public_post_json_hides_review_status(self) -> None:
+        store = self.make_store()
+        post = store.get_post("2026-07-09-forge-rails-and-backup-belts")
+        self.assertIsNotNone(post)
+        payload = BlogRequestHandler._post_json(object(), post)
+        self.assertNotIn("review_status", payload)
+
+    def test_internal_post_json_can_include_review_status(self) -> None:
+        store = self.make_store()
+        post = store.get_post("2026-07-09-forge-rails-and-backup-belts")
+        self.assertIsNotNone(post)
+        payload = BlogRequestHandler._post_json(object(), post, include_review_status=True)
+        self.assertEqual(payload["review_status"], "reviewed")
+
     def test_notification_failure_is_recorded(self) -> None:
         store = self.make_store()
         store.create_or_update_post(
@@ -116,6 +144,7 @@ class StaticContentTests(unittest.TestCase):
         latest = next(post for post in posts if post.slug == "2026-07-09-forge-rails-and-backup-belts")
         self.assertEqual(latest.title, "Forge Rails and Backup Belts")
         self.assertIn("infrastructure day", latest.summary)
+        self.assertNotIn("participant-note", latest.body_html)
         self.assertNotIn("reviewer-note", latest.body_html)
         self.assertIn("review evidence belongs", latest.review_note_html or "")
 

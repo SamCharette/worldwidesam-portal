@@ -40,7 +40,12 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
             return
         if path == "/api/blog/posts":
             include_drafts = self._authenticated_author() is not None and parse_qs(urlparse(self.path).query).get("status") == ["all"]
-            self._send_json([self._post_json(post) for post in self.store.list_posts(include_drafts=include_drafts)])
+            self._send_json(
+                [
+                    self._post_json(post, include_review_status=include_drafts)
+                    for post in self.store.list_posts(include_drafts=include_drafts)
+                ]
+            )
             return
         if path == "/api/blog/notifications":
             if not self._require_auth():
@@ -60,7 +65,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                 post = self.store.create_or_update_post(data, author)
                 if post["status"] == "published":
                     self._notify_peer("post_published", post["slug"], author, f"{author} published '{post['title']}'.")
-                self._send_json(self._post_json(post), status=HTTPStatus.CREATED)
+                self._send_json(self._post_json(post, include_review_status=True), status=HTTPStatus.CREATED)
                 return
             if path.startswith("/api/blog/posts/"):
                 parts = [part for part in path.split("/") if part]
@@ -72,7 +77,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                 if action == "publish":
                     post = self.store.publish_post(slug)
                     self._notify_peer("post_published", slug, author, f"{author} published '{post['title']}'.")
-                    self._send_json(self._post_json(post))
+                    self._send_json(self._post_json(post, include_review_status=True))
                     return
                 if action == "comments":
                     kind = str(data.get("kind", "comment"))
@@ -87,7 +92,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                             f"{author} left a {kind} on '{post['title']}'.",
                             comment_id=comment_id,
                         )
-                    self._send_json(self._post_json(post), status=HTTPStatus.CREATED)
+                    self._send_json(self._post_json(post, include_review_status=True), status=HTTPStatus.CREATED)
                     return
                 if action == "review-request":
                     reviewer = str(data.get("reviewer", "Vera"))
@@ -99,11 +104,11 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                         reviewer,
                         f"{author} requested your review on '{post['title']}'.",
                     )
-                    self._send_json(self._post_json(post))
+                    self._send_json(self._post_json(post, include_review_status=True))
                     return
                 if action == "review-unavailable":
                     post = self.store.mark_review_unavailable(slug)
-                    self._send_json(self._post_json(post))
+                    self._send_json(self._post_json(post, include_review_status=True))
                     return
             if path.startswith("/api/blog/notifications/"):
                 parts = [part for part in path.split("/") if part]
@@ -137,7 +142,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         except (ValueError, json.JSONDecodeError) as exc:
             self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
             return
-        self._send_json(self._post_json(post))
+        self._send_json(self._post_json(post, include_review_status=True))
 
     def _authenticated_author(self) -> str | None:
         return authenticate(self.root, self.headers.get("Authorization"))
@@ -172,16 +177,18 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(encoded)
 
-    def _post_json(self, post) -> dict:
-        return {
+    def _post_json(self, post, include_review_status: bool = False) -> dict:
+        data = {
             "slug": post["slug"],
             "title": post["title"],
             "summary": post["summary"],
             "status": post["status"],
             "author": post["author_name"],
-            "review_status": post["review_status"],
             "published_at": post["published_at"],
         }
+        if include_review_status:
+            data["review_status"] = post["review_status"]
+        return data
 
     def _notify_peer(self, event_type: str, slug: str, author: str, message: str) -> None:
         target = "Vera" if author == "Clawdia" else "Clawdia"
