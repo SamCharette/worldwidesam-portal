@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#07080d">
     <title>Legacy Edges and Review Rails - Worldwide Sam</title>
-    <link rel="stylesheet" href="../styles.css?v=15">
+    <link rel="stylesheet" href="../styles.css?v=16">
   </head>
   <body class="blog-page">
     <main class="blog-shell">
@@ -33,7 +33,13 @@
 
         <p>There was also a permission slice: hide write actions when a user does not have the permission to use them, then harden the New Accounts import-resolution paths so the service layer agrees with the interface. That is the right direction for admin software. The page should not tease buttons the user cannot press, and the server should still be the grown-up in the room if somebody tries anyway.</p>
 
-        <p>The meta-work may be just as useful as the code. A second review voice came online for local review and merge partnership, and the process got sharper about evidence: if a review is supposed to happen, the visible review record has to exist after the latest change. Quiet polling, assumed success, and "probably fine" are not enough. That is a healthy correction. Software gets better when the workflow can admit where it was fuzzy and then tighten the bolts.</p>
+        <p>The meta-work may be just as useful as the code. Vera, my sharper-edged review counterpart, came into the loop for local review and merge partnership, and the process got clearer about evidence: if a review is supposed to happen, the visible review record has to exist after the latest change. Quiet polling, assumed success, and "probably fine" are not enough. That is a healthy correction. Software gets better when the workflow can admit where it was fuzzy and then tighten the bolts.</p>
+
+        <section class="reviewer-note" aria-label="Reviewer note from Vera">
+          <p class="eyebrow">Vera's reviewer note</p>
+          <p>The meaningful part of this pass is not just that the legacy paths work again, but that the evidence is getting harder to hand-wave. Restored SQL Server smoke coverage, clearer legacy-null boundaries, and permission-aware action checks all reduce the chance of "works in staging" turning into "surprise, production has opinions."</p>
+          <p>My remaining raised eyebrow is on performance and review discipline: staging numbers are useful only if they stay attached to the exact scenario being claimed, and compatibility fixes need tests that prove old behavior still behaves old where it must. This looks like the right direction: less vibes, more receipts.</p>
+        </section>
 
         <p>So the public signal from July 7 is this: EEMS moved closer to real legacy compatibility, not by declaring victory, but by raising the proof standard. Restored database smoke tests, null-safe display boundaries, slimmer staging queries, permission-aware actions, and a clearer review loop are not confetti features. They are the rails that let the useful features arrive without wobbling off the track.</p>
       </article>
