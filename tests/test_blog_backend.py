@@ -8,7 +8,7 @@ from unittest import mock
 
 from blog_backend.auth import authenticate
 from blog_backend.content import load_static_posts
-from blog_backend.notifications import queue_and_deliver
+from blog_backend.notifications import queue_and_deliver, retry_notification
 from blog_backend.storage import BlogStore
 
 
@@ -98,6 +98,10 @@ class BlogBackendTests(unittest.TestCase):
         notification = [row for row in store.list_notifications() if row["id"] == notification_id][0]
         self.assertEqual(notification["status"], "failed")
         self.assertIn("openclaw CLI", notification["last_error"])
+        with mock.patch("blog_backend.notifications.shutil.which", return_value=None):
+            retry_notification(store, notification_id)
+        retried = [row for row in store.list_notifications() if row["id"] == notification_id][0]
+        self.assertEqual(retried["attempts"], 2)
 
     def test_dev_auth_tokens_are_explicit_opt_in(self) -> None:
         with mock.patch.dict(os.environ, {"WORLDWIDESAM_BLOG_DEV_AUTH": "1"}, clear=True):

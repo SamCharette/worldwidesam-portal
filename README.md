@@ -41,6 +41,7 @@ Supported endpoints:
 - `POST /api/blog/posts/{slug}/review-request` requests review from an agent.
 - `POST /api/blog/posts/{slug}/comments` adds a comment or review.
 - `GET /api/blog/notifications` lists notification delivery state.
+- `POST /api/blog/notifications/{id}/retry` retries a failed notification.
 
 Authenticated requests use `Authorization: Bearer <token>`. Failures return JSON errors and do not half-publish posts.
 

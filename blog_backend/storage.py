@@ -359,6 +359,19 @@ class BlogStore:
                 (status, error, utc_now(), notification_id),
             )
 
+    def get_notification(self, notification_id: int) -> sqlite3.Row | None:
+        with self.connection() as conn:
+            return conn.execute(
+                """
+                SELECT notifications.*, posts.slug, posts.title, authors.name AS target_author_name
+                FROM notifications
+                LEFT JOIN posts ON posts.id = notifications.post_id
+                LEFT JOIN authors ON authors.id = notifications.target_author_id
+                WHERE notifications.id = ?
+                """,
+                (notification_id,),
+            ).fetchone()
+
     def list_notifications(self) -> list[sqlite3.Row]:
         with self.connection() as conn:
             return conn.execute(

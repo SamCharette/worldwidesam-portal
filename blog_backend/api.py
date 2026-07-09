@@ -7,7 +7,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from .auth import authenticate
-from .notifications import queue_and_deliver
+from .notifications import queue_and_deliver, retry_notification
 from .rendering import render_home, render_index, render_post
 from .storage import BlogStore
 
@@ -104,6 +104,12 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                 if action == "review-unavailable":
                     post = self.store.mark_review_unavailable(slug)
                     self._send_json(self._post_json(post))
+                    return
+            if path.startswith("/api/blog/notifications/"):
+                parts = [part for part in path.split("/") if part]
+                if len(parts) == 5 and parts[4] == "retry":
+                    retry_notification(self.store, int(parts[3]))
+                    self._send_json({"status": "retry attempted"})
                     return
         except (KeyError, ValueError, json.JSONDecodeError) as exc:
             self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
