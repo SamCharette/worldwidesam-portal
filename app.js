@@ -26,7 +26,7 @@ function systemPlanetSize(category) {
 }
 
 const systems = [
-  { id: "games", name: "Games", kind: "playable experiments", code: "GM", radius: 5.8, speed: 0.052, size: systemPlanetSize("games"), start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, gravity toys, and tiny management games.", highlights: ["Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot", "One Bullet Dungeon", "Dungeon Desk"] },
+  { id: "games", name: "Games", kind: "cabinet of playable experiments", code: "GM", publicUrl: "https://games.worldwidesam.net/", localPort: 4323, radius: 5.8, speed: 0.052, size: systemPlanetSize("games"), start: 0.1, color: 0x2c7892, summary: "Arcade, puzzle, strategy, gravity toys, and tiny management games.", highlights: ["Clawdia Cabinet", "Hex", "Clawdtris", "Circuit Snap", "Orbital Slingshot", "One Bullet Dungeon", "Dungeon Desk"] },
   { id: "tools", name: "Tools", kind: "utility surfaces", code: "TL", radius: 8.0, speed: -0.041, size: systemPlanetSize("tools"), start: 2.75, color: 0x5f7b42, summary: "Dashboards and helper apps.", highlights: ["Mission Control", "Decisions Please"] },
   { id: "tabletop", name: "Tabletop", kind: "RPG and table helpers", code: "TT", radius: 10.2, speed: 0.034, size: systemPlanetSize("tabletop"), start: 4.75, color: 0xae793c, summary: "RPG library, VTT, and campaign/table tools.", highlights: ["RPG Catalog", "Ypsillon Overkill Dashboard", "Marvel Champions Runner", "Foundry VTT", "Wasteland Terminal Map"] },
   { id: "work", name: "Work", kind: "workplace apps", code: "WK", radius: 12.05, speed: -0.028, size: systemPlanetSize("work"), start: 1.72, color: 0x6579b8, summary: "Workplace systems and modernization projects.", highlights: ["EEMS"] }
@@ -52,6 +52,18 @@ function appUrl(app) {
   }
 
   return `http://${localHostForLinks()}:${app.localPort}/`;
+}
+
+function systemUrl(system) {
+  if (!system.publicUrl && !system.localPort) {
+    return "";
+  }
+
+  if (isPublicPortal || !system.localPort) {
+    return system.publicUrl;
+  }
+
+  return `http://${localHostForLinks()}:${system.localPort}/`;
 }
 
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -647,16 +659,21 @@ function makePlanet(body) {
     label.href = appUrl(body.data);
     label.setAttribute("aria-label", `Open ${body.data.name} in a new window`);
   } else {
-    label.removeAttribute("href");
-    label.setAttribute("role", "button");
-    label.setAttribute("tabindex", "0");
-    label.setAttribute("aria-label", `Focus ${body.data.name} planet`);
+    const launchUrl = systemUrl(body.data);
+    if (launchUrl) {
+      label.href = launchUrl;
+      label.setAttribute("aria-label", `Open ${body.data.name} cabinet in a new window`);
+    } else {
+      label.removeAttribute("href");
+      label.setAttribute("role", "button");
+      label.setAttribute("tabindex", "0");
+    }
     label.addEventListener("click", (event) => {
-      event.preventDefault();
+      if (launchUrl) return;
       focusSystem(body.data.id);
     });
     label.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
+      if (!launchUrl && (event.key === "Enter" || event.key === " ")) {
         event.preventDefault();
         focusSystem(body.data.id);
       }
