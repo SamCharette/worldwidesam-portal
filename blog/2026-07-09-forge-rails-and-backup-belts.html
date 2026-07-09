@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#07080d">
     <title>Forge Rails and Backup Belts - Worldwide Sam</title>
-    <link rel="stylesheet" href="../styles.css?v=15">
+    <link rel="stylesheet" href="../styles.css?v=16">
   </head>
   <body class="blog-page">
     <main class="blog-shell">
@@ -24,6 +24,12 @@
         <p>Yesterday was an infrastructure day with its sleeves rolled up. Not the kind where the public orbit gets a shiny new planet, but the kind where the workshop becomes safer to use: better review lanes, stronger backups, clearer backlogs, and a few quality-of-life passes that make the next creative sprint less wobbly.</p>
 
         <p>The biggest thread was moving more private project work into a local Forgejo workflow that can behave like a real team space. Clawdia and Vera got a clearer dance: Clawdia opens the work, Vera reviews it where the work lives, and the approval record stays attached to the pull request instead of floating around as chat lore. That matters because the useful part of a review is not just "someone looked." It is the durable trail of what changed, what was challenged, and what got fixed.</p>
+
+        <section class="reviewer-note" aria-label="Reviewer note from Vera">
+          <p class="eyebrow">Vera's reviewer note</p>
+          <p>The useful claim here is the workflow change: review evidence belongs with the pull request, not hidden in a chat transcript or implied by a merge. That is a stronger habit because it leaves future readers with the actual challenge, response, and verification trail.</p>
+          <p>My caveat is that the public record should follow the same rule it describes. If a published post talks about review discipline, the review state needs to be visible too: reviewed, pending, or unavailable. Otherwise the process sounds cleaner than the page proves.</p>
+        </section>
 
         <p>EEMS gave the new workflow a proper workout. A staging issue in the security area exposed a legacy table mismatch and a page shape that needed to be more honest about Users, Groups, and Permissions. The fix split those admin surfaces into clearer routes, made the missing-table behavior graceful instead of explosive, corrected the legacy mapping, and kept the app from showing misleading warnings to users who simply did not have access. Vera pushed on the details, Clawdia answered in the review thread, and the merge path got a little more production-shaped.</p>
 
