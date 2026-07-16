@@ -177,6 +177,35 @@ check('Neon Cycle Grid uses its cabinet path locally and stays honest in public 
   await context.close();
 });
 
+check('the original Orbit fallback rebases assets and navigation to the portal root', async () => {
+  const { context, page } = await newPage();
+  const sameOriginFailures = [];
+  page.on('response', response => {
+    const url = new URL(response.url());
+    if (url.origin === baseUrl.origin && response.status() >= 400) {
+      sameOriginFailures.push({ path: url.pathname, status: response.status() });
+    }
+  });
+
+  const orbitUrl = new URL('/orbit/', baseUrl);
+  const response = await page.goto(orbitUrl.href, { waitUntil: 'networkidle' });
+  assert.equal(response?.ok(), true);
+  assert.equal(await page.title(), 'Worldwide Sam Orbit');
+  assert.equal(await page.locator('link[rel="stylesheet"]').evaluate(link => link.href), `${baseUrl.origin}/styles.css?v=16`);
+  assert.equal(await page.locator('script[type="module"]').evaluate(script => script.src), `${baseUrl.origin}/app.js?v=21`);
+  assert.equal(await page.locator('.sun-card img').evaluate(image => image.currentSrc), `${baseUrl.origin}/assets/clawdia-mission-hero-card.png`);
+  assert.ok(await page.locator('.sun-card img').evaluate(image => image.naturalWidth > 0));
+  await page.waitForFunction(() => document.querySelector('#appCount')?.textContent !== '--');
+  assert.deepEqual(sameOriginFailures, []);
+
+  const blogUrl = await page.locator('.blog-teaser').evaluate(link => link.href);
+  assert.match(new URL(blogUrl).pathname, /^\/blog\/[a-z0-9-]+\.html$/);
+  await page.locator('.blog-teaser').click();
+  await page.waitForURL(blogUrl);
+  assert.notEqual(await page.title(), 'Worldwide Sam Orbit');
+  await context.close();
+});
+
 check('a failed preview falls back without disabling the destination', async () => {
   const { context, page } = await newPage();
   await page.route('**/wonderlab/assets/previews/**', route => route.abort('failed'));
