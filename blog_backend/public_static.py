@@ -45,8 +45,11 @@ def resolve_public_file(root: Path, request_target: str) -> Path | None:
         resolved_candidate = candidate.resolve(strict=True)
 
         if requested_parts[0] in _PUBLIC_DIRECTORIES:
-            public_base = (resolved_root / requested_parts[0]).resolve(strict=True)
-            if not public_base.is_relative_to(resolved_root):
+            declared_public_base = resolved_root / requested_parts[0]
+            if declared_public_base.is_symlink():
+                return None
+            public_base = declared_public_base.resolve(strict=True)
+            if public_base != declared_public_base:
                 return None
             resolved_candidate.relative_to(public_base)
         elif resolved_candidate != candidate:

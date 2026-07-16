@@ -36,6 +36,22 @@ class _StubStore:
         return []
 
 
+def _start_test_server(root: Path) -> tuple[ThreadingHTTPServer, threading.Thread]:
+    class Handler(BlogRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=str(root), **kwargs)
+
+        def log_message(self, format: str, *args) -> None:
+            pass
+
+    Handler.root = root
+    Handler.store = _StubStore()
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, thread
+
+
 class PublicStaticHttpTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -43,20 +59,7 @@ class PublicStaticHttpTests(unittest.TestCase):
         cls.root = Path(cls.tempdir.name)
         cls._write_fixture_files()
 
-        root = cls.root
-
-        class Handler(BlogRequestHandler):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, directory=str(root), **kwargs)
-
-            def log_message(self, format: str, *args) -> None:
-                pass
-
-        Handler.root = root
-        Handler.store = _StubStore()
-        cls.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-        cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
-        cls.thread.start()
+        cls.server, cls.thread = _start_test_server(cls.root)
         cls.host, cls.port = cls.server.server_address
 
     @classmethod
@@ -190,6 +193,29 @@ class PublicStaticHttpTests(unittest.TestCase):
 
     def test_resolver_rejects_a_symlink_escape(self) -> None:
         self.assertIsNone(resolve_public_file(self.root, "/assets/escape.txt"))
+
+    def test_top_level_public_directory_cannot_be_a_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            (root / "README.md").write_bytes(b"synthetic private fixture")
+            (root / "assets").symlink_to(root, target_is_directory=True)
+            server, thread = _start_test_server(root)
+            host, port = server.server_address
+            connection = http.client.HTTPConnection(host, port, timeout=5)
+            try:
+                connection.request("GET", "/assets/README.md")
+                response = connection.getresponse()
+                self.assertEqual(response.status, 404)
+                self.assertEqual(
+                    int(response.getheader("Content-Length", "0")),
+                    len(b"Not found\n"),
+                )
+                self.assertEqual(response.read(), b"Not found\n")
+            finally:
+                connection.close()
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
 
 
 if __name__ == "__main__":
