@@ -21,11 +21,13 @@ export function linkMode(locationLike) {
 export function resolveAppUrl(app, locationLike = window.location) {
   if (app.publicUrl?.startsWith('/')) return new URL(app.publicUrl, locationLike.origin).href;
   if (linkMode(locationLike) === 'public') return app.publicUrl || null;
-  if (app.localPort) return `http://${localHostname(locationLike.hostname)}:${app.localPort}/`;
+  if (app.localPort) {
+    const localPath = app.localPath || '/';
+    return `http://${localHostname(locationLike.hostname)}:${app.localPort}${localPath}`;
+  }
   return app.publicUrl ? new URL(app.publicUrl, locationLike.origin).href : null;
 }
 
 export function resolveOrbitUrl(locationLike = window.location) {
-  if (linkMode(locationLike) === 'public') return PUBLIC_ROOT;
-  return `http://${localHostname(locationLike.hostname)}:4178/`;
+  return new URL('/orbit/', locationLike.origin || PUBLIC_ROOT).href;
 }

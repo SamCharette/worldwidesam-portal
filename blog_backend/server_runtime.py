@@ -12,7 +12,7 @@ from .storage import BlogStore
 
 DEFAULT_HOST = "0.0.0.0"
 DEFAULT_PORT = 4178
-DEFAULT_HOME_DOCUMENT = "index.html"
+DEFAULT_HOME_DOCUMENT = "wonderlab/index.html"
 ALLOWED_HOME_DOCUMENTS = ("index.html", "wonderlab/index.html")
 
 

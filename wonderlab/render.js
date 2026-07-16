@@ -1,4 +1,4 @@
-import { APPS, CATEGORIES, CATEGORY_ORDER, appsIn } from './catalog.js?v=20260716a';
+import { APPS, CATEGORIES, CATEGORY_ORDER, appsIn } from './catalog.js?v=20260716b';
 
 export function renderCategories(container, state, onSelect) {
   container.innerHTML = CATEGORY_ORDER.map(key => {
@@ -20,7 +20,7 @@ export function renderExperiments(container, state, onSelect) {
     <span class="cartridge-index" aria-hidden="true">${String(index + 1).padStart(2, '0')}</span>
     <b>${app.name}</b><small>${app.kind}</small>
   </button>`).join('');
-  const emptyBays = Array.from({ length: 6 - categoryApps.length }, (_, index) => `<div class="empty-slot" aria-hidden="true">EMPTY BAY ${String(categoryApps.length + index + 1).padStart(2, '0')}</div>`).join('');
+  const emptyBays = Array.from({ length: Math.max(0, 6 - categoryApps.length) }, (_, index) => `<div class="empty-slot" aria-hidden="true">EMPTY BAY ${String(categoryApps.length + index + 1).padStart(2, '0')}</div>`).join('');
   container.innerHTML = experiments + emptyBays;
   container.querySelectorAll('.cartridge').forEach(button => {
     button.addEventListener('click', () => onSelect(button.dataset.app, button));

@@ -22,6 +22,13 @@ export const APPS = Object.freeze([
     preview: preview('dungeon-desk', 1280, 888)
   }),
   Object.freeze({
+    id: 'neon-cycle-grid', name: 'Neon Cycle Grid', category: 'games', kind: 'light-cycle arcade', localPort: 4323,
+    localPath: '/g/neon-cycle-grid/',
+    publicUrl: null,
+    summary: 'Outlast three rival riders in a fast 3D arena where every glowing trail becomes the next wall.',
+    preview: preview('neon-cycle-grid', 1280, 720)
+  }),
+  Object.freeze({
     id: 'clawdtris', name: 'Clawdtris', category: 'games', kind: 'arcade stacker', localPort: 4316,
     publicUrl: 'https://tetris.worldwidesam.net/',
     summary: 'A bright falling-block arcade build with quick restarts and score-chasing energy.',
@@ -117,8 +124,11 @@ export function validateCatalog() {
     if (ids.has(app.id)) throw new Error(`Duplicate app id: ${app.id}`);
     if (!CATEGORIES[app.category]) throw new Error(`Unknown category for ${app.id}`);
     if (!app.publicUrl && !app.localPort) throw new Error(`No route for ${app.id}`);
+    if (app.localPath && (!app.localPort || !app.localPath.startsWith('/') || !app.localPath.endsWith('/'))) {
+      throw new Error(`Invalid local path for ${app.id}`);
+    }
     ids.add(app.id);
   }
-  if (APPS.length !== 14) throw new Error(`Expected 14 apps, found ${APPS.length}`);
+  if (APPS.length !== 15) throw new Error(`Expected 15 apps, found ${APPS.length}`);
   return true;
 }

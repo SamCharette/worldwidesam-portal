@@ -116,6 +116,7 @@ class PublicStaticHttpTests(unittest.TestCase):
     def test_explicit_public_routes_are_served(self) -> None:
         for path in (
             "/",
+            "/orbit/",
             "/styles.css",
             "/app.js?v=1",
             "/assets/public.png",
@@ -143,6 +144,7 @@ class PublicStaticHttpTests(unittest.TestCase):
     def test_extensionless_public_directories_redirect_to_canonical_routes(self) -> None:
         for path, location in (
             ("/blog", "/blog/"),
+            ("/orbit", "/orbit/"),
             ("/wonderlab", "/wonderlab/"),
             ("/wasteland-terminal-map", "/wasteland-terminal-map/"),
         ):

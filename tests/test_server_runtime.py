@@ -15,14 +15,14 @@ class ServerConfigurationTests(unittest.TestCase):
         self.addCleanup(self.tempdir.cleanup)
         self.root = Path(self.tempdir.name)
 
-    def test_defaults_preserve_the_existing_orbit_runtime(self) -> None:
+    def test_defaults_serve_wonderlab_on_the_existing_port(self) -> None:
         configuration = parse_server_configuration([], root=self.root)
         self.assertEqual(configuration.host, "0.0.0.0")
         self.assertEqual(configuration.port, 4178)
-        self.assertEqual(configuration.home_document, "index.html")
+        self.assertEqual(configuration.home_document, "wonderlab/index.html")
         self.assertEqual(configuration.database, self.root / "data" / "blog.sqlite3")
 
-    def test_wonderlab_can_use_an_independent_port_and_shared_database(self) -> None:
+    def test_orbit_can_be_selected_for_an_independent_port_and_shared_database(self) -> None:
         shared_database = self.root / "shared" / "blog.sqlite3"
         configuration = parse_server_configuration(
             [
@@ -31,7 +31,7 @@ class ServerConfigurationTests(unittest.TestCase):
                 "--port",
                 "4179",
                 "--home",
-                "wonderlab/index.html",
+                "index.html",
                 "--database",
                 str(shared_database),
             ],
@@ -39,7 +39,7 @@ class ServerConfigurationTests(unittest.TestCase):
         )
         self.assertEqual(configuration.host, "127.0.0.1")
         self.assertEqual(configuration.port, 4179)
-        self.assertEqual(configuration.home_document, "wonderlab/index.html")
+        self.assertEqual(configuration.home_document, "index.html")
         self.assertEqual(configuration.database, shared_database)
 
     def test_relative_database_path_resolves_from_portal_root(self) -> None:

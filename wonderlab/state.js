@@ -1,4 +1,4 @@
-import { APPS, CATEGORY_ORDER, appById, appsIn } from './catalog.js?v=20260716a';
+import { APPS, CATEGORY_ORDER, appById, appsIn } from './catalog.js?v=20260716b';
 
 export function createSelectionState(initialHash = '') {
   const defaultApp = APPS[0];

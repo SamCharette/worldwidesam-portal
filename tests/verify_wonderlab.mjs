@@ -53,7 +53,7 @@ check('initial render loads exactly one selected preview', async () => {
 
   assert.equal(await page.title(), 'Worldwide Sam — Saturday Wonderlab');
   assert.equal(await page.locator('.category-control').count(), 4);
-  assert.equal(await page.locator('.cartridge').count(), 6);
+  assert.equal(await page.locator('.cartridge').count(), 7);
   assert.equal(await page.locator('.category-control[aria-pressed="true"]').count(), 1);
   assert.equal(await page.locator('.cartridge[aria-pressed="true"]').count(), 1);
   assert.equal(await page.locator('#appImage').isVisible(), true);
@@ -77,7 +77,7 @@ check('directory search, filters, keyboard navigation, and history stay in sync'
   const search = page.getByRole('searchbox', { name: 'Find an experiment' });
   assert.equal(await dialog.isVisible(), true);
   assert.equal(await search.evaluate(element => element === document.activeElement), true);
-  assert.equal(await page.locator('.directory-item').count(), 14);
+  assert.equal(await page.locator('.directory-item').count(), 15);
 
   await page.getByRole('button', { name: 'Tabletop', exact: true }).click();
   assert.equal(await page.locator('.directory-item').count(), 5);
@@ -157,6 +157,23 @@ check('Enter opens only an available destination', async () => {
   await page.keyboard.press('Enter');
   assert.equal(await page.evaluate(() => window.__wonderlabOpened.length), 1);
   assert.equal(await page.evaluate(() => window.__wonderlabOpened[0][0]), 'https://tetris.worldwidesam.net/');
+  await context.close();
+});
+
+check('Neon Cycle Grid uses its cabinet path locally and stays honest in public mode', async () => {
+  const { context, page } = await newPage();
+  await page.goto(candidateUrl({ hash: 'neon-cycle-grid' }), { waitUntil: 'domcontentloaded' });
+  await waitForApp(page, 'neon-cycle-grid', 'Neon Cycle Grid');
+  assert.equal(
+    await page.locator('#launchApp').getAttribute('href'),
+    'http://127.0.0.1:4323/g/neon-cycle-grid/'
+  );
+  assert.equal(await page.locator('#launchApp').getAttribute('aria-disabled'), null);
+
+  await page.goto(candidateUrl({ search: '?links=public', hash: 'neon-cycle-grid' }), { waitUntil: 'domcontentloaded' });
+  await waitForApp(page, 'neon-cycle-grid', 'Neon Cycle Grid');
+  assert.equal(await page.locator('#launchApp').getAttribute('href'), null);
+  assert.equal(await page.locator('#launchApp').getAttribute('aria-disabled'), 'true');
   await context.close();
 });
 
@@ -281,8 +298,9 @@ check('the no-JavaScript fallback keeps every destination discoverable', async (
 
   const fallback = page.locator('.no-script');
   assert.equal(await fallback.isVisible(), true);
-  assert.equal(await fallback.locator('li').count(), 15);
+  assert.equal(await fallback.locator('li').count(), 16);
   assert.match(await fallback.textContent(), /Dungeon Desk \(local network only\)/);
+  assert.match(await fallback.textContent(), /Neon Cycle Grid \(local network only\)/);
   assert.equal(await fallback.locator('a[href="https://games.worldwidesam.net/"]').count(), 0);
   assert.equal(await fallback.locator('a[href="/blog/"]').count(), 1);
   await context.close();

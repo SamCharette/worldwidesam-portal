@@ -1,8 +1,8 @@
-# Worldwide Sam Orbit
+# Worldwide Sam Saturday Wonderlab
 
 Standalone landing page for `worldwidesam.net`.
 
-The page is a Three.js orbital launcher: each app is a clickable planet circling the Clawdia command star. Blog pages are served from a small SQLite-backed Python backend that keeps the public pages static-looking.
+The main page is a tactile app launcher for Sam and Clawdia's games, tools, tabletop helpers, and work experiments. The original Three.js Orbit launcher remains available at `/orbit/`. Blog pages are served from a small SQLite-backed Python backend that keeps the public pages static-looking.
 
 ## Status And Audience
 
@@ -22,18 +22,18 @@ Open `http://127.0.0.1:4178`.
 
 The first run creates `data/blog.sqlite3` and seeds it from the existing `blog/*.html` posts. Runtime DB files and local author tokens are ignored by git.
 
-### Wonderlab Candidate
+### Landing Selection
 
-The Saturday Wonderlab landing page lives in `wonderlab/` while it is being evaluated. Run it on a separate port without changing the Orbit default:
+Saturday Wonderlab is the default root. The original Orbit remains available at `http://127.0.0.1:4178/orbit/`, or it can be selected as the root for a separate rollback/preview process:
 
 ```bash
 python3 server.py \
   --port 4179 \
-  --home wonderlab/index.html \
+  --home index.html \
   --database /path/to/the/current/data/blog.sqlite3
 ```
 
-Open `http://127.0.0.1:4179`. The candidate renders the current latest-post teaser from the selected database, while a no-argument `python3 server.py` continues to serve Orbit on port 4178.
+Both landing pages render the latest-post teaser from the selected database. Host, port, landing page, and database path can be configured independently.
 
 ## Agent Authoring API
 

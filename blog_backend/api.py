@@ -56,6 +56,19 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         if path == "/blog":
             self._send_redirect("/blog/", head_only=head_only)
             return
+        if path == "/orbit":
+            self._send_redirect("/orbit/", head_only=head_only)
+            return
+        if path == "/orbit/":
+            index_path = resolve_public_file(self.root, path)
+            if index_path is None:
+                self._send_not_found(head_only=head_only)
+                return
+            self._send_html(
+                render_home(index_path.read_text(encoding="utf-8"), self.store.latest_published()),
+                head_only=head_only,
+            )
+            return
         if path == "/wonderlab":
             self._send_redirect("/wonderlab/", head_only=head_only)
             return

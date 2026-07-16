@@ -6,6 +6,7 @@ from urllib.parse import unquote, urlsplit
 
 _EXACT_PUBLIC_FILES = {
     "/app.js": "app.js",
+    "/orbit/": "index.html",
     "/styles.css": "styles.css",
     "/wonderlab/": "wonderlab/index.html",
     "/wasteland-terminal-map/": "wasteland-terminal-map/index.html",
