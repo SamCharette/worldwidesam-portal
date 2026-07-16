@@ -8,6 +8,7 @@ from urllib.parse import parse_qs, urlparse
 
 from .auth import authenticate
 from .notifications import queue_and_deliver, retry_notification
+from .public_static import resolve_public_file
 from .rendering import render_home, render_index, render_post
 from .storage import BlogStore
 
@@ -23,20 +24,39 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def do_GET(self) -> None:
+        self._handle_get(head_only=False)
+
+    def do_HEAD(self) -> None:
+        self._handle_get(head_only=True)
+
+    def _handle_get(self, head_only: bool) -> None:
         path = urlparse(self.path).path
         if path == "/":
-            self._send_html(render_home((self.root / "index.html").read_text(encoding="utf-8"), self.store.latest_published()))
+            index_path = resolve_public_file(self.root, self.path)
+            if index_path is None:
+                self._send_not_found(head_only=head_only)
+                return
+            self._send_html(
+                render_home(index_path.read_text(encoding="utf-8"), self.store.latest_published()),
+                head_only=head_only,
+            )
+            return
+        if path == "/blog":
+            self._send_redirect("/blog/", head_only=head_only)
             return
         if path == "/blog/" or path == "/blog/index.html":
-            self._send_html(render_index(self.store.list_posts()))
+            self._send_html(render_index(self.store.list_posts()), head_only=head_only)
             return
         if path.startswith("/blog/") and path.endswith(".html"):
             slug = Path(path).stem
             post = self.store.get_post(slug)
             if post is None:
-                self.send_error(HTTPStatus.NOT_FOUND)
+                self._send_not_found(head_only=head_only)
                 return
-            self._send_html(render_post(post, self.store.comments_for_post(int(post["id"]))))
+            self._send_html(
+                render_post(post, self.store.comments_for_post(int(post["id"]))),
+                head_only=head_only,
+            )
             return
         if path == "/api/blog/posts":
             include_drafts = self._authenticated_author() is not None and parse_qs(urlparse(self.path).query).get("status") == ["all"]
@@ -44,15 +64,19 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                 [
                     self._post_json(post, include_review_status=include_drafts)
                     for post in self.store.list_posts(include_drafts=include_drafts)
-                ]
+                ],
+                head_only=head_only,
             )
             return
         if path == "/api/blog/notifications":
-            if not self._require_auth():
+            if not self._require_auth(head_only=head_only):
                 return
-            self._send_json([dict(row) for row in self.store.list_notifications()])
+            self._send_json([dict(row) for row in self.store.list_notifications()], head_only=head_only)
             return
-        super().do_GET()
+        if path == "/wasteland-terminal-map":
+            self._send_redirect("/wasteland-terminal-map/", head_only=head_only)
+            return
+        self._send_public_file(head_only=head_only)
 
     def do_POST(self) -> None:
         path = urlparse(self.path).path
@@ -147,10 +171,14 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     def _authenticated_author(self) -> str | None:
         return authenticate(self.root, self.headers.get("Authorization"))
 
-    def _require_auth(self) -> str | None:
+    def _require_auth(self, head_only: bool = False) -> str | None:
         author = self._authenticated_author()
         if not author:
-            self._send_json({"error": "valid agent bearer token required"}, status=HTTPStatus.UNAUTHORIZED)
+            self._send_json(
+                {"error": "valid agent bearer token required"},
+                status=HTTPStatus.UNAUTHORIZED,
+                head_only=head_only,
+            )
         return author
 
     def _read_json(self) -> dict:
@@ -161,21 +189,67 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
             raise ValueError("JSON object required")
         return data
 
-    def _send_html(self, body: str) -> None:
+    def _send_html(self, body: str, head_only: bool = False) -> None:
         encoded = body.encode("utf-8")
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(encoded)))
         self.end_headers()
-        self.wfile.write(encoded)
+        if not head_only:
+            self.wfile.write(encoded)
 
-    def _send_json(self, data: object, status: HTTPStatus = HTTPStatus.OK) -> None:
+    def _send_json(
+        self,
+        data: object,
+        status: HTTPStatus = HTTPStatus.OK,
+        head_only: bool = False,
+    ) -> None:
         encoded = json.dumps(data, indent=2, sort_keys=True).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(encoded)))
         self.end_headers()
-        self.wfile.write(encoded)
+        if not head_only:
+            self.wfile.write(encoded)
+
+    def _send_public_file(self, head_only: bool = False) -> None:
+        path = resolve_public_file(self.root, self.path)
+        if path is None:
+            self._send_not_found(head_only=head_only)
+            return
+        try:
+            source = path.open("rb")
+        except OSError:
+            self._send_not_found(head_only=head_only)
+            return
+        with source:
+            stat = path.stat()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", self.guess_type(str(path)))
+            self.send_header("Content-Length", str(stat.st_size))
+            self.send_header("Last-Modified", self.date_time_string(stat.st_mtime))
+            self.end_headers()
+            if not head_only:
+                self.copyfile(source, self.wfile)
+
+    def _send_redirect(self, location: str, head_only: bool = False) -> None:
+        encoded = b"Redirecting\n"
+        self.send_response(HTTPStatus.MOVED_PERMANENTLY)
+        self.send_header("Location", location)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        if not head_only:
+            self.wfile.write(encoded)
+
+    def _send_not_found(self, head_only: bool = False) -> None:
+        encoded = b"Not found\n"
+        self.send_response(HTTPStatus.NOT_FOUND)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        if not head_only:
+            self.wfile.write(encoded)
 
     def _post_json(self, post, include_review_status: bool = False) -> dict:
         data = {
