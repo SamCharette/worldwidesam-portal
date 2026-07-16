@@ -16,11 +16,18 @@ from .storage import BlogStore
 class BlogRequestHandler(SimpleHTTPRequestHandler):
     root: Path
     store: BlogStore
+    home_document = "index.html"
+
+    _DYNAMIC_CACHE_CONTROL = "no-store, max-age=0"
+    _SHORT_STATIC_CACHE_CONTROL = "public, max-age=3600"
+    _VERSIONED_STATIC_CACHE_CONTROL = "public, max-age=31536000, immutable"
 
     def end_headers(self) -> None:
-        self.send_header("Cache-Control", "no-store, max-age=0")
-        self.send_header("Pragma", "no-cache")
-        self.send_header("Expires", "0")
+        cache_control = getattr(self, "_cache_control", self._DYNAMIC_CACHE_CONTROL)
+        self.send_header("Cache-Control", cache_control)
+        if cache_control == self._DYNAMIC_CACHE_CONTROL:
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
         super().end_headers()
 
     def do_GET(self) -> None:
@@ -30,9 +37,14 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         self._handle_get(head_only=True)
 
     def _handle_get(self, head_only: bool) -> None:
+        self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
         if path == "/":
-            index_path = resolve_public_file(self.root, self.path)
+            index_path = resolve_public_file(
+                self.root,
+                self.path,
+                home_document=self.home_document,
+            )
             if index_path is None:
                 self._send_not_found(head_only=head_only)
                 return
@@ -43,6 +55,19 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
             return
         if path == "/blog":
             self._send_redirect("/blog/", head_only=head_only)
+            return
+        if path == "/wonderlab":
+            self._send_redirect("/wonderlab/", head_only=head_only)
+            return
+        if path in {"/wonderlab/", "/wonderlab/index.html"}:
+            index_path = resolve_public_file(self.root, path)
+            if index_path is None:
+                self._send_not_found(head_only=head_only)
+                return
+            self._send_html(
+                render_home(index_path.read_text(encoding="utf-8"), self.store.latest_published()),
+                head_only=head_only,
+            )
             return
         if path == "/blog/" or path == "/blog/index.html":
             self._send_html(render_index(self.store.list_posts()), head_only=head_only)
@@ -79,6 +104,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         self._send_public_file(head_only=head_only)
 
     def do_POST(self) -> None:
+        self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
         author = self._require_auth()
         if not author:
@@ -146,6 +172,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         self.send_error(HTTPStatus.NOT_FOUND)
 
     def do_PATCH(self) -> None:
+        self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
         author = self._require_auth()
         if not author:
@@ -224,6 +251,12 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
             return
         with source:
             stat = path.stat()
+            query = parse_qs(urlparse(self.path).query)
+            self._cache_control = (
+                self._VERSIONED_STATIC_CACHE_CONTROL
+                if query.get("v")
+                else self._SHORT_STATIC_CACHE_CONTROL
+            )
             self.send_response(HTTPStatus.OK)
             self.send_header("Content-Type", self.guess_type(str(path)))
             self.send_header("Content-Length", str(stat.st_size))

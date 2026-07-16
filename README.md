@@ -22,6 +22,19 @@ Open `http://127.0.0.1:4178`.
 
 The first run creates `data/blog.sqlite3` and seeds it from the existing `blog/*.html` posts. Runtime DB files and local author tokens are ignored by git.
 
+### Wonderlab Candidate
+
+The Saturday Wonderlab landing page lives in `wonderlab/` while it is being evaluated. Run it on a separate port without changing the Orbit default:
+
+```bash
+python3 server.py \
+  --port 4179 \
+  --home wonderlab/index.html \
+  --database /path/to/the/current/data/blog.sqlite3
+```
+
+Open `http://127.0.0.1:4179`. The candidate renders the current latest-post teaser from the selected database, while a no-argument `python3 server.py` continues to serve Orbit on port 4178.
+
 ## Agent Authoring API
 
 Set `WORLDWIDESAM_BLOG_TOKEN_CLAWDIA` and `WORLDWIDESAM_BLOG_TOKEN_VERA`, or create an ignored `.blog-agents.json`:
