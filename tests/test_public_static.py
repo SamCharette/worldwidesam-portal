@@ -36,7 +36,10 @@ class _StubStore:
         return []
 
 
-def _start_test_server(root: Path) -> tuple[ThreadingHTTPServer, threading.Thread]:
+def _start_test_server(
+    root: Path,
+    home_document: str = "index.html",
+) -> tuple[ThreadingHTTPServer, threading.Thread]:
     class Handler(BlogRequestHandler):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, directory=str(root), **kwargs)
@@ -46,6 +49,7 @@ def _start_test_server(root: Path) -> tuple[ThreadingHTTPServer, threading.Threa
 
     Handler.root = root
     Handler.store = _StubStore()
+    Handler.home_document = home_document
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -81,6 +85,11 @@ class PublicStaticHttpTests(unittest.TestCase):
             "wasteland-terminal-map/styles.css": b"body { color: green; }",
             "wasteland-terminal-map/app.js": b"window.publicMap = true;",
             "wasteland-terminal-map/assets/map.png": b"public map image",
+            "wonderlab/index.html": b"<!doctype html><title>Wonderlab home</title>",
+            "wonderlab/layout.css": b"body { color: blue; }",
+            "wonderlab/theme.css": b"body { background: cream; }",
+            "wonderlab/app.js": b"export const wonderlab = true;",
+            "wonderlab/assets/previews/app-640.webp": b"public preview",
             ".env": b"synthetic private fixture",
             ".git/config": b"synthetic repo fixture",
             "data/blog.sqlite3": b"synthetic database fixture",
@@ -107,6 +116,7 @@ class PublicStaticHttpTests(unittest.TestCase):
     def test_explicit_public_routes_are_served(self) -> None:
         for path in (
             "/",
+            "/orbit/",
             "/styles.css",
             "/app.js?v=1",
             "/assets/public.png",
@@ -116,6 +126,12 @@ class PublicStaticHttpTests(unittest.TestCase):
             "/wasteland-terminal-map/styles.css",
             "/wasteland-terminal-map/app.js",
             "/wasteland-terminal-map/assets/map.png",
+            "/wonderlab/",
+            "/wonderlab/index.html",
+            "/wonderlab/layout.css?v=1",
+            "/wonderlab/theme.css?v=1",
+            "/wonderlab/app.js?v=1",
+            "/wonderlab/assets/previews/app-640.webp",
             "/blog/",
             "/blog/public-post.html",
             "/api/blog/posts",
@@ -128,6 +144,8 @@ class PublicStaticHttpTests(unittest.TestCase):
     def test_extensionless_public_directories_redirect_to_canonical_routes(self) -> None:
         for path, location in (
             ("/blog", "/blog/"),
+            ("/orbit", "/orbit/"),
+            ("/wonderlab", "/wonderlab/"),
             ("/wasteland-terminal-map", "/wasteland-terminal-map/"),
         ):
             with self.subTest(path=path):
@@ -153,6 +171,9 @@ class PublicStaticHttpTests(unittest.TestCase):
             "/assets/.hidden",
             "/assets/escape.txt",
             "/wasteland-terminal-map/assets/",
+            "/wonderlab/../server.py",
+            "/wonderlab/%2e%2e/server.py",
+            "/wonderlab/assets/",
             "/missing.txt",
         )
         bodies = set()
@@ -193,6 +214,46 @@ class PublicStaticHttpTests(unittest.TestCase):
 
     def test_resolver_rejects_a_symlink_escape(self) -> None:
         self.assertIsNone(resolve_public_file(self.root, "/assets/escape.txt"))
+
+    def test_configured_home_document_is_explicitly_allowlisted(self) -> None:
+        self.assertEqual(
+            resolve_public_file(self.root, "/", home_document="wonderlab/index.html"),
+            self.root / "wonderlab" / "index.html",
+        )
+        self.assertIsNone(resolve_public_file(self.root, "/", home_document="README.md"))
+
+        server, thread = _start_test_server(self.root, home_document="wonderlab/index.html")
+        host, port = server.server_address
+        connection = http.client.HTTPConnection(host, port, timeout=5)
+        try:
+            connection.request("GET", "/")
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertIn(b"Wonderlab home", response.read())
+        finally:
+            connection.close()
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+
+    def test_dynamic_and_static_cache_policies_are_distinct(self) -> None:
+        status, headers, _ = self.request("/")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Cache-Control"], "no-store, max-age=0")
+        self.assertEqual(headers["Pragma"], "no-cache")
+
+        status, headers, _ = self.request("/wonderlab/layout.css?v=1")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Cache-Control"], "public, max-age=31536000, immutable")
+        self.assertNotIn("Pragma", headers)
+
+        status, headers, _ = self.request("/wonderlab/assets/previews/app-640.webp")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Cache-Control"], "public, max-age=3600")
+
+        status, headers, _ = self.request("/missing.txt")
+        self.assertEqual(status, 404)
+        self.assertEqual(headers["Cache-Control"], "no-store, max-age=0")
 
     def test_top_level_public_directory_cannot_be_a_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as tempdir:

@@ -5,17 +5,23 @@ from urllib.parse import unquote, urlsplit
 
 
 _EXACT_PUBLIC_FILES = {
-    "/": "index.html",
     "/app.js": "app.js",
+    "/orbit/": "index.html",
     "/styles.css": "styles.css",
+    "/wonderlab/": "wonderlab/index.html",
     "/wasteland-terminal-map/": "wasteland-terminal-map/index.html",
 }
-_PUBLIC_DIRECTORIES = ("assets", "wasteland-terminal-map")
+_PUBLIC_DIRECTORIES = ("assets", "wasteland-terminal-map", "wonderlab")
+_PUBLIC_HOME_DOCUMENTS = {"index.html", "wonderlab/index.html"}
 _PRIVATE_PATH_NAMES = {"__pycache__", "data", "test", "tests"}
 _PRIVATE_SUFFIXES = {".py", ".pyc", ".pyo", ".pyw"}
 
 
-def resolve_public_file(root: Path, request_target: str) -> Path | None:
+def resolve_public_file(
+    root: Path,
+    request_target: str,
+    home_document: str = "index.html",
+) -> Path | None:
     """Resolve an explicitly public request target without exposing the repo tree."""
     try:
         encoded_path = urlsplit(request_target).path
@@ -26,7 +32,12 @@ def resolve_public_file(root: Path, request_target: str) -> Path | None:
     if not request_path.startswith("/") or "\0" in request_path or "\\" in request_path:
         return None
 
-    relative_path = _EXACT_PUBLIC_FILES.get(request_path)
+    if request_path == "/":
+        if home_document not in _PUBLIC_HOME_DOCUMENTS:
+            return None
+        relative_path = home_document
+    else:
+        relative_path = _EXACT_PUBLIC_FILES.get(request_path)
     if relative_path is None:
         parts = request_path.removeprefix("/").split("/")
         if not parts or parts[0] not in _PUBLIC_DIRECTORIES:
