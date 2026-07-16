@@ -94,28 +94,28 @@ test('public routes preserve external URLs, root-relative routes, and local-only
   assert.equal(resolveAppUrl(appById('clawdtris'), publicLocation), 'https://tetris.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('wasteland-map'), publicLocation), 'https://worldwidesam.net/wasteland-terminal-map/');
   assert.equal(resolveAppUrl(appById('dungeon-desk'), publicLocation), null);
-  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), publicLocation), null);
+  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), publicLocation), 'https://worldwidesam.net/neon-cycle-grid/');
   assert.equal(resolveOrbitUrl(publicLocation), 'https://worldwidesam.net/orbit/');
 });
 
 test('local routes use the current machine hostname and each destination port', () => {
   const lanLocation = at('http://192.168.1.99:4179/wonderlab/');
   assert.equal(resolveAppUrl(appById('dungeon-desk'), lanLocation), 'http://192.168.1.99:5174/');
-  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), lanLocation), 'http://192.168.1.99:4323/g/neon-cycle-grid/');
+  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), lanLocation), 'http://192.168.1.99:4325/');
   assert.equal(resolveAppUrl(appById('decision-please'), lanLocation), 'http://192.168.1.99:5178/');
   assert.equal(resolveAppUrl(appById('wasteland-map'), lanLocation), 'http://192.168.1.99:4179/wasteland-terminal-map/');
   assert.equal(resolveOrbitUrl(lanLocation), 'http://192.168.1.99:4179/orbit/');
 
   const loopbackLocation = at('http://localhost:4179/');
   assert.equal(resolveAppUrl(appById('dungeon-desk'), loopbackLocation), 'http://127.0.0.1:5174/');
-  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), loopbackLocation), 'http://127.0.0.1:4323/g/neon-cycle-grid/');
+  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), loopbackLocation), 'http://127.0.0.1:4325/');
   assert.equal(resolveOrbitUrl(loopbackLocation), 'http://localhost:4179/orbit/');
 });
 
 test('IPv6 loopback is normalized to a valid local destination URL', () => {
   const ipv6Loopback = at('http://[::1]:4179/');
   assert.equal(resolveAppUrl(appById('dungeon-desk'), ipv6Loopback), 'http://127.0.0.1:5174/');
-  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), ipv6Loopback), 'http://127.0.0.1:4323/g/neon-cycle-grid/');
+  assert.equal(resolveAppUrl(appById('neon-cycle-grid'), ipv6Loopback), 'http://127.0.0.1:4325/');
   assert.equal(resolveOrbitUrl(ipv6Loopback), 'http://[::1]:4179/orbit/');
 });
 

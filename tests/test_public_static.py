@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import http.client
+import socket
 import tempfile
 import threading
 import unittest
-from http.server import ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlparse
 
 from blog_backend.api import BlogRequestHandler
 from blog_backend.public_static import resolve_public_file
@@ -39,6 +41,7 @@ class _StubStore:
 def _start_test_server(
     root: Path,
     home_document: str = "index.html",
+    neon_upstream: tuple[str, int] | None = None,
 ) -> tuple[ThreadingHTTPServer, threading.Thread]:
     class Handler(BlogRequestHandler):
         def __init__(self, *args, **kwargs):
@@ -50,6 +53,45 @@ def _start_test_server(
     Handler.root = root
     Handler.store = _StubStore()
     Handler.home_document = home_document
+    if neon_upstream:
+        Handler.neon_upstream_host, Handler.neon_upstream_port = neon_upstream
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, thread
+
+
+def _start_neon_stub() -> tuple[ThreadingHTTPServer, threading.Thread]:
+    class Handler(BaseHTTPRequestHandler):
+        files = {
+            "/": ("text/html; charset=utf-8", b"<!doctype html><title>Neon standalone</title>"),
+            "/src/game.js": ("text/javascript; charset=utf-8", b"export const neon = true;"),
+        }
+
+        def do_GET(self) -> None:
+            self._send(head_only=False)
+
+        def do_HEAD(self) -> None:
+            self._send(head_only=True)
+
+        def _send(self, head_only: bool) -> None:
+            route = self.files.get(urlparse(self.path).path)
+            if route is None:
+                status, content_type, body = 404, "text/plain; charset=utf-8", b"Not found\n"
+            else:
+                status, (content_type, body) = 200, route
+            self.send_response(status)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Security-Policy", "default-src 'self'")
+            self.end_headers()
+            if not head_only:
+                self.wfile.write(body)
+
+        def log_message(self, format: str, *args) -> None:
+            pass
+
     server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -146,12 +188,77 @@ class PublicStaticHttpTests(unittest.TestCase):
             ("/blog", "/blog/"),
             ("/orbit", "/orbit/"),
             ("/wonderlab", "/wonderlab/"),
+            ("/neon-cycle-grid", "/neon-cycle-grid/"),
             ("/wasteland-terminal-map", "/wasteland-terminal-map/"),
         ):
             with self.subTest(path=path):
                 status, headers, _ = self.request(path)
                 self.assertEqual(status, 301)
                 self.assertEqual(headers["Location"], location)
+
+    def test_neon_route_proxies_only_to_the_standalone_service(self) -> None:
+        upstream, upstream_thread = _start_neon_stub()
+        server, thread = _start_test_server(self.root, neon_upstream=upstream.server_address)
+        host, port = server.server_address
+        connection = http.client.HTTPConnection(host, port, timeout=5)
+        try:
+            connection.request("GET", "/neon-cycle-grid/")
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.getheader("Cache-Control"), "no-store")
+            self.assertEqual(response.getheader("Content-Security-Policy"), "default-src 'self'")
+            self.assertIn(b"Neon standalone", response.read())
+
+            connection.request("GET", "/neon-cycle-grid/src/game.js?cache=1")
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.getheader("Content-Type"), "text/javascript; charset=utf-8")
+            self.assertEqual(response.read(), b"export const neon = true;")
+
+            connection.request("GET", "/neon-cycle-grid/.git/config")
+            response = connection.getresponse()
+            self.assertEqual(response.status, 404)
+            self.assertEqual(response.read(), b"Not found\n")
+
+            connection.request("HEAD", "/neon-cycle-grid/src/game.js")
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.read(), b"")
+
+            connection.request("POST", "/neon-cycle-grid/")
+            response = connection.getresponse()
+            self.assertEqual(response.status, 405)
+            self.assertEqual(response.getheader("Allow"), "GET, HEAD")
+            self.assertEqual(response.read(), b"Method not allowed\n")
+        finally:
+            connection.close()
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=5)
+            upstream.shutdown()
+            upstream.server_close()
+            upstream_thread.join(timeout=5)
+
+    def test_neon_route_returns_a_bounded_error_when_the_service_is_offline(self) -> None:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as unavailable:
+            unavailable.bind(("127.0.0.1", 0))
+            server, thread = _start_test_server(
+                self.root,
+                neon_upstream=("127.0.0.1", unavailable.getsockname()[1]),
+            )
+            host, port = server.server_address
+            connection = http.client.HTTPConnection(host, port, timeout=5)
+            try:
+                connection.request("GET", "/neon-cycle-grid/")
+                response = connection.getresponse()
+                self.assertEqual(response.status, 503)
+                self.assertEqual(response.getheader("Retry-After"), "5")
+                self.assertEqual(response.read(), b"Neon Cycle Grid is temporarily unavailable.\n")
+            finally:
+                connection.close()
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
 
     def test_private_and_unlisted_repo_paths_share_a_generic_404(self) -> None:
         denied_paths = (
