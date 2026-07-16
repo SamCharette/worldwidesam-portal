@@ -22,9 +22,8 @@ export const APPS = Object.freeze([
     preview: preview('dungeon-desk', 1280, 888)
   }),
   Object.freeze({
-    id: 'neon-cycle-grid', name: 'Neon Cycle Grid', category: 'games', kind: 'light-cycle arcade', localPort: 4323,
-    localPath: '/g/neon-cycle-grid/',
-    publicUrl: null,
+    id: 'neon-cycle-grid', name: 'Neon Cycle Grid', category: 'games', kind: 'light-cycle arcade', localPort: 4325,
+    publicUrl: 'https://worldwidesam.net/neon-cycle-grid/',
     summary: 'Outlast three rival riders in a fast 3D arena where every glowing trail becomes the next wall.',
     preview: preview('neon-cycle-grid', 1280, 720)
   }),

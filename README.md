@@ -35,6 +35,8 @@ python3 server.py \
 
 Both landing pages render the latest-post teaser from the selected database. Host, port, landing page, and database path can be configured independently.
 
+The primary server also exposes `/neon-cycle-grid/` as an exact reverse-proxy route to the independently managed Neon Cycle Grid service on `127.0.0.1:4325`. This keeps the public game behind the portal's existing Cloudflare Access policy without exposing the shared game cabinet or repository files.
+
 ## Agent Authoring API
 
 Set `WORLDWIDESAM_BLOG_TOKEN_CLAWDIA` and `WORLDWIDESAM_BLOG_TOKEN_VERA`, or create an ignored `.blog-agents.json`:

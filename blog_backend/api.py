@@ -7,6 +7,13 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from .auth import authenticate
+from .neon_proxy import (
+    PUBLIC_PREFIX as NEON_PUBLIC_PREFIX,
+    UPSTREAM_HOST as NEON_UPSTREAM_HOST,
+    UPSTREAM_PORT as NEON_UPSTREAM_PORT,
+    NeonProxyUnavailable,
+    request_neon,
+)
 from .notifications import queue_and_deliver, retry_notification
 from .public_static import resolve_public_file
 from .rendering import render_home, render_index, render_post
@@ -17,6 +24,8 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     root: Path
     store: BlogStore
     home_document = "index.html"
+    neon_upstream_host = NEON_UPSTREAM_HOST
+    neon_upstream_port = NEON_UPSTREAM_PORT
 
     _DYNAMIC_CACHE_CONTROL = "no-store, max-age=0"
     _SHORT_STATIC_CACHE_CONTROL = "public, max-age=3600"
@@ -82,6 +91,12 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                 head_only=head_only,
             )
             return
+        if path == NEON_PUBLIC_PREFIX:
+            self._send_redirect(f"{NEON_PUBLIC_PREFIX}/", head_only=head_only)
+            return
+        if path.startswith(f"{NEON_PUBLIC_PREFIX}/"):
+            self._send_neon(head_only=head_only)
+            return
         if path == "/blog/" or path == "/blog/index.html":
             self._send_html(render_index(self.store.list_posts()), head_only=head_only)
             return
@@ -119,6 +134,9 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     def do_POST(self) -> None:
         self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
+        if path == NEON_PUBLIC_PREFIX or path.startswith(f"{NEON_PUBLIC_PREFIX}/"):
+            self._send_neon_method_not_allowed()
+            return
         author = self._require_auth()
         if not author:
             return
@@ -187,6 +205,9 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     def do_PATCH(self) -> None:
         self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
+        if path == NEON_PUBLIC_PREFIX or path.startswith(f"{NEON_PUBLIC_PREFIX}/"):
+            self._send_neon_method_not_allowed()
+            return
         author = self._require_auth()
         if not author:
             return
@@ -277,6 +298,47 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             if not head_only:
                 self.copyfile(source, self.wfile)
+
+    def _send_neon(self, head_only: bool = False) -> None:
+        try:
+            response = request_neon(
+                self.path,
+                method="HEAD" if head_only else "GET",
+                host=self.neon_upstream_host,
+                port=self.neon_upstream_port,
+            )
+        except NeonProxyUnavailable:
+            self._send_neon_unavailable(head_only=head_only)
+            return
+
+        if response.cache_control:
+            self._cache_control = response.cache_control
+        self.send_response(response.status)
+        for name, value in response.headers:
+            if name.lower() != "cache-control":
+                self.send_header(name, value)
+        self.end_headers()
+        if not head_only:
+            self.wfile.write(response.body)
+
+    def _send_neon_unavailable(self, head_only: bool = False) -> None:
+        encoded = b"Neon Cycle Grid is temporarily unavailable.\n"
+        self.send_response(HTTPStatus.SERVICE_UNAVAILABLE)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.send_header("Retry-After", "5")
+        self.end_headers()
+        if not head_only:
+            self.wfile.write(encoded)
+
+    def _send_neon_method_not_allowed(self) -> None:
+        encoded = b"Method not allowed\n"
+        self.send_response(HTTPStatus.METHOD_NOT_ALLOWED)
+        self.send_header("Allow", "GET, HEAD")
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        self.wfile.write(encoded)
 
     def _send_redirect(self, location: str, head_only: bool = False) -> None:
         encoded = b"Redirecting\n"

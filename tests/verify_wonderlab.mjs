@@ -160,20 +160,20 @@ check('Enter opens only an available destination', async () => {
   await context.close();
 });
 
-check('Neon Cycle Grid uses its cabinet path locally and stays honest in public mode', async () => {
+check('Neon Cycle Grid uses its standalone routes in local and public modes', async () => {
   const { context, page } = await newPage();
   await page.goto(candidateUrl({ hash: 'neon-cycle-grid' }), { waitUntil: 'domcontentloaded' });
   await waitForApp(page, 'neon-cycle-grid', 'Neon Cycle Grid');
   assert.equal(
     await page.locator('#launchApp').getAttribute('href'),
-    'http://127.0.0.1:4323/g/neon-cycle-grid/'
+    'http://127.0.0.1:4325/'
   );
   assert.equal(await page.locator('#launchApp').getAttribute('aria-disabled'), null);
 
   await page.goto(candidateUrl({ search: '?links=public', hash: 'neon-cycle-grid' }), { waitUntil: 'domcontentloaded' });
   await waitForApp(page, 'neon-cycle-grid', 'Neon Cycle Grid');
-  assert.equal(await page.locator('#launchApp').getAttribute('href'), null);
-  assert.equal(await page.locator('#launchApp').getAttribute('aria-disabled'), 'true');
+  assert.equal(await page.locator('#launchApp').getAttribute('href'), 'https://worldwidesam.net/neon-cycle-grid/');
+  assert.equal(await page.locator('#launchApp').getAttribute('aria-disabled'), null);
   await context.close();
 });
 
@@ -329,7 +329,7 @@ check('the no-JavaScript fallback keeps every destination discoverable', async (
   assert.equal(await fallback.isVisible(), true);
   assert.equal(await fallback.locator('li').count(), 16);
   assert.match(await fallback.textContent(), /Dungeon Desk \(local network only\)/);
-  assert.match(await fallback.textContent(), /Neon Cycle Grid \(local network only\)/);
+  assert.equal(await fallback.locator('a[href="/neon-cycle-grid/"]').count(), 1);
   assert.equal(await fallback.locator('a[href="https://games.worldwidesam.net/"]').count(), 0);
   assert.equal(await fallback.locator('a[href="/blog/"]').count(), 1);
   await context.close();
