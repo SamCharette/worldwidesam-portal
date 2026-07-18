@@ -37,6 +37,10 @@ Both landing pages render the latest-post teaser from the selected database. Hos
 
 The primary server also exposes `/neon-cycle-grid/` as an exact reverse-proxy route to the independently managed Neon Cycle Grid service on `127.0.0.1:4325`. This keeps the public game behind the portal's existing Cloudflare Access policy without exposing the shared game cabinet or repository files.
 
+### Direct-access prototypes
+
+`/procon/` is an intentionally unlisted decision-modeling prototype. It runs as static files on the existing portal origin, stores its editable decision only in that browser's local storage, and is not included in the Wonderlab or Orbit catalogs. Its independent-factor probability map is not a forecast; conditional dependency paths are reserved for a later model.
+
 ## Agent Authoring API
 
 Set `WORLDWIDESAM_BLOG_TOKEN_CLAWDIA` and `WORLDWIDESAM_BLOG_TOKEN_VERA`, or create an ignored `.blog-agents.json`:
@@ -71,6 +75,13 @@ python3 -m unittest discover -s tests
 ```
 
 For visual changes, check both desktop and mobile widths because the first viewport must clearly show the Worldwide Sam portal and hint at the next section.
+
+ProCon's focused checks are:
+
+```bash
+node --test tests/test_procon_model.mjs tests/test_procon_state.mjs
+PROCON_BASE_URL=http://127.0.0.1:4178/procon/ node tests/verify_procon.mjs
+```
 
 ## Deploy
 
