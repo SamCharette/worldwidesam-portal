@@ -419,7 +419,7 @@ function balanceDescription({ scenario, hasOverrides }, state) {
     positive: "The supporting arm hangs lower.",
     negative: "The opposing arm hangs lower.",
   }[state];
-  return `${stateCopy} Importance controls disk area, effective probability controls distance from the pivot, and tilt shows the expected balance. Expected balance ${expected}; ${aboveZero} of modeled outcomes are above zero; middle 80 percent ${likely}.${scenarioCopy}`;
+  return `${stateCopy} Importance controls disk area, effective probability controls distance from the pivot, and tilt shows the expected balance. Expected balance ${expected}; ${aboveZero} of modeled outcomes are above zero; 10th-to-90th percentile span ${likely}.${scenarioCopy}`;
 }
 
 function svgElement(name, attributes = {}, text = null) {

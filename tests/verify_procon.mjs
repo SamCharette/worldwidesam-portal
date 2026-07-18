@@ -210,7 +210,7 @@ check("starter model renders two truthful probability balances", async () => {
   assertClose(scoreNumber(await page.locator("#mobile-against-total").textContent()), against, 0.051, "against total");
   assertClose(scoreNumber(await page.locator("#expected-score").textContent()), support + against, 0.051, "expected total");
 
-  const expectedDescription = "The opposing arm hangs lower. Importance controls disk area, effective probability controls distance from the pivot, and tilt shows the expected balance. Expected balance −4.8; 25.4% of modeled outcomes are above zero; middle 80 percent −16 to +8.";
+  const expectedDescription = "The opposing arm hangs lower. Importance controls disk area, effective probability controls distance from the pivot, and tilt shows the expected balance. Expected balance −4.8; 25.4% of modeled outcomes are above zero; 10th-to-90th percentile span −16 to +8.";
   const legendById = new Map(legend.map((item) => [item.id, item]));
   for (const selector of ["#mobile-probability-balance", "#analysis-probability-balance"]) {
     const snapshot = await balanceSnapshot(page.locator(selector));
