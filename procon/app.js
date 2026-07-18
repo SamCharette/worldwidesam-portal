@@ -25,6 +25,7 @@ import {
 
 const loaded = loadDecision();
 let decision = loaded.decision;
+let storageStatus = loaded.status;
 let scenarios = {};
 let factorFilter = "all";
 const expandedFactors = new Set();
@@ -38,7 +39,7 @@ bindDecisionEvents();
 bindOptionEvents();
 bindFactorEvents();
 bindDialogEvents();
-renderEverything(loaded.status);
+renderEverything();
 
 function bindDecisionEvents() {
   const title = document.getElementById("decision-title");
@@ -335,8 +336,8 @@ function setMirroredValues(numberId, rangeId, value) {
   document.getElementById(rangeId).value = String(value);
 }
 
-function renderEverything(loadStatus = "restored") {
-  renderDecisionHeader(decision, loadStatus);
+function renderEverything() {
+  renderDecisionHeader(decision, storageStatus);
   renderOptionRail(decision);
   renderLedgerAndAnalysis();
 }
@@ -385,7 +386,8 @@ function refreshFactorAndAnalysis(factorId) {
 
 function persistDecision() {
   const saved = saveDecision(decision);
-  setStorageStatus(saved ? "saved" : "failed");
+  storageStatus = saved ? "saved" : "failed";
+  setStorageStatus(storageStatus);
 }
 
 function activeOverrideCount() {

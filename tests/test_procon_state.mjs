@@ -84,6 +84,23 @@ test("storage persists only the decision model and restores normalized data", ()
   assert.equal(restored.decision.options[0].factors[0].probability, 75);
 });
 
+test("storage failures are reported instead of pretending the decision persisted", () => {
+  const unavailable = {
+    getItem() {
+      throw new DOMException("Blocked", "SecurityError");
+    },
+  };
+  const unwritable = {
+    setItem() {
+      throw new DOMException("Full", "QuotaExceededError");
+    },
+  };
+
+  assert.equal(loadDecision(null).status, "unavailable");
+  assert.equal(loadDecision(unavailable).status, "recovered");
+  assert.equal(saveDecision(createSeedDecision(), unwritable), false);
+});
+
 test("invalid saved data recovers to a usable starter decision", () => {
   const storage = new MemoryStorage();
   storage.setItem(STORAGE_KEY, "not-json");

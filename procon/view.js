@@ -8,6 +8,7 @@ export function renderDecisionHeader(decision, loadStatus = "restored") {
 
   const status = document.getElementById("storage-status");
   const messages = {
+    saved: "Saved on this device",
     restored: "Saved on this device",
     seeded: "Starter model · saves as you edit",
     recovered: "Starter restored · saves as you edit",

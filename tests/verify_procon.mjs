@@ -246,6 +246,50 @@ check("ProCon stays absent from visible portal navigation", async () => {
   await context.close();
 });
 
+check("unavailable or failed browser storage never produces a false saved status", async () => {
+  {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await context.addInitScript(() => {
+      Object.defineProperty(window, "localStorage", {
+        configurable: true,
+        get() {
+          throw new DOMException("Blocked", "SecurityError");
+        },
+      });
+    });
+    const page = await context.newPage();
+    await page.goto(baseUrl.href, { waitUntil: "networkidle" });
+    assert.equal(await page.locator("#storage-status").textContent(), "Browser storage unavailable");
+
+    await page.getByRole("button", { name: "Add an option" }).click();
+    const dialog = page.getByRole("dialog", { name: "Add an option" });
+    await dialog.getByLabel("Option name").fill("Storage test");
+    await dialog.getByRole("button", { name: "Add option" }).click();
+    assert.equal(await page.locator("#storage-status").textContent(), "Could not save on this device");
+    await context.close();
+  }
+
+  {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await context.addInitScript(() => {
+      Storage.prototype.setItem = function setItem() {
+        throw new DOMException("Full", "QuotaExceededError");
+      };
+    });
+    const page = await context.newPage();
+    await page.goto(baseUrl.href, { waitUntil: "networkidle" });
+    await page.locator("#decision-title").fill("This cannot be stored");
+    assert.equal(await page.locator("#storage-status").textContent(), "Could not save on this device");
+
+    await page.getByRole("button", { name: "Add an option" }).click();
+    const dialog = page.getByRole("dialog", { name: "Add an option" });
+    await dialog.getByLabel("Option name").fill("Still not stored");
+    await dialog.getByRole("button", { name: "Add option" }).click();
+    assert.equal(await page.locator("#storage-status").textContent(), "Could not save on this device");
+    await context.close();
+  }
+});
+
 async function run() {
   browser = await browserType.launch({ headless: true });
   let failures = 0;
