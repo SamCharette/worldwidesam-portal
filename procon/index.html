@@ -31,7 +31,40 @@
       </p>
     </noscript>
 
-    <main id="main-content" class="app-shell">
+    <main id="main-content" class="app-shell" data-mobile-view="consequences">
+      <nav class="mobile-view-nav" aria-label="ProCon sections">
+        <button
+          class="mobile-view-button"
+          type="button"
+          data-mobile-view-target="decision"
+          aria-controls="decision-region"
+          aria-pressed="false"
+        >
+          <span>Decision</span>
+          <small>Question &amp; options</small>
+        </button>
+        <button
+          class="mobile-view-button"
+          type="button"
+          data-mobile-view-target="consequences"
+          aria-controls="factors-panel"
+          aria-pressed="true"
+        >
+          <span>Consequences</span>
+          <small id="mobile-factor-count">10 factors</small>
+        </button>
+        <button
+          class="mobile-view-button"
+          type="button"
+          data-mobile-view-target="analysis"
+          aria-controls="analysis-panel"
+          aria-pressed="false"
+        >
+          <span>Analysis</span>
+          <small id="mobile-expected-score">— balance</small>
+        </button>
+      </nav>
+
       <section id="decision-region" class="decision-region" aria-labelledby="decision-heading">
         <h2 id="decision-heading" class="eyebrow">Current decision</h2>
         <label class="decision-label" for="decision-title">What are you deciding?</label>

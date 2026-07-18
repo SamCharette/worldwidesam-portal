@@ -12,6 +12,7 @@ import {
   updateQuestion,
 } from "./state.js";
 import { loadDecision, saveDecision } from "./storage.js";
+import { bindMobileNavigation } from "./mobile-navigation.js";
 import {
   announce,
   renderAnalysis,
@@ -39,6 +40,7 @@ bindDecisionEvents();
 bindOptionEvents();
 bindFactorEvents();
 bindDialogEvents();
+bindMobileNavigation();
 renderEverything();
 
 function bindDecisionEvents() {
