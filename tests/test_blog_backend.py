@@ -132,8 +132,21 @@ class BlogBackendTests(unittest.TestCase):
         self.assertEqual(retried["attempts"], 2)
 
     def test_dev_auth_tokens_are_explicit_opt_in(self) -> None:
-        with mock.patch.dict(os.environ, {"WORLDWIDESAM_BLOG_DEV_AUTH": "1"}, clear=True):
-            self.assertEqual(authenticate(ROOT, "Bearer clawdia-dev-token"), "Clawdia")
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            with mock.patch.dict(os.environ, {"WORLDWIDESAM_BLOG_DEV_AUTH": "1"}, clear=True):
+                self.assertEqual(authenticate(root, "Bearer clawdia-dev-token"), "Clawdia")
+
+    def test_configured_auth_tokens_override_dev_fallbacks(self) -> None:
+        with tempfile.TemporaryDirectory() as tempdir:
+            root = Path(tempdir)
+            (root / ".blog-agents.json").write_text(
+                '{"Clawdia": "configured-token"}',
+                encoding="utf-8",
+            )
+            with mock.patch.dict(os.environ, {"WORLDWIDESAM_BLOG_DEV_AUTH": "1"}, clear=True):
+                self.assertIsNone(authenticate(root, "Bearer clawdia-dev-token"))
+                self.assertEqual(authenticate(root, "Bearer configured-token"), "Clawdia")
 
 
 class StaticContentTests(unittest.TestCase):
