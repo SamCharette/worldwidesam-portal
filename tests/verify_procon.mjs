@@ -1,5 +1,14 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { chromium, webkit } from "playwright";
 
@@ -17,28 +26,39 @@ function check(name, run) {
 
 async function newPage({ width = 390, height = 844, reducedMotion = "no-preference" } = {}) {
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion });
-  if (assetRoot) {
-    await context.route("**/procon/**", async (route) => {
-      const requestPath = new URL(route.request().url()).pathname.slice("/procon/".length)
-        || "index.html";
-      const filePath = path.resolve(assetRoot, requestPath);
-      if (!filePath.startsWith(`${assetRoot}${path.sep}`)) {
-        await route.abort("accessdenied");
-        return;
-      }
-      const contentTypes = {
-        ".css": "text/css",
-        ".html": "text/html",
-        ".js": "text/javascript",
-      };
-      await route.fulfill({
-        body: await readFile(filePath),
-        contentType: contentTypes[path.extname(filePath)] ?? "application/octet-stream",
-      });
-    });
-  }
+  await routeLocalAssets(context);
   const page = await context.newPage();
   return { context, page };
+}
+
+async function routeLocalAssets(context, requestedRoot = assetRoot) {
+  if (!requestedRoot) return;
+  const realRoot = await realpath(requestedRoot);
+  await context.route("**/procon/**", async (route) => {
+    const requestPath = new URL(route.request().url()).pathname.slice("/procon/".length)
+      || "index.html";
+    const resolvedPath = path.resolve(realRoot, requestPath);
+    let realFilePath;
+    try {
+      realFilePath = await realpath(resolvedPath);
+    } catch {
+      await route.abort("failed");
+      return;
+    }
+    if (!realFilePath.startsWith(`${realRoot}${path.sep}`)) {
+      await route.abort("accessdenied");
+      return;
+    }
+    const contentTypes = {
+      ".css": "text/css",
+      ".html": "text/html",
+      ".js": "text/javascript",
+    };
+    await route.fulfill({
+      body: await readFile(realFilePath),
+      contentType: contentTypes[path.extname(realFilePath)] ?? "application/octet-stream",
+    });
+  });
 }
 
 async function openApp(page) {
@@ -309,9 +329,33 @@ check("ProCon stays absent from visible portal navigation", async () => {
   await context.close();
 });
 
+check("local asset routing rejects symlink escapes", async () => {
+  if (!assetRoot) return;
+  const temporaryParent = await mkdtemp(path.join(os.tmpdir(), "procon-assets-"));
+  const temporaryRoot = path.join(temporaryParent, "root");
+  const outsideFile = path.join(temporaryParent, "outside.txt");
+  await mkdir(temporaryRoot);
+  await writeFile(outsideFile, "outside the declared asset root", "utf8");
+  await symlink(outsideFile, path.join(temporaryRoot, "escape.txt"));
+
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    await routeLocalAssets(context, temporaryRoot);
+    const page = await context.newPage();
+    await assert.rejects(
+      page.goto(new URL("escape.txt", baseUrl).href),
+      /ERR_(?:ACCESS_DENIED|FAILED)/,
+    );
+  } finally {
+    await context.close();
+    await rm(temporaryParent, { recursive: true, force: true });
+  }
+});
+
 check("unavailable or failed browser storage never produces a false saved status", async () => {
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await routeLocalAssets(context);
     await context.addInitScript(() => {
       Object.defineProperty(window, "localStorage", {
         configurable: true,
@@ -324,6 +368,9 @@ check("unavailable or failed browser storage never produces a false saved status
     await page.goto(baseUrl.href, { waitUntil: "networkidle" });
     assert.equal(await page.locator("#storage-status").textContent(), "Browser storage unavailable");
 
+    await page.getByRole("navigation", { name: "ProCon sections" })
+      .getByRole("button", { name: /Decision/ })
+      .click();
     await page.getByRole("button", { name: "Add an option" }).click();
     const dialog = page.getByRole("dialog", { name: "Add an option" });
     await dialog.getByLabel("Option name").fill("Storage test");
@@ -334,6 +381,7 @@ check("unavailable or failed browser storage never produces a false saved status
 
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await routeLocalAssets(context);
     await context.addInitScript(() => {
       Storage.prototype.setItem = function setItem() {
         throw new DOMException("Full", "QuotaExceededError");
@@ -341,6 +389,9 @@ check("unavailable or failed browser storage never produces a false saved status
     });
     const page = await context.newPage();
     await page.goto(baseUrl.href, { waitUntil: "networkidle" });
+    await page.getByRole("navigation", { name: "ProCon sections" })
+      .getByRole("button", { name: /Decision/ })
+      .click();
     await page.locator("#decision-title").fill("This cannot be stored");
     assert.equal(await page.locator("#storage-status").textContent(), "Could not save on this device");
 
