@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#eef2f5" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta
+      name="description"
+      content="A personal decision workbench for weighing possible outcomes."
+    />
+    <title>ProCon · Decision workbench</title>
+    <link rel="stylesheet" href="./styles.css?v=1" />
+    <script type="module" src="./app.js?v=1"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to the decision workbench</a>
+
+    <header class="app-header">
+      <h1 class="wordmark" aria-label="ProCon">
+        <span class="wordmark-mark" aria-hidden="true">±</span>
+        <span>ProCon</span>
+      </h1>
+      <p id="storage-status" class="storage-status" role="status">Saved on this device</p>
+    </header>
+
+    <noscript>
+      <p class="noscript-note">
+        ProCon needs JavaScript to calculate and save your model. The decision question below
+        remains editable, but factors and what-if assumptions will not work.
+      </p>
+    </noscript>
+
+    <main id="main-content" class="app-shell">
+      <section id="decision-region" class="decision-region" aria-labelledby="decision-heading">
+        <h2 id="decision-heading" class="eyebrow">Current decision</h2>
+        <label class="decision-label" for="decision-title">What are you deciding?</label>
+        <textarea
+          id="decision-title"
+          class="decision-title"
+          name="decision-title"
+          rows="2"
+          maxlength="180"
+          aria-describedby="decision-help"
+          spellcheck="true"
+        >Quit my job and start working freelance, using AI?</textarea>
+        <p id="decision-help" class="field-note">
+          Weights express your personal importance. Probabilities express your estimate if you
+          choose an option.
+        </p>
+
+        <section id="option-region" class="option-region" aria-labelledby="options-heading">
+          <div class="section-heading-row">
+            <h2 id="options-heading">Options</h2>
+            <button id="add-option-button" class="quiet-button" type="button">
+              Add an option
+            </button>
+          </div>
+          <div
+            id="option-rail"
+            class="option-rail"
+            role="group"
+            aria-label="Decision options"
+          >
+            <button
+              id="selected-option"
+              class="option-chip is-selected"
+              type="button"
+              data-option-id="yes"
+              aria-pressed="true"
+            >
+              Yes
+            </button>
+            <span id="baseline-option" class="baseline-chip">No is the baseline</span>
+          </div>
+          <p id="option-context" class="option-context">
+            The factors below describe what may happen if you choose Yes.
+          </p>
+        </section>
+      </section>
+
+      <section
+        id="scenario-strip"
+        class="scenario-strip"
+        aria-labelledby="scenario-heading"
+        hidden
+      >
+        <div>
+          <p id="scenario-heading" class="scenario-label">What-if layer</p>
+          <p id="scenario-summary" class="scenario-summary">Using your saved estimates</p>
+        </div>
+        <button id="clear-scenarios" class="scenario-clear" type="button" disabled>
+          Clear assumptions
+        </button>
+      </section>
+
+      <div class="workbench-grid">
+        <aside id="analysis-panel" class="analysis-panel" aria-labelledby="analysis-heading" tabindex="-1">
+          <div class="analysis-heading-row">
+            <div>
+              <p class="eyebrow">Live model</p>
+              <h2 id="analysis-heading">Modeled balance</h2>
+            </div>
+            <output id="expected-score" class="expected-score" aria-label="Expected balance">
+              —
+            </output>
+          </div>
+
+          <figure id="tally-trace-region" class="tally-trace-region">
+            <svg
+              id="tally-trace"
+              class="tally-trace"
+              viewBox="0 0 640 150"
+              role="img"
+              aria-labelledby="tally-trace-title tally-trace-description"
+              preserveAspectRatio="none"
+            >
+              <title id="tally-trace-title">Distribution of modeled outcomes</title>
+              <desc id="tally-trace-description">
+                Add consequences to see how often the weighted balance falls above or below zero.
+              </desc>
+              <g id="trace-axis-layer" class="trace-axis-layer" aria-hidden="true">
+                <line x1="20" y1="116" x2="620" y2="116"></line>
+                <line class="trace-zero" x1="320" y1="22" x2="320" y2="124"></line>
+              </g>
+              <g id="trace-baseline-layer" class="trace-baseline-layer" aria-hidden="true"></g>
+              <g
+                id="trace-distribution-layer"
+                class="trace-distribution-layer"
+                aria-hidden="true"
+              ></g>
+              <g id="trace-range-layer" class="trace-range-layer" aria-hidden="true"></g>
+              <g id="trace-expected-layer" class="trace-expected-layer" aria-hidden="true"></g>
+              <text id="trace-empty-label" class="trace-empty-label" x="320" y="72">
+                Add a consequence to draw the outcome map
+              </text>
+            </svg>
+            <figcaption class="trace-caption">
+              <span>Counts against</span>
+              <span>Zero</span>
+              <span>Supports</span>
+            </figcaption>
+          </figure>
+
+          <dl id="result-stats" class="result-stats">
+            <div>
+              <dt>Above zero</dt>
+              <dd id="chance-positive">—</dd>
+            </div>
+            <div>
+              <dt>Likely range</dt>
+              <dd id="likely-range">—</dd>
+            </div>
+            <div>
+              <dt>Possible range</dt>
+              <dd id="possible-range">—</dd>
+            </div>
+          </dl>
+
+          <div id="analysis-details" class="analysis-details">
+            <button
+              id="analysis-toggle"
+              class="analysis-toggle"
+              type="button"
+              aria-expanded="false"
+              aria-controls="analysis-details-content"
+            >
+              Open full analysis
+            </button>
+
+            <div id="analysis-details-content" class="analysis-details-content">
+              <section
+                id="contributors-region"
+                class="analysis-section"
+                aria-labelledby="contributors-heading"
+              >
+                <div class="analysis-section-heading">
+                  <h3 id="contributors-heading">Biggest contributors</h3>
+                  <span aria-hidden="true">+−</span>
+                </div>
+                <ul id="contributors-list" class="analysis-list">
+                  <li class="empty-list-item" data-placeholder="true">
+                    Add factors to see what carries the balance.
+                  </li>
+                </ul>
+              </section>
+
+              <section
+                id="sensitivity-region"
+                class="analysis-section"
+                aria-labelledby="sensitivity-heading"
+              >
+                <div class="analysis-section-heading">
+                  <h3 id="sensitivity-heading">Most sensitive assumptions</h3>
+                  <span aria-hidden="true">±</span>
+                </div>
+                <ul id="sensitivity-list" class="analysis-list">
+                  <li class="empty-list-item" data-placeholder="true">
+                    This will show which uncertain factor can move the result most.
+                  </li>
+                </ul>
+              </section>
+
+              <section
+                id="option-comparison-region"
+                class="analysis-section"
+                aria-labelledby="option-comparison-heading"
+              >
+                <div class="analysis-section-heading">
+                  <h3 id="option-comparison-heading">Option comparison</h3>
+                  <span aria-hidden="true">↔</span>
+                </div>
+                <div id="option-comparison" class="option-comparison">
+                  Add another option to compare modeled balances.
+                </div>
+              </section>
+
+              <p id="model-note" class="model-note">
+                This is a model of your estimates, not a forecast. It treats factors as
+                independent and shows how their weighted outcomes combine.
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        <section id="factors-panel" class="factors-panel" aria-labelledby="factors-heading">
+          <div class="factors-heading-row">
+            <div>
+              <p class="eyebrow">Factor ledger</p>
+              <h2 id="factors-heading">Possible consequences</h2>
+            </div>
+            <span id="factor-count" class="factor-count" aria-live="polite">0 factors</span>
+          </div>
+
+          <div id="factor-filter-region" class="factor-filter-region">
+            <span id="filter-label" class="visually-hidden">Filter consequences</span>
+            <div class="filter-control" role="group" aria-labelledby="filter-label">
+              <button id="filter-all" type="button" data-filter="all" aria-pressed="true">
+                All
+              </button>
+              <button id="filter-pro" type="button" data-filter="pro" aria-pressed="false">
+                Supports
+              </button>
+              <button id="filter-con" type="button" data-filter="con" aria-pressed="false">
+                Against
+              </button>
+            </div>
+          </div>
+
+          <div id="factor-ledger" class="factor-ledger" aria-busy="false">
+            <section id="pro-factors-region" class="factor-group" aria-labelledby="pro-heading">
+              <h3 id="pro-heading">
+                <span class="polarity-mark polarity-mark-pro" aria-hidden="true">+</span>
+                Supports Yes
+              </h3>
+              <ul id="pro-list" class="factor-list"></ul>
+            </section>
+
+            <section id="con-factors-region" class="factor-group" aria-labelledby="con-heading">
+              <h3 id="con-heading">
+                <span class="polarity-mark polarity-mark-con" aria-hidden="true">−</span>
+                Counts against Yes
+              </h3>
+              <ul id="con-list" class="factor-list"></ul>
+            </section>
+
+            <p id="factor-empty-state" class="factor-empty-state">
+              Start with one possible upside or downside. ProCon will map how your estimates add
+              up without turning them into a verdict.
+            </p>
+          </div>
+
+          <section id="add-factor-region" class="add-factor-region" aria-label="Add a consequence">
+            <button id="add-factor-button" class="primary-button" type="button">
+              <span aria-hidden="true">+</span>
+              Add a consequence
+            </button>
+          </section>
+        </section>
+      </div>
+    </main>
+
+    <dialog id="factor-dialog" class="editor-dialog" aria-labelledby="factor-dialog-title">
+      <form id="factor-form" method="dialog">
+        <div class="dialog-heading-row">
+          <div>
+            <p class="eyebrow">Factor</p>
+            <h2 id="factor-dialog-title">Add a consequence</h2>
+          </div>
+          <button
+            id="close-factor-dialog"
+            class="icon-button"
+            type="button"
+            aria-label="Close factor editor"
+          >
+            ×
+          </button>
+        </div>
+
+        <label class="field-stack" for="factor-name">
+          <span>What might happen?</span>
+          <input
+            id="factor-name"
+            name="factor-name"
+            type="text"
+            maxlength="120"
+            autocomplete="off"
+            placeholder="More control over my schedule"
+            required
+          />
+        </label>
+
+        <fieldset id="factor-kind-group" class="choice-fieldset">
+          <legend>How does it count?</legend>
+          <label>
+            <input id="factor-kind-pro" type="radio" name="factor-kind" value="pro" checked />
+            <span><strong>Supports</strong> this option</span>
+          </label>
+          <label>
+            <input id="factor-kind-con" type="radio" name="factor-kind" value="con" />
+            <span><strong>Counts against</strong> this option</span>
+          </label>
+        </fieldset>
+
+        <div class="measure-field">
+          <div class="measure-heading">
+            <label for="factor-weight-range">Personal importance</label>
+            <input
+              id="factor-weight-input"
+              class="number-input"
+              name="factor-weight"
+              type="number"
+              min="1"
+              max="10"
+              step="1"
+              value="5"
+              inputmode="numeric"
+              aria-label="Personal importance from 1 to 10"
+            />
+          </div>
+          <input
+            id="factor-weight-range"
+            name="factor-weight-range"
+            type="range"
+            min="1"
+            max="10"
+            step="1"
+            value="5"
+          />
+          <p class="field-note">1 is a nudge; 10 is pivotal for this decision.</p>
+        </div>
+
+        <div class="measure-field">
+          <div class="measure-heading">
+            <label for="factor-probability-range">Chance if I choose this option</label>
+            <div class="number-suffix">
+              <input
+                id="factor-probability-input"
+                class="number-input"
+                name="factor-probability"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value="50"
+                inputmode="decimal"
+                aria-label="Probability from 0 to 100 percent"
+              />
+              <span aria-hidden="true">%</span>
+            </div>
+          </div>
+          <input
+            id="factor-probability-range"
+            name="factor-probability-range"
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value="50"
+          />
+          <p class="field-note">Your estimate of whether this consequence will happen.</p>
+        </div>
+
+        <div class="dialog-actions">
+          <button id="cancel-factor-button" class="secondary-button" type="button">Cancel</button>
+          <button id="save-factor-button" class="primary-button" type="submit" value="save">
+            Save consequence
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="option-dialog" class="editor-dialog" aria-labelledby="option-dialog-title">
+      <form id="option-form" method="dialog">
+        <div class="dialog-heading-row">
+          <div>
+            <p class="eyebrow">Alternative</p>
+            <h2 id="option-dialog-title">Add an option</h2>
+          </div>
+          <button
+            id="close-option-dialog"
+            class="icon-button"
+            type="button"
+            aria-label="Close option editor"
+          >
+            ×
+          </button>
+        </div>
+        <label class="field-stack" for="option-name">
+          <span>Option name</span>
+          <input
+            id="option-name"
+            name="option-name"
+            type="text"
+            maxlength="80"
+            autocomplete="off"
+            placeholder="Freelance part-time first"
+            required
+          />
+        </label>
+        <div class="dialog-actions">
+          <button id="cancel-option-button" class="secondary-button" type="button">Cancel</button>
+          <button id="save-option-button" class="primary-button" type="submit" value="save">
+            Add option
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="factor-card-template">
+      <li class="factor-card">
+        <article>
+          <button
+            class="factor-summary"
+            type="button"
+            data-action="toggle-factor"
+            aria-expanded="false"
+          >
+            <span class="polarity-mark" data-role="polarity" aria-hidden="true"></span>
+            <span class="factor-summary-copy">
+              <strong data-role="factor-name"></strong>
+              <small data-role="factor-formula"></small>
+            </span>
+            <span class="factor-summary-result">
+              <output data-role="factor-contribution"></output>
+              <span data-role="scenario-state">Estimate</span>
+            </span>
+          </button>
+          <div class="inline-factor-editor" data-role="factor-editor" hidden>
+            <div class="inline-field-grid">
+              <label class="compact-field">
+                <span>Consequence</span>
+                <input data-field="name" type="text" maxlength="120" autocomplete="off" />
+              </label>
+              <label class="compact-field">
+                <span>Counts as</span>
+                <select data-field="kind">
+                  <option value="pro">Supports this option</option>
+                  <option value="con">Counts against this option</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="inline-measure-grid">
+              <div class="compact-measure">
+                <div class="measure-heading">
+                  <span>Personal importance</span>
+                  <label class="number-suffix">
+                    <span class="visually-hidden">Importance from 1 to 10</span>
+                    <input
+                      class="number-input"
+                      data-field="weight-number"
+                      type="number"
+                      min="1"
+                      max="10"
+                      step="1"
+                      inputmode="numeric"
+                    />
+                    <span aria-hidden="true">/10</span>
+                  </label>
+                </div>
+                <label class="range-label">
+                  <span class="visually-hidden">Personal importance slider</span>
+                  <input
+                    data-field="weight-range"
+                    type="range"
+                    min="1"
+                    max="10"
+                    step="1"
+                  />
+                </label>
+              </div>
+
+              <div class="compact-measure">
+                <div class="measure-heading">
+                  <span>Chance if chosen</span>
+                  <label class="number-suffix">
+                    <span class="visually-hidden">Probability from 0 to 100 percent</span>
+                    <input
+                      class="number-input"
+                      data-field="probability-number"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      inputmode="decimal"
+                    />
+                    <span aria-hidden="true">%</span>
+                  </label>
+                </div>
+                <label class="range-label">
+                  <span class="visually-hidden">Probability slider</span>
+                  <input
+                    data-field="probability-range"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <fieldset class="scenario-fieldset" data-role="scenario-controls">
+              <legend>For this what-if</legend>
+              <div class="scenario-choices">
+                <label>
+                  <input data-field="scenario" type="radio" name="factor-scenario" value="estimate" />
+                  <span>Use estimate</span>
+                </label>
+                <label>
+                  <input data-field="scenario" type="radio" name="factor-scenario" value="true" />
+                  <span>Assume true</span>
+                </label>
+                <label>
+                  <input data-field="scenario" type="radio" name="factor-scenario" value="false" />
+                  <span>Assume false</span>
+                </label>
+              </div>
+              <p data-role="scenario-note">An assumption changes this model, not your saved estimate.</p>
+            </fieldset>
+
+            <div class="inline-factor-actions">
+              <button class="danger-button" type="button" data-action="delete-factor">
+                Delete factor
+              </button>
+              <button class="secondary-button" type="button" data-action="close-factor">
+                Done
+              </button>
+            </div>
+          </div>
+        </article>
+      </li>
+    </template>
+
+    <div id="live-region" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>

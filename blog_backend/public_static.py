@@ -7,11 +7,12 @@ from urllib.parse import unquote, urlsplit
 _EXACT_PUBLIC_FILES = {
     "/app.js": "app.js",
     "/orbit/": "index.html",
+    "/procon/": "procon/index.html",
     "/styles.css": "styles.css",
     "/wonderlab/": "wonderlab/index.html",
     "/wasteland-terminal-map/": "wasteland-terminal-map/index.html",
 }
-_PUBLIC_DIRECTORIES = ("assets", "wasteland-terminal-map", "wonderlab")
+_PUBLIC_DIRECTORIES = ("assets", "procon", "wasteland-terminal-map", "wonderlab")
 _PUBLIC_HOME_DOCUMENTS = {"index.html", "wonderlab/index.html"}
 _PRIVATE_PATH_NAMES = {"__pycache__", "data", "test", "tests"}
 _PRIVATE_SUFFIXES = {".py", ".pyc", ".pyo", ".pyw"}

@@ -78,6 +78,9 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
                 head_only=head_only,
             )
             return
+        if path == "/procon":
+            self._send_redirect("/procon/", head_only=head_only)
+            return
         if path == "/wonderlab":
             self._send_redirect("/wonderlab/", head_only=head_only)
             return

@@ -123,6 +123,10 @@ class PublicStaticHttpTests(unittest.TestCase):
             "app.js": b"export const publicApp = true;",
             "assets/public.png": b"public image",
             "assets/nested/public.json": b'{"public": true}',
+            "procon/index.html": b"<!doctype html><title>ProCon</title>",
+            "procon/styles.css": b"body { color: purple; }",
+            "procon/app.js": b"export const procon = true;",
+            "procon/assets/probability-map.json": b'{"outcomes": []}',
             "wasteland-terminal-map/index.html": b"<!doctype html><title>Public map</title>",
             "wasteland-terminal-map/styles.css": b"body { color: green; }",
             "wasteland-terminal-map/app.js": b"window.publicMap = true;",
@@ -140,6 +144,9 @@ class PublicStaticHttpTests(unittest.TestCase):
             "assets/tool.py": b"synthetic source fixture",
             "assets/data/private.txt": b"synthetic private fixture",
             "assets/.hidden": b"synthetic private fixture",
+            "procon/private.py": b"synthetic source fixture",
+            "procon/data/private.json": b"synthetic private fixture",
+            "procon/.hidden": b"synthetic private fixture",
         }
         for name, content in files.items():
             path = cls.root / name
@@ -147,6 +154,7 @@ class PublicStaticHttpTests(unittest.TestCase):
             path.write_bytes(content)
         (cls.root / "private.txt").write_bytes(b"synthetic private fixture")
         (cls.root / "assets" / "escape.txt").symlink_to(cls.root / "private.txt")
+        (cls.root / "procon" / "escape.txt").symlink_to(cls.root / "private.txt")
 
     def request(self, path: str, method: str = "GET") -> tuple[int, dict[str, str], bytes]:
         connection = http.client.HTTPConnection(self.host, self.port, timeout=5)
@@ -163,6 +171,11 @@ class PublicStaticHttpTests(unittest.TestCase):
             "/app.js?v=1",
             "/assets/public.png",
             "/assets/nested/public.json?cache=1",
+            "/procon/",
+            "/procon/index.html",
+            "/procon/styles.css",
+            "/procon/app.js?v=1",
+            "/procon/assets/probability-map.json?cache=1",
             "/wasteland-terminal-map/",
             "/wasteland-terminal-map/index.html",
             "/wasteland-terminal-map/styles.css",
@@ -187,6 +200,7 @@ class PublicStaticHttpTests(unittest.TestCase):
         for path, location in (
             ("/blog", "/blog/"),
             ("/orbit", "/orbit/"),
+            ("/procon", "/procon/"),
             ("/wonderlab", "/wonderlab/"),
             ("/neon-cycle-grid", "/neon-cycle-grid/"),
             ("/wasteland-terminal-map", "/wasteland-terminal-map/"),
@@ -277,6 +291,11 @@ class PublicStaticHttpTests(unittest.TestCase):
             "/assets/data/private.txt",
             "/assets/.hidden",
             "/assets/escape.txt",
+            "/procon/assets/",
+            "/procon/private.py",
+            "/procon/data/private.json",
+            "/procon/.hidden",
+            "/procon/escape.txt",
             "/wasteland-terminal-map/assets/",
             "/wonderlab/../server.py",
             "/wonderlab/%2e%2e/server.py",
@@ -300,6 +319,9 @@ class PublicStaticHttpTests(unittest.TestCase):
             "/assets/%2e/public.png",
             "/assets//public.png",
             "/assets/%2f..%2fserver.py",
+            "/procon/../server.py",
+            "/procon/%2e%2e/server.py",
+            "/procon//app.js",
             "/%2egit/config",
             "/assets/%ff",
         ):
@@ -321,6 +343,7 @@ class PublicStaticHttpTests(unittest.TestCase):
 
     def test_resolver_rejects_a_symlink_escape(self) -> None:
         self.assertIsNone(resolve_public_file(self.root, "/assets/escape.txt"))
+        self.assertIsNone(resolve_public_file(self.root, "/procon/escape.txt"))
 
     def test_configured_home_document_is_explicitly_allowlisted(self) -> None:
         self.assertEqual(
