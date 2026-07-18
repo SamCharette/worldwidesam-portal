@@ -144,9 +144,9 @@ check("a warm browser cache cannot mix modules from different ProCon releases", 
     expectedModules,
   );
   assert.deepEqual(
-    moduleRequests.filter(({ version }) => version !== "4"),
+    moduleRequests.filter(({ version }) => version !== "5"),
     [],
-    `Every loaded module must use release v4: ${JSON.stringify(moduleRequests)}`,
+    `Every loaded module must use release v5: ${JSON.stringify(moduleRequests)}`,
   );
   assert.deepEqual(errors, []);
   assert.equal(await page.locator("#mobile-decision-brief").isVisible(), true);
@@ -312,9 +312,28 @@ check("phone decision brief explains the model and opens focused editors", async
   assert.match(await brief.locator("#mobile-brief-question").textContent(), /Quit my job/);
   assert.match(await brief.locator("#mobile-brief-comparison").textContent(), /Yes.*No/);
   assert.match(await brief.locator("#mobile-brief-reading").textContent(), /lean away from Yes/);
-  assert.equal(await brief.locator("#mobile-brief-reasons li").count(), 3);
+  const forces = brief.locator("#mobile-force-reasons li");
+  assert.equal(await forces.count(), 7);
+  assert.equal(await forces.locator(".mobile-force-label").count(), 7);
+  assert.equal(await forces.filter({ hasText: /other reasons combined/ }).count(), 2);
+  const reaches = await forces.evaluateAll((items) => items.map((item) =>
+    Number.parseFloat(item.style.getPropertyValue("--force-reach")),
+  ));
+  assert.equal(Math.max(...reaches), 100);
+  assert.ok(reaches.every((reach) => reach > 0 && reach <= 100));
+  const represented = await forces.evaluateAll((items) => items.map((item) =>
+    Number(item.dataset.forceContribution),
+  ));
+  const representedSupport = represented.filter((value) => value > 0).reduce((sum, value) => sum + value, 0);
+  const representedAgainst = represented.filter((value) => value < 0).reduce((sum, value) => sum + value, 0);
   assert.match(await brief.locator("#mobile-support-total").textContent(), /^\+/);
   assert.match(await brief.locator("#mobile-against-total").textContent(), /^−/);
+  const shownSupport = Number.parseFloat(await brief.locator("#mobile-support-total").textContent());
+  const shownAgainst = -Number.parseFloat(
+    (await brief.locator("#mobile-against-total").textContent()).replace("−", ""),
+  );
+  assert.ok(Math.abs(representedSupport - shownSupport) <= 0.051);
+  assert.ok(Math.abs(representedAgainst - shownAgainst) <= 0.051);
   assert.equal(await page.locator("#decision-region").isVisible(), false);
   assert.equal(await page.locator("#analysis-panel").isVisible(), false);
 
@@ -413,6 +432,13 @@ check("decision brief distinguishes empty, balanced, positive, and negative pull
       `${testCase.name} reading`,
     );
     assert.equal(await page.locator("#expected-score").textContent(), testCase.score);
+    if (testCase.name === "empty") {
+      assert.equal(await page.locator("#mobile-force-reasons").getAttribute("class"), "mobile-force-reasons is-empty");
+      assert.equal(await page.locator("#mobile-force-reasons li").evaluate((node) => {
+        const styles = getComputedStyle(node);
+        return styles.gridTemplateColumns.split(" ").length === 1 && styles.textAlign === "center";
+      }), true);
+    }
     if (testCase.name === "balanced") {
       assert.equal(await page.locator("#mobile-support-total").textContent(), "+0.3");
       assert.equal(await page.locator("#mobile-against-total").textContent(), "−0.3");

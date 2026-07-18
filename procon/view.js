@@ -1,5 +1,5 @@
-import { renderTallyTrace } from "./chart.js?v=4";
-import { formatPercent, formatRange, formatScore, pluralize } from "./format.js?v=4";
+import { renderTallyTrace } from "./chart.js?v=5";
+import { formatPercent, formatRange, formatScore, pluralize } from "./format.js?v=5";
 
 export function renderDecisionHeader(decision, loadStatus = "restored") {
   const title = document.getElementById("decision-title");
@@ -196,16 +196,10 @@ function renderMobileDecisionBrief(decision, option, scenario) {
   const against = Math.abs(scenario.contributors
     .filter((item) => item.expectedContribution < 0)
     .reduce((total, item) => total + item.expectedContribution, 0));
-  const scale = Math.max(support, against, 1);
-  const track = document.getElementById("mobile-pull-track");
-  track.style.setProperty("--support-pull", `${(support / scale) * 100}%`);
-  track.style.setProperty("--against-pull", `${(against / scale) * 100}%`);
-  track.setAttribute(
-    "aria-label",
-    `${formatScore(support)} modeled support and ${formatScore(-against)} modeled resistance for ${option.name}`,
-  );
   document.getElementById("mobile-support-total").textContent = formatScore(support);
   document.getElementById("mobile-against-total").textContent = formatScore(-against);
+  document.getElementById("mobile-support-label").textContent = `For ${option.name}`;
+  document.getElementById("mobile-against-label").textContent = `Against ${option.name}`;
 
   const reading = document.getElementById("mobile-brief-reading");
   const displayedScore = formatScore(scenario.expectedScore, { alwaysSign: false });
@@ -221,24 +215,60 @@ function renderMobileDecisionBrief(decision, option, scenario) {
 
   document.getElementById("mobile-brief-factor-count").textContent =
     pluralize(option.factors.length, "reason");
-  const reasons = document.getElementById("mobile-brief-reasons");
+  const reasons = document.getElementById("mobile-force-reasons");
   reasons.replaceChildren();
-  const visible = scenario.contributors
-    .filter((item) => item.absoluteContribution > 0)
-    .slice(0, 3);
-  if (!visible.length) {
-    reasons.append(emptyItem("Add one possible upside or downside to begin."));
+  const contributing = scenario.contributors.filter((item) => item.absoluteContribution > 0);
+  reasons.classList.toggle("is-empty", contributing.length === 0);
+  if (!contributing.length) {
+    const empty = emptyItem("Add one possible upside or downside to begin.");
+    empty.classList.add("mobile-force-empty");
+    reasons.append(empty);
     return;
   }
-  for (const contributor of visible) {
-    const item = element("li", contributor.expectedContribution >= 0 ? "is-pro" : "is-con");
-    const mark = element("span", "mobile-reason-mark");
-    mark.textContent = contributor.expectedContribution >= 0 ? "+" : "−";
-    const label = element("span", "mobile-reason-label");
+  const leading = contributing.slice(0, 5);
+  const remainder = contributing.slice(5);
+  const groupedRemainders = ["con", "pro"].flatMap((type) => {
+    const grouped = remainder.filter((item) => item.type === type);
+    if (!grouped.length) return [];
+    const expectedContribution = grouped.reduce(
+      (total, item) => total + item.expectedContribution,
+      0,
+    );
+    return [{
+      type,
+      label: `${pluralize(grouped.length, "other reason")} combined`,
+      expectedContribution,
+      absoluteContribution: Math.abs(expectedContribution),
+      isGroup: true,
+    }];
+  });
+  const forces = [...leading, ...groupedRemainders];
+  const reasonScale = Math.max(...forces.map((item) => item.absoluteContribution), 1);
+  for (const contributor of forces) {
+    const supports = contributor.expectedContribution >= 0;
+    const item = element(
+      "li",
+      `${supports ? "is-pro" : "is-con"}${contributor.isGroup ? " is-group" : ""}`,
+    );
+    item.dataset.forceContribution = String(contributor.expectedContribution);
+    item.style.setProperty(
+      "--force-reach",
+      `${(contributor.absoluteContribution / reasonScale) * 100}%`,
+    );
+    const card = element("div", "mobile-force-card");
+    const fill = element("span", "mobile-force-fill");
+    fill.setAttribute("aria-hidden", "true");
+    const copy = element("span", "mobile-force-copy");
+    const label = element("span", "mobile-force-label");
     label.textContent = contributor.label;
-    const value = element("strong", "mobile-reason-value");
+    const value = element("strong", "mobile-force-value");
     value.textContent = formatScore(contributor.expectedContribution);
-    item.append(mark, label, value);
+    copy.append(label, value);
+    card.append(fill, copy);
+    const node = element("span", "mobile-force-node");
+    node.textContent = supports ? "+" : "−";
+    node.setAttribute("aria-hidden", "true");
+    item.append(card, node);
     reasons.append(item);
   }
 }
