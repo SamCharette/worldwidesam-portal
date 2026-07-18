@@ -4,6 +4,12 @@ const MOBILE_VIEW_TITLES = {
   consequences: "Review what matters",
   analysis: "See the calculation",
 };
+const MOBILE_VIEW_FOCUS_TARGETS = {
+  summary: "mobile-brief-question",
+  decision: "decision-heading",
+  consequences: "factors-heading",
+  analysis: "analysis-heading",
+};
 
 export function bindMobileNavigation() {
   const shell = document.getElementById("main-content");
@@ -20,5 +26,8 @@ export function bindMobileNavigation() {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     shell.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    window.requestAnimationFrame(() => {
+      document.getElementById(MOBILE_VIEW_FOCUS_TARGETS[view])?.focus({ preventScroll: true });
+    });
   });
 }

@@ -208,14 +208,15 @@ function renderMobileDecisionBrief(decision, option, scenario) {
   document.getElementById("mobile-against-total").textContent = formatScore(-against);
 
   const reading = document.getElementById("mobile-brief-reading");
+  const displayedScore = formatScore(scenario.expectedScore, { alwaysSign: false });
   if (!option.factors.length) {
     reading.textContent = `Nothing is pulling ${option.name} in either direction yet.`;
+  } else if (displayedScore === "0") {
+    reading.textContent = `Right now, the modeled pull is evenly balanced.`;
   } else if (scenario.expectedScore > 0) {
     reading.textContent = `Right now, your estimates lean toward ${option.name}.`;
-  } else if (scenario.expectedScore < 0) {
-    reading.textContent = `Right now, your estimates lean away from ${option.name}.`;
   } else {
-    reading.textContent = `Right now, the modeled pull is evenly balanced.`;
+    reading.textContent = `Right now, your estimates lean away from ${option.name}.`;
   }
 
   document.getElementById("mobile-brief-factor-count").textContent =

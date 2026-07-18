@@ -71,6 +71,13 @@ function factorCard(page, label) {
   return page.locator(".factor-card").filter({ hasText: label }).first();
 }
 
+async function waitForFocus(page, selector) {
+  await page.waitForFunction(
+    (focusSelector) => document.querySelector(focusSelector) === document.activeElement,
+    selector,
+  );
+}
+
 check("starter model renders a truthful live probability map", async () => {
   const { context, page } = await newPage();
   const errors = [];
@@ -263,14 +270,17 @@ check("phone decision brief explains the model and opens focused editors", async
   await brief.getByRole("button", { name: "Change the decision" }).click();
   assert.equal(await nav.isVisible(), true);
   assert.match(await page.locator("#mobile-view-title").textContent(), /Change the decision/);
+  await waitForFocus(page, "#decision-heading");
   assert.equal(await page.locator("#decision-region").isVisible(), true);
   assert.equal(await page.locator("#factors-panel").isVisible(), false);
   await page.locator("#decision-title").fill("Should I make the change?");
 
   await nav.getByRole("button", { name: /Decision overview/ }).click();
+  await waitForFocus(page, "#mobile-brief-question");
   assert.equal(await brief.locator("#mobile-brief-question").textContent(), "Should I make the change?");
   const supportBefore = await page.locator("#mobile-support-total").textContent();
   await brief.getByRole("button", { name: "Review what matters" }).click();
+  await waitForFocus(page, "#factors-heading");
   const first = page.locator(".factor-card").first();
   await first.locator(".factor-summary").click();
   await first.locator('[data-field="weight"][data-control="number"]').fill("10");
@@ -279,6 +289,7 @@ check("phone decision brief explains the model and opens focused editors", async
   assert.notEqual(await page.locator("#mobile-support-total").textContent(), supportBefore);
 
   await brief.getByRole("button", { name: "See the calculation" }).click();
+  await waitForFocus(page, "#analysis-heading");
   assert.equal(await page.locator("#analysis-panel").isVisible(), true);
   assert.equal(await page.locator("#decision-region").isVisible(), false);
 
@@ -289,6 +300,74 @@ check("phone decision brief explains the model and opens focused editors", async
   assert.equal(await page.locator("#factors-panel").isVisible(), true);
   assert.equal(await page.locator("#analysis-panel").isVisible(), true);
   await context.close();
+});
+
+check("decision brief distinguishes empty, balanced, positive, and negative pulls", async () => {
+  const cases = [
+    {
+      name: "empty",
+      factors: [],
+      reading: /Nothing is pulling Yes/,
+      score: "0",
+    },
+    {
+      name: "balanced",
+      factors: [
+        { id: "plus-one", label: "A small upside", type: "pro", weight: 1, probability: 10 },
+        { id: "plus-two", label: "Another upside", type: "pro", weight: 1, probability: 20 },
+        { id: "minus-three", label: "An equal downside", type: "con", weight: 1, probability: 30 },
+      ],
+      reading: /evenly balanced/,
+      score: "0",
+    },
+    {
+      name: "positive",
+      factors: [
+        { id: "positive", label: "A likely upside", type: "pro", weight: 2, probability: 50 },
+      ],
+      reading: /lean toward Yes/,
+      score: "+1",
+    },
+    {
+      name: "negative",
+      factors: [
+        { id: "negative", label: "A likely downside", type: "con", weight: 2, probability: 50 },
+      ],
+      reading: /lean away from Yes/,
+      score: "−1",
+    },
+  ];
+
+  for (const testCase of cases) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await routeLocalAssets(context);
+    await context.addInitScript(({ factors }) => {
+      localStorage.setItem("procon:prototype:v1", JSON.stringify({
+        schemaVersion: 1,
+        decision: {
+          schemaVersion: 1,
+          id: "decision-brief-state",
+          question: "Should I choose this?",
+          baselineLabel: "No",
+          selectedOptionId: "option-yes",
+          options: [{ id: "option-yes", name: "Yes", factors }],
+        },
+      }));
+    }, { factors: testCase.factors });
+    const page = await context.newPage();
+    await page.goto(baseUrl.href, { waitUntil: "networkidle" });
+    assert.match(
+      await page.locator("#mobile-brief-reading").textContent(),
+      testCase.reading,
+      `${testCase.name} reading`,
+    );
+    assert.equal(await page.locator("#expected-score").textContent(), testCase.score);
+    if (testCase.name === "balanced") {
+      assert.equal(await page.locator("#mobile-support-total").textContent(), "+0.3");
+      assert.equal(await page.locator("#mobile-against-total").textContent(), "−0.3");
+    }
+    await context.close();
+  }
 });
 
 check("keyboard, labels, reduced motion, and mobile analysis controls remain usable", async () => {
@@ -321,10 +400,12 @@ check("keyboard, labels, reduced motion, and mobile analysis controls remain usa
 
   await first.getByRole("radio", { name: /Counts against/ }).click();
   const moved = factorCard(page, "More control over how I spend my working time");
-  assert.equal(
-    await moved.getByRole("radio", { name: /Counts against/ }).evaluate((node) => node === document.activeElement),
-    true,
-  );
+  await page.waitForFunction(() => {
+    const card = [...document.querySelectorAll(".factor-card")]
+      .find((candidate) => candidate.dataset.factorId === "factor-autonomy");
+    return card?.querySelector('[data-field="type"][value="con"]') === document.activeElement;
+  });
+  assert.equal(await moved.getByRole("radio", { name: /Counts against/ }).isChecked(), true);
 
   const toggle = page.locator("#analysis-toggle");
   await page.getByRole("navigation", { name: "Current section" })
