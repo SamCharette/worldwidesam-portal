@@ -99,9 +99,10 @@ export function normalizeDecision(value) {
   if (!value || typeof value !== "object") return createSeedDecision();
 
   const weightMax = DEFAULT_WEIGHT_MAX;
-  const options = Array.isArray(value.options)
+  const normalizedOptions = Array.isArray(value.options)
     ? value.options.map((option, index) => normalizeOption(option, index, weightMax))
     : [];
+  const options = ensureUniqueIds(normalizedOptions);
   const usableOptions = options.length ? options : [createOption("Yes")];
   const selectedOptionId = usableOptions.some((option) => option.id === value.selectedOptionId)
     ? value.selectedOptionId
@@ -233,6 +234,26 @@ function normalizeFactor(value, weightMax) {
     weight: integerInRange(factor.weight, 1, weightMax, Math.min(5, weightMax)),
     probability: integerInRange(factor.probability, 0, 100, 50),
   };
+}
+
+function ensureUniqueIds(options) {
+  const optionIds = new Set();
+  const factorIds = new Set();
+  return options.map((option) => ({
+    ...option,
+    id: uniqueId(option.id, "option", optionIds),
+    factors: option.factors.map((factor) => ({
+      ...factor,
+      id: uniqueId(factor.id, "factor", factorIds),
+    })),
+  }));
+}
+
+function uniqueId(candidate, prefix, usedIds) {
+  let id = candidate;
+  while (usedIds.has(id)) id = createId(prefix);
+  usedIds.add(id);
+  return id;
 }
 
 function validateFactorPatch(factor, patch, weightMax) {

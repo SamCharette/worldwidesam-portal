@@ -24,9 +24,11 @@ export function renderDecisionHeader(decision, loadStatus = "restored") {
 
 export function setStorageStatus(status) {
   const element = document.getElementById("storage-status");
-  element.textContent = status === "failed"
+  const message = status === "failed"
     ? "Could not save on this device"
     : "Saved on this device";
+  if (element.dataset.state === status && element.textContent === message) return;
+  element.textContent = message;
   element.dataset.state = status;
 }
 

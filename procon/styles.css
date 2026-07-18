@@ -1273,6 +1273,15 @@ input[type="range"] {
     font-size: clamp(1.65rem, 8vw, 2.4rem);
   }
 
+  .factor-summary-copy strong {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+  }
+
   .analysis-section {
     padding-bottom: 0.7rem;
   }

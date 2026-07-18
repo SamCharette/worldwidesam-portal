@@ -53,6 +53,7 @@ function bindDecisionEvents() {
   document.getElementById("clear-scenarios").addEventListener("click", () => {
     scenarios = {};
     renderLedgerAndAnalysis();
+    document.getElementById("analysis-panel").focus({ preventScroll: true });
     announce("What-if assumptions cleared. Saved probability estimates were not changed.");
   });
 }
@@ -176,6 +177,7 @@ function bindFactorEvents() {
       });
       persistDecision();
       renderLedgerAndAnalysis();
+      restoreFactorControl(context.factor.id, `[data-field="type"][value="${input.value}"]`);
       announce(`Consequence now ${input.value === "pro" ? "supports" : "counts against"} ${context.option.name}.`);
       return;
     }
@@ -183,7 +185,7 @@ function bindFactorEvents() {
     if (input.dataset.field === "scenario") {
       if (input.value === "estimated") delete scenarios[context.factor.id];
       else scenarios[context.factor.id] = input.value;
-      renderLedgerAndAnalysis();
+      refreshFactorAndAnalysis(context.factor.id);
       const description = input.value === "estimated" ? "uses its saved estimate" : `is assumed ${input.value}`;
       announce(`${context.factor.label} ${description}.`);
       return;
@@ -414,5 +416,15 @@ function focusFactor(factorId) {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     card?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
     card?.querySelector('[data-field="label"]')?.focus({ preventScroll: true });
+  });
+}
+
+function restoreFactorControl(factorId, selector) {
+  window.requestAnimationFrame(() => {
+    const card = [...document.querySelectorAll(".factor-card")]
+      .find((candidate) => candidate.dataset.factorId === factorId);
+    const control = card?.querySelector(selector)
+      ?? document.querySelector('[data-filter][aria-pressed="true"]');
+    control?.focus({ preventScroll: true });
   });
 }

@@ -36,6 +36,7 @@ check("starter model renders a truthful live probability map", async () => {
 
   await openApp(page);
   assert.equal(await page.title(), "ProCon · Decision workbench");
+  assert.equal(await page.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow, noarchive");
   assert.equal(await page.locator("#decision-title").inputValue(), "Quit my job and start working freelance, using AI?");
   assert.equal(await page.locator(".factor-card").count(), 10);
   assert.equal(await page.locator("#expected-score").textContent(), "−4.8");
@@ -82,6 +83,10 @@ check("what-if assumptions change outcomes without changing saved estimates", as
   await incomeRisk.locator('[data-field="probability"][data-control="number"]').fill("73");
   const baselineScore = await page.locator("#expected-score").textContent();
   await incomeRisk.getByRole("radio", { name: "Assume false" }).check();
+  assert.equal(
+    await incomeRisk.getByRole("radio", { name: "Assume false" }).evaluate((node) => node === document.activeElement),
+    true,
+  );
 
   assert.equal(await page.locator("#scenario-strip").isVisible(), true);
   assert.match(await page.locator("#scenario-summary").textContent(), /1 assumption.*from the saved estimate/);
@@ -172,6 +177,10 @@ check("phone, iPad, and desktop widths stay within the viewport", async () => {
     }
 
     if (width === 320) {
+      assert.equal(
+        await page.locator(".factor-summary-copy strong").first().evaluate((node) => getComputedStyle(node).whiteSpace),
+        "normal",
+      );
       await page.getByRole("button", { name: "Add a consequence" }).click();
       const rect = await page.getByRole("dialog", { name: /Add a consequence/ }).evaluate((node) => {
         const bounds = node.getBoundingClientRect();
@@ -210,6 +219,13 @@ check("keyboard, labels, reduced motion, and mobile analysis controls remain usa
     .filter((input) => input.labels.length === 0 && !input.getAttribute("aria-label"))
     .map((input) => input.outerHTML));
   assert.deepEqual(unlabeledInputs, []);
+
+  await first.getByRole("radio", { name: /Counts against/ }).click();
+  const moved = factorCard(page, "More control over how I spend my working time");
+  assert.equal(
+    await moved.getByRole("radio", { name: /Counts against/ }).evaluate((node) => node === document.activeElement),
+    true,
+  );
 
   const toggle = page.locator("#analysis-toggle");
   assert.equal((await toggle.textContent()).trim(), "Open full analysis");

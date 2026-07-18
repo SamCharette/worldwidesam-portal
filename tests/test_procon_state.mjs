@@ -95,3 +95,25 @@ test("invalid saved data recovers to a usable starter decision", () => {
   assert.equal(normalized.weightMax, 10);
   assert.equal(normalized.options.length, 1);
 });
+
+test("normalization repairs duplicate option and factor identities", () => {
+  const normalized = normalizeDecision({
+    selectedOptionId: "duplicate-option",
+    options: [
+      {
+        id: "duplicate-option",
+        name: "One",
+        factors: [{ id: "duplicate-factor", label: "One", type: "pro", weight: 5, probability: 50 }],
+      },
+      {
+        id: "duplicate-option",
+        name: "Two",
+        factors: [{ id: "duplicate-factor", label: "Two", type: "con", weight: 5, probability: 50 }],
+      },
+    ],
+  });
+
+  assert.equal(new Set(normalized.options.map((option) => option.id)).size, 2);
+  assert.equal(new Set(normalized.options.flatMap((option) => option.factors.map((factor) => factor.id))).size, 2);
+  assert.equal(normalized.selectedOptionId, normalized.options[0].id);
+});
