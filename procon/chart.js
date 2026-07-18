@@ -1,4 +1,4 @@
-import { formatPercent, formatRange, formatScore } from "./format.js";
+import { formatPercent, formatRange, formatScore } from "./format.js?v=4";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const LEFT = 28;

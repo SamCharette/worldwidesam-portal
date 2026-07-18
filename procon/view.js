@@ -1,5 +1,5 @@
-import { renderTallyTrace } from "./chart.js";
-import { formatPercent, formatRange, formatScore, pluralize } from "./format.js";
+import { renderTallyTrace } from "./chart.js?v=4";
+import { formatPercent, formatRange, formatScore, pluralize } from "./format.js?v=4";
 
 export function renderDecisionHeader(decision, loadStatus = "restored") {
   const title = document.getElementById("decision-title");
