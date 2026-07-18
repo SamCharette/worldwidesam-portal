@@ -203,6 +203,7 @@ summary {
 
 .assumption-mobile-heading {
   grid-area: heading;
+  min-width: 0;
 }
 
 .assumption-mobile-heading h2 {
@@ -214,6 +215,7 @@ summary {
   font-weight: 820;
   letter-spacing: -0.055em;
   line-height: 0.92;
+  overflow-wrap: anywhere;
 }
 
 .mobile-brief-comparison {
@@ -364,6 +366,10 @@ summary {
 
 .probability-balance svg.is-arriving {
   animation: instrument-arrival 520ms cubic-bezier(0.22, 0.86, 0.32, 1) both;
+}
+
+.balance-phone-ruler {
+  display: none;
 }
 
 .balance-ruler,
@@ -1695,6 +1701,52 @@ input[type="range"] {
     padding-top: 0;
   }
 
+  .balance-phone-ruler {
+    display: grid;
+    gap: 0.18rem;
+    margin: 0.85rem var(--balance-ruler-inset) -0.25rem;
+    color: rgba(250, 252, 251, 0.78);
+    font-family: var(--data-stack);
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .balance-phone-ruler-directions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--sheet);
+    font-weight: 850;
+  }
+
+  .balance-phone-ruler-scale {
+    position: relative;
+    height: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .balance-phone-ruler-scale span {
+    position: absolute;
+    left: var(--balance-tick-position);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .balance-phone-ruler-scale span:first-child {
+    transform: none;
+  }
+
+  .balance-phone-ruler-scale span:last-child {
+    transform: translateX(-100%);
+  }
+
+  .probability-balance .balance-ruler-label,
+  .probability-balance .balance-side-label {
+    display: none;
+  }
+
   .app-shell:not([data-mobile-view="summary"]) .mobile-view-nav {
     display: flex;
     align-items: center;
@@ -1842,17 +1894,10 @@ input[type="range"] {
   }
 
   .assumption-mobile {
-    grid-template-areas:
-      "heading machine"
-      "verdict machine";
-    grid-template-columns: minmax(15rem, 0.72fr) minmax(25rem, 1.28fr);
-    align-items: start;
-    column-gap: clamp(1.5rem, 4vw, 3.5rem);
     margin-bottom: 1rem;
   }
 
   .assumption-mobile-verdict {
-    align-self: end;
     padding-bottom: 0.35rem;
   }
 
@@ -1906,6 +1951,23 @@ input[type="range"] {
 }
 
 @media (min-width: 1040px) {
+  .assumption-mobile {
+    grid-template-areas:
+      "heading machine"
+      "verdict machine";
+    grid-template-columns: minmax(15rem, 0.72fr) minmax(25rem, 1.28fr);
+    align-items: start;
+    column-gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  .assumption-mobile-heading h2 {
+    font-size: clamp(3rem, 5.4vw, 4.9rem);
+  }
+
+  .assumption-mobile-verdict {
+    align-self: end;
+  }
+
   .workbench-grid {
     grid-template-columns: minmax(0, 1.5fr) minmax(21rem, 0.8fr);
     gap: 1.25rem;

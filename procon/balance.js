@@ -59,15 +59,46 @@ export function renderProbabilityBalance(container, comparison, { variant = "her
   const renderSettings = settingsForScene(settings, scene);
   const state = balanceState(comparison.scenario);
   const firstRender = container.dataset.rendered !== "true";
+  const phoneRuler = buildPhoneRuler(settings);
   const svg = buildSvg(container.id, comparison, scene, renderSettings, state);
   if (firstRender) svg.classList.add("is-arriving");
 
-  container.replaceChildren(svg);
+  container.replaceChildren(phoneRuler, svg);
   container.dataset.rendered = "true";
   container.dataset.state = state;
   container.dataset.balanceAngle = String(scene.beam.scenario.angle);
   container.dataset.domainMagnitude = String(scene.domainMagnitude);
   container.dataset.factorCount = String(scene.factors.length);
+}
+
+function buildPhoneRuler(settings) {
+  const ruler = document.createElement("div");
+  ruler.className = "balance-phone-ruler";
+  ruler.setAttribute("aria-hidden", "true");
+  ruler.style.setProperty(
+    "--balance-ruler-inset",
+    `${((settings.width / 2 - settings.armHalfLength) / settings.width) * 100}%`,
+  );
+
+  const directions = document.createElement("div");
+  directions.className = "balance-phone-ruler-directions";
+  for (const label of ["Against", "Supports"]) {
+    const direction = document.createElement("strong");
+    direction.textContent = label;
+    directions.append(direction);
+  }
+
+  const scale = document.createElement("div");
+  scale.className = "balance-phone-ruler-scale";
+  ["100%", "50%", "0%", "50%", "100%"].forEach((label, index, labels) => {
+    const tick = document.createElement("span");
+    tick.textContent = label;
+    tick.style.setProperty("--balance-tick-position", `${(index / (labels.length - 1)) * 100}%`);
+    scale.append(tick);
+  });
+
+  ruler.append(directions, scale);
+  return ruler;
 }
 
 export function renderBalanceLegend(list, contributors) {

@@ -531,7 +531,7 @@ check("additional options get isolated ledgers and appear in comparison", async 
 });
 
 check("phone, iPad, and desktop widths stay within the viewport", async () => {
-  for (const [width, height] of [[320, 760], [390, 844], [768, 1024], [1024, 900], [1440, 1000]]) {
+  for (const [width, height] of [[320, 760], [390, 844], [768, 1024], [820, 1024], [900, 1000], [1024, 900], [1040, 900], [1440, 1000]]) {
     const { context, page } = await newPage({ width, height });
     await openApp(page);
     if (width < 760) await page.locator(".balance-manifest summary").click();
@@ -558,6 +558,76 @@ check("phone, iPad, and desktop widths stay within the viewport", async () => {
     for (const region of geometry.regions) {
       assert.ok(region.left >= -1, `${width}px region starts at ${region.left}`);
       assert.ok(region.right <= width + 1, `${width}px region ends at ${region.right}`);
+    }
+
+    if (width <= 390) {
+      const ruler = page.locator("#mobile-probability-balance .balance-phone-ruler");
+      assert.equal(await ruler.isVisible(), true);
+      const rulerGeometry = await ruler.evaluate((node) => {
+        const labels = [...node.querySelectorAll(".balance-phone-ruler-scale span")];
+        const bounds = labels.map((label) => {
+          const rect = label.getBoundingClientRect();
+          return { left: rect.left, right: rect.right };
+        });
+        return {
+          fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+          bounds,
+          svgLabelsVisible: [...node.nextElementSibling.querySelectorAll(
+            ".balance-ruler-label, .balance-side-label",
+          )].some((label) => getComputedStyle(label).display !== "none"),
+        };
+      });
+      assert.ok(rulerGeometry.fontSize >= 10, `${width}px ruler font ${rulerGeometry.fontSize}px`);
+      assert.equal(rulerGeometry.svgLabelsVisible, false);
+      for (let index = 1; index < rulerGeometry.bounds.length; index += 1) {
+        assert.ok(
+          rulerGeometry.bounds[index - 1].right <= rulerGeometry.bounds[index].left + 1,
+          `${width}px ruler labels ${index - 1} and ${index} overlap`,
+        );
+      }
+    }
+
+    if (width >= 760) {
+      const hostileQuestion = "WouldAnUnbrokenDecisionQuestionEverHideBehindTheProbabilityInstrument?";
+      await page.locator("#decision-title").fill(hostileQuestion);
+      await page.waitForFunction(
+        (question) => document.getElementById("mobile-brief-question")?.textContent === question,
+        hostileQuestion,
+      );
+      const headingGeometry = await page.evaluate(() => {
+        const heading = document.getElementById("mobile-brief-question");
+        const machine = document.querySelector(".balance-stage");
+        const range = document.createRange();
+        range.selectNodeContents(heading);
+        const box = heading.getBoundingClientRect();
+        const painted = range.getBoundingClientRect();
+        return {
+          clientWidth: heading.clientWidth,
+          scrollWidth: heading.scrollWidth,
+          left: box.left,
+          right: box.right,
+          bottom: box.bottom,
+          paintLeft: painted.left,
+          paintRight: painted.right,
+          paintBottom: painted.bottom,
+          machineTop: machine.getBoundingClientRect().top,
+        };
+      });
+      assert.ok(
+        headingGeometry.scrollWidth <= headingGeometry.clientWidth + 1,
+        `${width}px heading scroll width ${headingGeometry.scrollWidth}/${headingGeometry.clientWidth}`,
+      );
+      assert.ok(headingGeometry.paintLeft >= headingGeometry.left - 1);
+      assert.ok(
+        headingGeometry.paintRight <= headingGeometry.right + 1,
+        `${width}px heading paints through ${headingGeometry.paintRight}/${headingGeometry.right}`,
+      );
+      if (width < 1040) {
+        assert.ok(
+          headingGeometry.machineTop >= headingGeometry.paintBottom - 1,
+          `${width}px machine begins at ${headingGeometry.machineTop} before heading ends at ${headingGeometry.paintBottom}`,
+        );
+      }
     }
 
     if (width === 320) {
