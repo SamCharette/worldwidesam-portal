@@ -160,6 +160,10 @@ summary {
     max(1rem, env(safe-area-inset-left));
 }
 
+.mobile-view-nav {
+  display: none;
+}
+
 .decision-region,
 .analysis-panel,
 .factors-panel {
@@ -1264,6 +1268,98 @@ input[type="range"] {
 }
 
 @media (max-width: 759px) {
+  .app-shell {
+    padding-top: 0;
+  }
+
+  .mobile-view-nav {
+    position: sticky;
+    z-index: 20;
+    top: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 -1rem 0.75rem;
+    padding: 0 max(0.35rem, env(safe-area-inset-right)) 0
+      max(0.35rem, env(safe-area-inset-left));
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--canvas) 94%, transparent);
+    box-shadow: 0 0.45rem 1.2rem rgba(23, 33, 43, 0.08);
+    backdrop-filter: blur(16px);
+  }
+
+  .mobile-view-button {
+    position: relative;
+    min-width: 0;
+    min-height: 3.85rem;
+    padding: 0.58rem 0.35rem 0.52rem;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .mobile-view-button::after {
+    position: absolute;
+    right: 0.45rem;
+    bottom: -1px;
+    left: 0.45rem;
+    height: 0.22rem;
+    border-radius: 0.22rem 0.22rem 0 0;
+    background: transparent;
+    content: "";
+  }
+
+  .mobile-view-button span,
+  .mobile-view-button small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-view-button span {
+    font-family: var(--display-stack);
+    font-size: 0.76rem;
+    font-weight: 780;
+    letter-spacing: -0.01em;
+  }
+
+  .mobile-view-button small {
+    margin-top: 0.08rem;
+    font-family: var(--data-stack);
+    font-size: 0.6rem;
+    font-weight: 650;
+  }
+
+  .mobile-view-button[aria-pressed="true"] {
+    color: var(--ink);
+  }
+
+  .mobile-view-button[aria-pressed="true"]::after {
+    background: var(--ink);
+  }
+
+  .app-shell[data-mobile-view="decision"] .analysis-panel,
+  .app-shell[data-mobile-view="decision"] .factors-panel,
+  .app-shell[data-mobile-view="decision"] .scenario-strip,
+  .app-shell[data-mobile-view="consequences"] .decision-region,
+  .app-shell[data-mobile-view="consequences"] .analysis-panel,
+  .app-shell[data-mobile-view="analysis"] .decision-region,
+  .app-shell[data-mobile-view="analysis"] .factors-panel {
+    display: none;
+  }
+
+  .app-shell[data-mobile-view="analysis"] .analysis-panel,
+  .app-shell[data-mobile-view="consequences"] .factors-panel {
+    border-top: 0.28rem solid var(--ink);
+    box-shadow: var(--shadow);
+  }
+
+  .app-shell[data-mobile-view="analysis"] .scenario-strip {
+    margin-top: 0;
+  }
+
   .analysis-panel {
     position: static;
   }

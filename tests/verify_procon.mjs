@@ -1,8 +1,22 @@
 import assert from "node:assert/strict";
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { chromium, webkit } from "playwright";
 
 const baseUrl = new URL(process.env.PROCON_BASE_URL || "http://127.0.0.1:4179/procon/");
 const browserType = process.env.PROCON_BROWSER === "webkit" ? webkit : chromium;
+const assetRoot = process.env.PROCON_ASSET_ROOT
+  ? path.resolve(process.env.PROCON_ASSET_ROOT)
+  : null;
 const checks = [];
 let browser;
 
@@ -12,8 +26,39 @@ function check(name, run) {
 
 async function newPage({ width = 390, height = 844, reducedMotion = "no-preference" } = {}) {
   const context = await browser.newContext({ viewport: { width, height }, reducedMotion });
+  await routeLocalAssets(context);
   const page = await context.newPage();
   return { context, page };
+}
+
+async function routeLocalAssets(context, requestedRoot = assetRoot) {
+  if (!requestedRoot) return;
+  const realRoot = await realpath(requestedRoot);
+  await context.route("**/procon/**", async (route) => {
+    const requestPath = new URL(route.request().url()).pathname.slice("/procon/".length)
+      || "index.html";
+    const resolvedPath = path.resolve(realRoot, requestPath);
+    let realFilePath;
+    try {
+      realFilePath = await realpath(resolvedPath);
+    } catch {
+      await route.abort("failed");
+      return;
+    }
+    if (!realFilePath.startsWith(`${realRoot}${path.sep}`)) {
+      await route.abort("accessdenied");
+      return;
+    }
+    const contentTypes = {
+      ".css": "text/css",
+      ".html": "text/html",
+      ".js": "text/javascript",
+    };
+    await route.fulfill({
+      body: await readFile(realFilePath),
+      contentType: contentTypes[path.extname(realFilePath)] ?? "application/octet-stream",
+    });
+  });
 }
 
 async function openApp(page) {
@@ -193,6 +238,41 @@ check("phone, iPad, and desktop widths stay within the viewport", async () => {
   }
 });
 
+check("phone navigation separates decision, consequences, and analysis", async () => {
+  const { context, page } = await newPage({ width: 390, height: 844 });
+  await openApp(page);
+
+  const nav = page.getByRole("navigation", { name: "ProCon sections" });
+  const decisionButton = nav.getByRole("button", { name: /Decision/ });
+  const consequencesButton = nav.getByRole("button", { name: /Consequences/ });
+  const analysisButton = nav.getByRole("button", { name: /Analysis/ });
+
+  assert.equal(await nav.isVisible(), true);
+  assert.equal(await consequencesButton.getAttribute("aria-pressed"), "true");
+  assert.equal(await page.locator("#factors-panel").isVisible(), true);
+  assert.equal(await page.locator("#decision-region").isVisible(), false);
+  assert.equal(await page.locator("#analysis-panel").isVisible(), false);
+  assert.match(await page.locator("#mobile-factor-count").textContent(), /10 factors/);
+  assert.match(await page.locator("#mobile-expected-score").textContent(), /−4\.8 balance/);
+
+  await decisionButton.click();
+  assert.equal(await decisionButton.getAttribute("aria-pressed"), "true");
+  assert.equal(await page.locator("#decision-region").isVisible(), true);
+  assert.equal(await page.locator("#factors-panel").isVisible(), false);
+
+  await analysisButton.click();
+  assert.equal(await analysisButton.getAttribute("aria-pressed"), "true");
+  assert.equal(await page.locator("#analysis-panel").isVisible(), true);
+  assert.equal(await page.locator("#decision-region").isVisible(), false);
+
+  await page.setViewportSize({ width: 1024, height: 900 });
+  assert.equal(await nav.isVisible(), false);
+  assert.equal(await page.locator("#decision-region").isVisible(), true);
+  assert.equal(await page.locator("#factors-panel").isVisible(), true);
+  assert.equal(await page.locator("#analysis-panel").isVisible(), true);
+  await context.close();
+});
+
 check("keyboard, labels, reduced motion, and mobile analysis controls remain usable", async () => {
   const { context, page } = await newPage({ reducedMotion: "reduce" });
   await openApp(page);
@@ -228,6 +308,9 @@ check("keyboard, labels, reduced motion, and mobile analysis controls remain usa
   );
 
   const toggle = page.locator("#analysis-toggle");
+  await page.getByRole("navigation", { name: "ProCon sections" })
+    .getByRole("button", { name: /Analysis/ })
+    .click();
   assert.equal((await toggle.textContent()).trim(), "Open full analysis");
   await toggle.click();
   assert.equal(await toggle.getAttribute("aria-expanded"), "true");
@@ -246,9 +329,33 @@ check("ProCon stays absent from visible portal navigation", async () => {
   await context.close();
 });
 
+check("local asset routing rejects symlink escapes", async () => {
+  if (!assetRoot) return;
+  const temporaryParent = await mkdtemp(path.join(os.tmpdir(), "procon-assets-"));
+  const temporaryRoot = path.join(temporaryParent, "root");
+  const outsideFile = path.join(temporaryParent, "outside.txt");
+  await mkdir(temporaryRoot);
+  await writeFile(outsideFile, "outside the declared asset root", "utf8");
+  await symlink(outsideFile, path.join(temporaryRoot, "escape.txt"));
+
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  try {
+    await routeLocalAssets(context, temporaryRoot);
+    const page = await context.newPage();
+    await assert.rejects(
+      page.goto(new URL("escape.txt", baseUrl).href),
+      /ERR_(?:ACCESS_DENIED|FAILED)/,
+    );
+  } finally {
+    await context.close();
+    await rm(temporaryParent, { recursive: true, force: true });
+  }
+});
+
 check("unavailable or failed browser storage never produces a false saved status", async () => {
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await routeLocalAssets(context);
     await context.addInitScript(() => {
       Object.defineProperty(window, "localStorage", {
         configurable: true,
@@ -261,6 +368,9 @@ check("unavailable or failed browser storage never produces a false saved status
     await page.goto(baseUrl.href, { waitUntil: "networkidle" });
     assert.equal(await page.locator("#storage-status").textContent(), "Browser storage unavailable");
 
+    await page.getByRole("navigation", { name: "ProCon sections" })
+      .getByRole("button", { name: /Decision/ })
+      .click();
     await page.getByRole("button", { name: "Add an option" }).click();
     const dialog = page.getByRole("dialog", { name: "Add an option" });
     await dialog.getByLabel("Option name").fill("Storage test");
@@ -271,6 +381,7 @@ check("unavailable or failed browser storage never produces a false saved status
 
   {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await routeLocalAssets(context);
     await context.addInitScript(() => {
       Storage.prototype.setItem = function setItem() {
         throw new DOMException("Full", "QuotaExceededError");
@@ -278,6 +389,9 @@ check("unavailable or failed browser storage never produces a false saved status
     });
     const page = await context.newPage();
     await page.goto(baseUrl.href, { waitUntil: "networkidle" });
+    await page.getByRole("navigation", { name: "ProCon sections" })
+      .getByRole("button", { name: /Decision/ })
+      .click();
     await page.locator("#decision-title").fill("This cannot be stored");
     assert.equal(await page.locator("#storage-status").textContent(), "Could not save on this device");
 

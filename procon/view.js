@@ -125,6 +125,8 @@ export function renderFactorLedger({ option, comparison, scenarios, filter, expa
     ? "Start with one possible upside or downside. ProCon will map how your estimates add up without turning them into a verdict."
     : `No consequences are in the ${filter === "pro" ? "Supports" : "Against"} view yet.`;
   document.getElementById("factor-count").textContent = pluralize(option.factors.length, "factor");
+  document.getElementById("mobile-factor-count").textContent =
+    pluralize(option.factors.length, "factor");
 
   for (const button of document.querySelectorAll("[data-filter]")) {
     button.setAttribute("aria-pressed", String(button.dataset.filter === filter));
@@ -153,6 +155,8 @@ export function renderAnalysis({ decision, option, comparison, optionComparisons
   const { baseline, scenario, hasOverrides, expectedScoreDelta } = comparison;
   const expected = document.getElementById("expected-score");
   expected.textContent = formatScore(scenario.expectedScore);
+  document.getElementById("mobile-expected-score").textContent =
+    `${formatScore(scenario.expectedScore)} balance`;
   expected.classList.toggle("is-positive", scenario.expectedScore > 0);
   expected.classList.toggle("is-negative", scenario.expectedScore < 0);
   expected.setAttribute(
