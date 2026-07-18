@@ -217,19 +217,40 @@ function renderMobileDecisionBrief(decision, option, scenario) {
     pluralize(option.factors.length, "reason");
   const reasons = document.getElementById("mobile-force-reasons");
   reasons.replaceChildren();
-  const visible = scenario.contributors
-    .filter((item) => item.absoluteContribution > 0)
-    .slice(0, 5);
-  if (!visible.length) {
+  const contributing = scenario.contributors.filter((item) => item.absoluteContribution > 0);
+  reasons.classList.toggle("is-empty", contributing.length === 0);
+  if (!contributing.length) {
     const empty = emptyItem("Add one possible upside or downside to begin.");
     empty.classList.add("mobile-force-empty");
     reasons.append(empty);
     return;
   }
-  const reasonScale = Math.max(...visible.map((item) => item.absoluteContribution), 1);
-  for (const contributor of visible) {
+  const leading = contributing.slice(0, 5);
+  const remainder = contributing.slice(5);
+  const groupedRemainders = ["con", "pro"].flatMap((type) => {
+    const grouped = remainder.filter((item) => item.type === type);
+    if (!grouped.length) return [];
+    const expectedContribution = grouped.reduce(
+      (total, item) => total + item.expectedContribution,
+      0,
+    );
+    return [{
+      type,
+      label: `${pluralize(grouped.length, "other reason")} combined`,
+      expectedContribution,
+      absoluteContribution: Math.abs(expectedContribution),
+      isGroup: true,
+    }];
+  });
+  const forces = [...leading, ...groupedRemainders];
+  const reasonScale = Math.max(...forces.map((item) => item.absoluteContribution), 1);
+  for (const contributor of forces) {
     const supports = contributor.expectedContribution >= 0;
-    const item = element("li", supports ? "is-pro" : "is-con");
+    const item = element(
+      "li",
+      `${supports ? "is-pro" : "is-con"}${contributor.isGroup ? " is-group" : ""}`,
+    );
+    item.dataset.forceContribution = String(contributor.expectedContribution);
     item.style.setProperty(
       "--force-reach",
       `${(contributor.absoluteContribution / reasonScale) * 100}%`,

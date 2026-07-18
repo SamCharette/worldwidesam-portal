@@ -1436,6 +1436,10 @@ input[type="range"] {
     content: "";
   }
 
+  .mobile-force-reasons.is-empty::before {
+    content: none;
+  }
+
   .mobile-force-reasons li {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 1.55rem minmax(0, 1fr);
@@ -1529,15 +1533,23 @@ input[type="range"] {
     font-size: 0.64rem;
   }
 
-  .mobile-force-empty {
-    grid-template-columns: 1fr;
-    min-height: 3rem;
-    color: var(--muted);
-    font-size: 0.72rem;
+  .mobile-force-reasons li.is-group {
+    min-height: 3.1rem;
   }
 
-  .mobile-force-empty::before {
-    content: none;
+  .mobile-force-reasons li.is-group .mobile-force-label {
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-style: italic;
+  }
+
+  .mobile-force-reasons li.mobile-force-empty {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 3rem;
+    justify-items: center;
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-align: center;
   }
 
   .mobile-brief-actions {
