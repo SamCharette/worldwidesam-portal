@@ -125,8 +125,6 @@ export function renderFactorLedger({ option, comparison, scenarios, filter, expa
     ? "Start with one possible upside or downside. ProCon will map how your estimates add up without turning them into a verdict."
     : `No consequences are in the ${filter === "pro" ? "Supports" : "Against"} view yet.`;
   document.getElementById("factor-count").textContent = pluralize(option.factors.length, "factor");
-  document.getElementById("mobile-factor-count").textContent =
-    pluralize(option.factors.length, "factor");
 
   for (const button of document.querySelectorAll("[data-filter]")) {
     button.setAttribute("aria-pressed", String(button.dataset.filter === filter));
@@ -155,8 +153,6 @@ export function renderAnalysis({ decision, option, comparison, optionComparisons
   const { baseline, scenario, hasOverrides, expectedScoreDelta } = comparison;
   const expected = document.getElementById("expected-score");
   expected.textContent = formatScore(scenario.expectedScore);
-  document.getElementById("mobile-expected-score").textContent =
-    `${formatScore(scenario.expectedScore)} balance`;
   expected.classList.toggle("is-positive", scenario.expectedScore > 0);
   expected.classList.toggle("is-negative", scenario.expectedScore < 0);
   expected.setAttribute(
@@ -183,9 +179,67 @@ export function renderAnalysis({ decision, option, comparison, optionComparisons
     totalOverrideCount,
     expectedScoreDelta,
   });
+  renderMobileDecisionBrief(decision, option, scenario);
 
   document.getElementById("model-note").textContent =
     "These figures reflect your inputs, not objective probabilities. The prototype treats consequences as independent and can overstate a reason if overlapping factors double-count it.";
+}
+
+function renderMobileDecisionBrief(decision, option, scenario) {
+  document.getElementById("mobile-brief-question").textContent = decision.question;
+  document.getElementById("mobile-brief-comparison").textContent =
+    `Comparing ${option.name} with ${decision.baselineLabel}`;
+
+  const support = scenario.contributors
+    .filter((item) => item.expectedContribution > 0)
+    .reduce((total, item) => total + item.expectedContribution, 0);
+  const against = Math.abs(scenario.contributors
+    .filter((item) => item.expectedContribution < 0)
+    .reduce((total, item) => total + item.expectedContribution, 0));
+  const scale = Math.max(support, against, 1);
+  const track = document.getElementById("mobile-pull-track");
+  track.style.setProperty("--support-pull", `${(support / scale) * 100}%`);
+  track.style.setProperty("--against-pull", `${(against / scale) * 100}%`);
+  track.setAttribute(
+    "aria-label",
+    `${formatScore(support)} modeled support and ${formatScore(-against)} modeled resistance for ${option.name}`,
+  );
+  document.getElementById("mobile-support-total").textContent = formatScore(support);
+  document.getElementById("mobile-against-total").textContent = formatScore(-against);
+
+  const reading = document.getElementById("mobile-brief-reading");
+  if (!option.factors.length) {
+    reading.textContent = `Nothing is pulling ${option.name} in either direction yet.`;
+  } else if (scenario.expectedScore > 0) {
+    reading.textContent = `Right now, your estimates lean toward ${option.name}.`;
+  } else if (scenario.expectedScore < 0) {
+    reading.textContent = `Right now, your estimates lean away from ${option.name}.`;
+  } else {
+    reading.textContent = `Right now, the modeled pull is evenly balanced.`;
+  }
+
+  document.getElementById("mobile-brief-factor-count").textContent =
+    pluralize(option.factors.length, "reason");
+  const reasons = document.getElementById("mobile-brief-reasons");
+  reasons.replaceChildren();
+  const visible = scenario.contributors
+    .filter((item) => item.absoluteContribution > 0)
+    .slice(0, 3);
+  if (!visible.length) {
+    reasons.append(emptyItem("Add one possible upside or downside to begin."));
+    return;
+  }
+  for (const contributor of visible) {
+    const item = element("li", contributor.expectedContribution >= 0 ? "is-pro" : "is-con");
+    const mark = element("span", "mobile-reason-mark");
+    mark.textContent = contributor.expectedContribution >= 0 ? "+" : "−";
+    const label = element("span", "mobile-reason-label");
+    label.textContent = contributor.label;
+    const value = element("strong", "mobile-reason-value");
+    value.textContent = formatScore(contributor.expectedContribution);
+    item.append(mark, label, value);
+    reasons.append(item);
+  }
 }
 
 export function announce(message) {
