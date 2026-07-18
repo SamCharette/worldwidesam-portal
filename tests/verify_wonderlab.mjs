@@ -200,6 +200,12 @@ check('the Curiosity Lever selects every public experiment without launching one
     expectedId => location.hash === `#${expectedId}` && history.state?.appId === expectedId,
     previousId
   );
+  const currentId = selectedIds.at(-1);
+  await page.goForward();
+  await page.waitForFunction(
+    expectedId => location.hash === `#${expectedId}` && history.state?.appId === expectedId,
+    currentId
+  );
   await context.close();
 });
 
