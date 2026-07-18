@@ -10,8 +10,8 @@
       content="A personal decision workbench for weighing possible outcomes."
     />
     <title>ProCon · Decision workbench</title>
-    <link rel="stylesheet" href="./styles.css?v=2" />
-    <script type="module" src="./app.js?v=2"></script>
+    <link rel="stylesheet" href="./styles.css?v=3" />
+    <script type="module" src="./app.js?v=3"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to the decision workbench</a>
@@ -31,42 +31,70 @@
       </p>
     </noscript>
 
-    <main id="main-content" class="app-shell" data-mobile-view="consequences">
-      <nav class="mobile-view-nav" aria-label="ProCon sections">
-        <button
-          class="mobile-view-button"
-          type="button"
-          data-mobile-view-target="decision"
-          aria-controls="decision-region"
-          aria-pressed="false"
-        >
-          <span>Decision</span>
-          <small>Question &amp; options</small>
+    <main id="main-content" class="app-shell" data-mobile-view="summary">
+      <nav class="mobile-view-nav" aria-label="Current section">
+        <button class="mobile-back-button" type="button" data-mobile-view-target="summary">
+          <span aria-hidden="true">←</span>
+          Decision overview
         </button>
-        <button
-          class="mobile-view-button"
-          type="button"
-          data-mobile-view-target="consequences"
-          aria-controls="factors-panel"
-          aria-pressed="true"
-        >
-          <span>Consequences</span>
-          <small id="mobile-factor-count">10 factors</small>
-        </button>
-        <button
-          class="mobile-view-button"
-          type="button"
-          data-mobile-view-target="analysis"
-          aria-controls="analysis-panel"
-          aria-pressed="false"
-        >
-          <span>Analysis</span>
-          <small id="mobile-expected-score">— balance</small>
-        </button>
+        <span id="mobile-view-title" class="mobile-view-title">Decision</span>
       </nav>
 
+      <section
+        id="mobile-decision-brief"
+        class="mobile-decision-brief"
+        aria-labelledby="mobile-brief-question"
+      >
+        <p class="eyebrow">Decision brief</p>
+        <h2 id="mobile-brief-question" tabindex="-1">What are you deciding?</h2>
+        <p id="mobile-brief-comparison" class="mobile-brief-comparison"></p>
+
+        <figure class="mobile-pull-figure">
+          <div
+            id="mobile-pull-track"
+            class="mobile-pull-track"
+            role="img"
+            aria-label="Modeled support and resistance"
+          >
+            <div class="mobile-pull-half is-against">
+              <span class="mobile-pull-fill"></span>
+            </div>
+            <div class="mobile-pull-half is-support">
+              <span class="mobile-pull-fill"></span>
+            </div>
+            <span class="mobile-pull-zero" aria-hidden="true"></span>
+          </div>
+          <figcaption>
+            <span><strong id="mobile-against-total">—</strong> resistance</span>
+            <span><strong id="mobile-support-total">—</strong> support</span>
+          </figcaption>
+        </figure>
+
+        <p id="mobile-brief-reading" class="mobile-brief-reading">Add what matters to see the pull.</p>
+
+        <section class="mobile-reasons" aria-labelledby="mobile-reasons-heading">
+          <div class="mobile-reasons-heading">
+            <h3 id="mobile-reasons-heading">What is shaping the result</h3>
+            <span id="mobile-brief-factor-count">0 reasons</span>
+          </div>
+          <ul id="mobile-brief-reasons"></ul>
+        </section>
+
+        <div class="mobile-brief-actions">
+          <button class="primary-button" type="button" data-mobile-view-target="consequences">
+            Review what matters
+          </button>
+          <button class="mobile-brief-link" type="button" data-mobile-view-target="decision">
+            Change the decision
+          </button>
+          <button class="mobile-brief-link" type="button" data-mobile-view-target="analysis">
+            See the calculation
+          </button>
+        </div>
+      </section>
+
       <section id="decision-region" class="decision-region" aria-labelledby="decision-heading">
-        <h2 id="decision-heading" class="eyebrow">Current decision</h2>
+        <h2 id="decision-heading" class="eyebrow" tabindex="-1">Current decision</h2>
         <label class="decision-label" for="decision-title">What are you deciding?</label>
         <textarea
           id="decision-title"
@@ -132,7 +160,7 @@
           <div class="analysis-heading-row">
             <div>
               <p class="eyebrow">Live model</p>
-              <h2 id="analysis-heading">Modeled balance</h2>
+              <h2 id="analysis-heading" tabindex="-1">Modeled balance</h2>
             </div>
             <output id="expected-score" class="expected-score" aria-label="Expected balance">
               —
@@ -260,7 +288,7 @@
           <div class="factors-heading-row">
             <div>
               <p class="eyebrow">Factor ledger</p>
-              <h2 id="factors-heading">Possible consequences</h2>
+              <h2 id="factors-heading" tabindex="-1">Possible consequences</h2>
             </div>
             <span id="factor-count" class="factor-count" aria-live="polite">0 factors</span>
           </div>

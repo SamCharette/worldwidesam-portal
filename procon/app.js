@@ -49,6 +49,7 @@ function bindDecisionEvents() {
     decision = updateQuestion(decision, title.value);
     persistDecision();
     resizeDecisionTitle();
+    document.getElementById("mobile-brief-question").textContent = decision.question;
     document.getElementById("decision-help").textContent =
       "Weights express personal importance. Probabilities estimate what happens if you choose an option.";
   });

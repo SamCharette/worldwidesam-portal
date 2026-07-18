@@ -64,11 +64,18 @@ async function routeLocalAssets(context, requestedRoot = assetRoot) {
 async function openApp(page) {
   const response = await page.goto(baseUrl.href, { waitUntil: "networkidle" });
   assert.equal(response?.ok(), true);
-  await page.locator("#factor-count").filter({ hasText: "10 factors" }).waitFor();
+  await page.waitForFunction(() => document.getElementById("factor-count")?.textContent === "10 factors");
 }
 
 function factorCard(page, label) {
   return page.locator(".factor-card").filter({ hasText: label }).first();
+}
+
+async function waitForFocus(page, selector) {
+  await page.waitForFunction(
+    (focusSelector) => document.querySelector(focusSelector) === document.activeElement,
+    selector,
+  );
 }
 
 check("starter model renders a truthful live probability map", async () => {
@@ -98,6 +105,7 @@ check("starter model renders a truthful live probability map", async () => {
 check("weights and probabilities update the tally live and persist locally", async () => {
   const { context, page } = await newPage();
   await openApp(page);
+  await page.getByRole("button", { name: "Review what matters" }).click();
   const before = await page.locator("#expected-score").textContent();
   const autonomy = factorCard(page, "More control over how I spend my working time");
   await autonomy.locator(".factor-summary").click();
@@ -113,6 +121,7 @@ check("weights and probabilities update the tally live and persist locally", asy
   assert.equal(savedFactor.probability, 100);
 
   await page.reload({ waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Review what matters" }).click();
   const restored = factorCard(page, "More control over how I spend my working time");
   await restored.locator(".factor-summary").click();
   assert.equal(await restored.locator('[data-field="weight"][data-control="number"]').inputValue(), "10");
@@ -123,6 +132,7 @@ check("weights and probabilities update the tally live and persist locally", asy
 check("what-if assumptions change outcomes without changing saved estimates", async () => {
   const { context, page } = await newPage();
   await openApp(page);
+  await page.getByRole("button", { name: "Review what matters" }).click();
   let incomeRisk = factorCard(page, "Unpredictable income while building a client base");
   await incomeRisk.locator(".factor-summary").click();
   await incomeRisk.locator('[data-field="probability"][data-control="number"]').fill("73");
@@ -156,6 +166,7 @@ check("what-if assumptions change outcomes without changing saved estimates", as
 check("a consequence can be added and edited from the phone flow", async () => {
   const { context, page } = await newPage();
   await openApp(page);
+  await page.getByRole("button", { name: "Review what matters" }).click();
   await page.getByRole("button", { name: "Add a consequence" }).click();
   const dialog = page.getByRole("dialog", { name: /Add a consequence/ });
   assert.equal(await dialog.isVisible(), true);
@@ -226,6 +237,7 @@ check("phone, iPad, and desktop widths stay within the viewport", async () => {
         await page.locator(".factor-summary-copy strong").first().evaluate((node) => getComputedStyle(node).whiteSpace),
         "normal",
       );
+      await page.getByRole("button", { name: "Review what matters" }).click();
       await page.getByRole("button", { name: "Add a consequence" }).click();
       const rect = await page.getByRole("dialog", { name: /Add a consequence/ }).evaluate((node) => {
         const bounds = node.getBoundingClientRect();
@@ -238,39 +250,124 @@ check("phone, iPad, and desktop widths stay within the viewport", async () => {
   }
 });
 
-check("phone navigation separates decision, consequences, and analysis", async () => {
+check("phone decision brief explains the model and opens focused editors", async () => {
   const { context, page } = await newPage({ width: 390, height: 844 });
   await openApp(page);
 
-  const nav = page.getByRole("navigation", { name: "ProCon sections" });
-  const decisionButton = nav.getByRole("button", { name: /Decision/ });
-  const consequencesButton = nav.getByRole("button", { name: /Consequences/ });
-  const analysisButton = nav.getByRole("button", { name: /Analysis/ });
-
-  assert.equal(await nav.isVisible(), true);
-  assert.equal(await consequencesButton.getAttribute("aria-pressed"), "true");
-  assert.equal(await page.locator("#factors-panel").isVisible(), true);
+  const brief = page.locator("#mobile-decision-brief");
+  const nav = page.getByRole("navigation", { name: "Current section" });
+  assert.equal(await brief.isVisible(), true);
+  assert.equal(await nav.isHidden(), true);
+  assert.match(await brief.locator("#mobile-brief-question").textContent(), /Quit my job/);
+  assert.match(await brief.locator("#mobile-brief-comparison").textContent(), /Yes.*No/);
+  assert.match(await brief.locator("#mobile-brief-reading").textContent(), /lean away from Yes/);
+  assert.equal(await brief.locator("#mobile-brief-reasons li").count(), 3);
+  assert.match(await brief.locator("#mobile-support-total").textContent(), /^\+/);
+  assert.match(await brief.locator("#mobile-against-total").textContent(), /^−/);
   assert.equal(await page.locator("#decision-region").isVisible(), false);
   assert.equal(await page.locator("#analysis-panel").isVisible(), false);
-  assert.match(await page.locator("#mobile-factor-count").textContent(), /10 factors/);
-  assert.match(await page.locator("#mobile-expected-score").textContent(), /−4\.8 balance/);
 
-  await decisionButton.click();
-  assert.equal(await decisionButton.getAttribute("aria-pressed"), "true");
+  await brief.getByRole("button", { name: "Change the decision" }).click();
+  assert.equal(await nav.isVisible(), true);
+  assert.match(await page.locator("#mobile-view-title").textContent(), /Change the decision/);
+  await waitForFocus(page, "#decision-heading");
   assert.equal(await page.locator("#decision-region").isVisible(), true);
   assert.equal(await page.locator("#factors-panel").isVisible(), false);
+  await page.locator("#decision-title").fill("Should I make the change?");
 
-  await analysisButton.click();
-  assert.equal(await analysisButton.getAttribute("aria-pressed"), "true");
+  await nav.getByRole("button", { name: /Decision overview/ }).click();
+  await waitForFocus(page, "#mobile-brief-question");
+  assert.equal(await brief.locator("#mobile-brief-question").textContent(), "Should I make the change?");
+  const supportBefore = await page.locator("#mobile-support-total").textContent();
+  await brief.getByRole("button", { name: "Review what matters" }).click();
+  await waitForFocus(page, "#factors-heading");
+  const first = page.locator(".factor-card").first();
+  await first.locator(".factor-summary").click();
+  await first.locator('[data-field="weight"][data-control="number"]').fill("10");
+  await first.locator('[data-field="probability"][data-control="number"]').fill("100");
+  await nav.getByRole("button", { name: /Decision overview/ }).click();
+  assert.notEqual(await page.locator("#mobile-support-total").textContent(), supportBefore);
+
+  await brief.getByRole("button", { name: "See the calculation" }).click();
+  await waitForFocus(page, "#analysis-heading");
   assert.equal(await page.locator("#analysis-panel").isVisible(), true);
   assert.equal(await page.locator("#decision-region").isVisible(), false);
 
   await page.setViewportSize({ width: 1024, height: 900 });
   assert.equal(await nav.isVisible(), false);
+  assert.equal(await brief.isVisible(), false);
   assert.equal(await page.locator("#decision-region").isVisible(), true);
   assert.equal(await page.locator("#factors-panel").isVisible(), true);
   assert.equal(await page.locator("#analysis-panel").isVisible(), true);
   await context.close();
+});
+
+check("decision brief distinguishes empty, balanced, positive, and negative pulls", async () => {
+  const cases = [
+    {
+      name: "empty",
+      factors: [],
+      reading: /Nothing is pulling Yes/,
+      score: "0",
+    },
+    {
+      name: "balanced",
+      factors: [
+        { id: "plus-one", label: "A small upside", type: "pro", weight: 1, probability: 10 },
+        { id: "plus-two", label: "Another upside", type: "pro", weight: 1, probability: 20 },
+        { id: "minus-three", label: "An equal downside", type: "con", weight: 1, probability: 30 },
+      ],
+      reading: /evenly balanced/,
+      score: "0",
+    },
+    {
+      name: "positive",
+      factors: [
+        { id: "positive", label: "A likely upside", type: "pro", weight: 2, probability: 50 },
+      ],
+      reading: /lean toward Yes/,
+      score: "+1",
+    },
+    {
+      name: "negative",
+      factors: [
+        { id: "negative", label: "A likely downside", type: "con", weight: 2, probability: 50 },
+      ],
+      reading: /lean away from Yes/,
+      score: "−1",
+    },
+  ];
+
+  for (const testCase of cases) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await routeLocalAssets(context);
+    await context.addInitScript(({ factors }) => {
+      localStorage.setItem("procon:prototype:v1", JSON.stringify({
+        schemaVersion: 1,
+        decision: {
+          schemaVersion: 1,
+          id: "decision-brief-state",
+          question: "Should I choose this?",
+          baselineLabel: "No",
+          selectedOptionId: "option-yes",
+          options: [{ id: "option-yes", name: "Yes", factors }],
+        },
+      }));
+    }, { factors: testCase.factors });
+    const page = await context.newPage();
+    await page.goto(baseUrl.href, { waitUntil: "networkidle" });
+    assert.match(
+      await page.locator("#mobile-brief-reading").textContent(),
+      testCase.reading,
+      `${testCase.name} reading`,
+    );
+    assert.equal(await page.locator("#expected-score").textContent(), testCase.score);
+    if (testCase.name === "balanced") {
+      assert.equal(await page.locator("#mobile-support-total").textContent(), "+0.3");
+      assert.equal(await page.locator("#mobile-against-total").textContent(), "−0.3");
+    }
+    await context.close();
+  }
 });
 
 check("keyboard, labels, reduced motion, and mobile analysis controls remain usable", async () => {
@@ -293,6 +390,7 @@ check("keyboard, labels, reduced motion, and mobile analysis controls remain usa
     .map((button) => button.outerHTML));
   assert.deepEqual(unnamedButtons, []);
 
+  await page.getByRole("button", { name: "Review what matters" }).click();
   const first = page.locator(".factor-card").first();
   await first.locator(".factor-summary").click();
   const unlabeledInputs = await first.locator("input").evaluateAll((inputs) => inputs
@@ -302,15 +400,18 @@ check("keyboard, labels, reduced motion, and mobile analysis controls remain usa
 
   await first.getByRole("radio", { name: /Counts against/ }).click();
   const moved = factorCard(page, "More control over how I spend my working time");
-  assert.equal(
-    await moved.getByRole("radio", { name: /Counts against/ }).evaluate((node) => node === document.activeElement),
-    true,
-  );
+  await page.waitForFunction(() => {
+    const card = [...document.querySelectorAll(".factor-card")]
+      .find((candidate) => candidate.dataset.factorId === "factor-autonomy");
+    return card?.querySelector('[data-field="type"][value="con"]') === document.activeElement;
+  });
+  assert.equal(await moved.getByRole("radio", { name: /Counts against/ }).isChecked(), true);
 
   const toggle = page.locator("#analysis-toggle");
-  await page.getByRole("navigation", { name: "ProCon sections" })
-    .getByRole("button", { name: /Analysis/ })
+  await page.getByRole("navigation", { name: "Current section" })
+    .getByRole("button", { name: /Decision overview/ })
     .click();
+  await page.getByRole("button", { name: "See the calculation" }).click();
   assert.equal((await toggle.textContent()).trim(), "Open full analysis");
   await toggle.click();
   assert.equal(await toggle.getAttribute("aria-expanded"), "true");
@@ -368,9 +469,7 @@ check("unavailable or failed browser storage never produces a false saved status
     await page.goto(baseUrl.href, { waitUntil: "networkidle" });
     assert.equal(await page.locator("#storage-status").textContent(), "Browser storage unavailable");
 
-    await page.getByRole("navigation", { name: "ProCon sections" })
-      .getByRole("button", { name: /Decision/ })
-      .click();
+    await page.getByRole("button", { name: "Change the decision" }).click();
     await page.getByRole("button", { name: "Add an option" }).click();
     const dialog = page.getByRole("dialog", { name: "Add an option" });
     await dialog.getByLabel("Option name").fill("Storage test");
@@ -389,9 +488,7 @@ check("unavailable or failed browser storage never produces a false saved status
     });
     const page = await context.newPage();
     await page.goto(baseUrl.href, { waitUntil: "networkidle" });
-    await page.getByRole("navigation", { name: "ProCon sections" })
-      .getByRole("button", { name: /Decision/ })
-      .click();
+    await page.getByRole("button", { name: "Change the decision" }).click();
     await page.locator("#decision-title").fill("This cannot be stored");
     assert.equal(await page.locator("#storage-status").textContent(), "Could not save on this device");
 
