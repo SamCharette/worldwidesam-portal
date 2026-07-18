@@ -21,13 +21,18 @@ export function bindMobileNavigation() {
     const view = button?.dataset.mobileViewTarget;
     if (!MOBILE_VIEW_NAMES.has(view)) return;
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isPhoneLayout = window.matchMedia("(max-width: 759px)").matches;
     shell.dataset.mobileView = view;
     document.getElementById("mobile-view-title").textContent = MOBILE_VIEW_TITLES[view] ?? "";
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    shell.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    const focusTarget = document.getElementById(MOBILE_VIEW_FOCUS_TARGETS[view]);
+    (isPhoneLayout ? shell : focusTarget)?.scrollIntoView({
+      behavior: reducedMotion ? "auto" : "smooth",
+      block: "start",
+    });
     window.requestAnimationFrame(() => {
-      document.getElementById(MOBILE_VIEW_FOCUS_TARGETS[view])?.focus({ preventScroll: true });
+      focusTarget?.focus({ preventScroll: true });
     });
   });
 }

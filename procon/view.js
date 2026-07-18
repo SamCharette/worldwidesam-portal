@@ -1,5 +1,5 @@
-import { renderTallyTrace } from "./chart.js?v=5";
-import { formatPercent, formatRange, formatScore, pluralize } from "./format.js?v=5";
+import { renderBalanceLegend, renderProbabilityBalance } from "./balance.js?v=6";
+import { formatPercent, formatRange, formatScore, pluralize } from "./format.js?v=6";
 
 export function renderDecisionHeader(decision, loadStatus = "restored") {
   const title = document.getElementById("decision-title");
@@ -169,7 +169,11 @@ export function renderAnalysis({ decision, option, comparison, optionComparisons
   document.getElementById("possible-range").textContent =
     formatRange(scenario.possibleRange.min, scenario.possibleRange.max);
 
-  renderTallyTrace({ baseline, scenario, hasOverrides });
+  renderProbabilityBalance(
+    document.getElementById("analysis-probability-balance"),
+    comparison,
+    { variant: "analysis" },
+  );
   renderContributors(scenario.contributors);
   renderSensitivity(scenario.sensitivity);
   renderOptionComparison(decision, optionComparisons);
@@ -179,13 +183,14 @@ export function renderAnalysis({ decision, option, comparison, optionComparisons
     totalOverrideCount,
     expectedScoreDelta,
   });
-  renderMobileDecisionBrief(decision, option, scenario);
+  renderMobileDecisionBrief(decision, option, comparison);
 
   document.getElementById("model-note").textContent =
     "These figures reflect your inputs, not objective probabilities. The prototype treats consequences as independent and can overstate a reason if overlapping factors double-count it.";
 }
 
-function renderMobileDecisionBrief(decision, option, scenario) {
+function renderMobileDecisionBrief(decision, option, comparison) {
+  const { scenario, hasOverrides } = comparison;
   document.getElementById("mobile-brief-question").textContent = decision.question;
   document.getElementById("mobile-brief-comparison").textContent =
     `Comparing ${option.name} with ${decision.baselineLabel}`;
@@ -204,73 +209,29 @@ function renderMobileDecisionBrief(decision, option, scenario) {
   const reading = document.getElementById("mobile-brief-reading");
   const displayedScore = formatScore(scenario.expectedScore, { alwaysSign: false });
   if (!option.factors.length) {
-    reading.textContent = `Nothing is pulling ${option.name} in either direction yet.`;
+    reading.textContent = `The beam is empty. Add the first consequence to give the decision some gravity.`;
+  } else if (!scenario.contributors.some((item) => item.absoluteContribution > 0)) {
+    reading.textContent = `Every weight is parked at the pivot, so nothing is pulling ${option.name} yet.`;
   } else if (displayedScore === "0") {
-    reading.textContent = `Right now, the modeled pull is evenly balanced.`;
+    reading.textContent = `Right now, the machine holds level: equal expected pull in both directions.`;
   } else if (scenario.expectedScore > 0) {
-    reading.textContent = `Right now, your estimates lean toward ${option.name}.`;
+    reading.textContent = `Right now, the ${option.name} side hangs lower.`;
   } else {
-    reading.textContent = `Right now, your estimates lean away from ${option.name}.`;
+    reading.textContent = `Right now, the side against ${option.name} hangs lower.`;
   }
 
   document.getElementById("mobile-brief-factor-count").textContent =
-    pluralize(option.factors.length, "reason");
-  const reasons = document.getElementById("mobile-force-reasons");
-  reasons.replaceChildren();
-  const contributing = scenario.contributors.filter((item) => item.absoluteContribution > 0);
-  reasons.classList.toggle("is-empty", contributing.length === 0);
-  if (!contributing.length) {
-    const empty = emptyItem("Add one possible upside or downside to begin.");
-    empty.classList.add("mobile-force-empty");
-    reasons.append(empty);
-    return;
-  }
-  const leading = contributing.slice(0, 5);
-  const remainder = contributing.slice(5);
-  const groupedRemainders = ["con", "pro"].flatMap((type) => {
-    const grouped = remainder.filter((item) => item.type === type);
-    if (!grouped.length) return [];
-    const expectedContribution = grouped.reduce(
-      (total, item) => total + item.expectedContribution,
-      0,
-    );
-    return [{
-      type,
-      label: `${pluralize(grouped.length, "other reason")} combined`,
-      expectedContribution,
-      absoluteContribution: Math.abs(expectedContribution),
-      isGroup: true,
-    }];
-  });
-  const forces = [...leading, ...groupedRemainders];
-  const reasonScale = Math.max(...forces.map((item) => item.absoluteContribution), 1);
-  for (const contributor of forces) {
-    const supports = contributor.expectedContribution >= 0;
-    const item = element(
-      "li",
-      `${supports ? "is-pro" : "is-con"}${contributor.isGroup ? " is-group" : ""}`,
-    );
-    item.dataset.forceContribution = String(contributor.expectedContribution);
-    item.style.setProperty(
-      "--force-reach",
-      `${(contributor.absoluteContribution / reasonScale) * 100}%`,
-    );
-    const card = element("div", "mobile-force-card");
-    const fill = element("span", "mobile-force-fill");
-    fill.setAttribute("aria-hidden", "true");
-    const copy = element("span", "mobile-force-copy");
-    const label = element("span", "mobile-force-label");
-    label.textContent = contributor.label;
-    const value = element("strong", "mobile-force-value");
-    value.textContent = formatScore(contributor.expectedContribution);
-    copy.append(label, value);
-    card.append(fill, copy);
-    const node = element("span", "mobile-force-node");
-    node.textContent = supports ? "+" : "−";
-    node.setAttribute("aria-hidden", "true");
-    item.append(card, node);
-    reasons.append(item);
-  }
+    pluralize(option.factors.length, "weight");
+  renderProbabilityBalance(
+    document.getElementById("mobile-probability-balance"),
+    comparison,
+    { variant: "hero" },
+  );
+  renderBalanceLegend(
+    document.getElementById("mobile-balance-legend"),
+    scenario.contributors,
+  );
+  document.getElementById("mobile-balance-scenario").hidden = !hasOverrides;
 }
 
 export function announce(message) {
@@ -432,7 +393,9 @@ function renderScenarioStrip({ option, currentOverrideCount, totalOverrideCount,
   const clear = document.getElementById("clear-scenarios");
   strip.hidden = totalOverrideCount === 0;
   strip.classList.toggle("is-active", totalOverrideCount > 0);
-  clear.disabled = totalOverrideCount === 0;
+  for (const button of document.querySelectorAll("[data-clear-scenarios]")) {
+    button.disabled = totalOverrideCount === 0;
+  }
 
   if (currentOverrideCount > 0) {
     summary.textContent = `${pluralize(currentOverrideCount, "assumption")} for ${option.name} · ${formatScore(expectedScoreDelta)} from the saved estimate`;

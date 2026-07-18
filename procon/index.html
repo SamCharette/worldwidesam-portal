@@ -3,15 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#eef2f5" />
+    <meta name="theme-color" content="#dfe9ed" />
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta
       name="description"
       content="A personal decision workbench for weighing possible outcomes."
     />
-    <title>ProCon · Decision workbench</title>
-    <link rel="stylesheet" href="./styles.css?v=5" />
-    <script type="module" src="./app.js?v=5"></script>
+    <title>ProCon · Assumption mobile</title>
+    <link rel="stylesheet" href="./styles.css?v=6" />
+    <script type="module" src="./app.js?v=6"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to the decision workbench</a>
@@ -42,20 +42,22 @@
 
       <section
         id="mobile-decision-brief"
-        class="mobile-decision-brief"
+        class="assumption-mobile"
         aria-labelledby="mobile-brief-question"
       >
-        <p class="eyebrow">Decision brief</p>
-        <h2 id="mobile-brief-question" tabindex="-1">What are you deciding?</h2>
-        <p id="mobile-brief-comparison" class="mobile-brief-comparison"></p>
+        <div class="assumption-mobile-heading">
+          <p class="eyebrow">The assumption mobile</p>
+          <h2 id="mobile-brief-question" tabindex="-1">What are you deciding?</h2>
+          <p id="mobile-brief-comparison" class="mobile-brief-comparison"></p>
+        </div>
 
-        <section class="mobile-force-map" aria-labelledby="mobile-force-map-heading">
-          <div class="mobile-force-heading">
+        <section class="balance-stage" aria-labelledby="mobile-balance-heading">
+          <div class="balance-stage-heading">
             <div>
-              <h3 id="mobile-force-map-heading">How the reasons pull</h3>
-              <p>Reach shows importance × chance</p>
+              <h3 id="mobile-balance-heading">Your reasons, under gravity</h3>
+              <p>Every weight sits exactly where your estimate puts it.</p>
             </div>
-            <span id="mobile-brief-factor-count">0 reasons</span>
+            <span id="mobile-brief-factor-count">0 weights</span>
           </div>
 
           <div class="mobile-force-totals" aria-label="Total modeled pull">
@@ -69,21 +71,41 @@
             </span>
           </div>
 
-          <ol id="mobile-force-reasons" class="mobile-force-reasons"></ol>
+          <div id="mobile-balance-scenario" class="mobile-balance-scenario" hidden>
+            <span>What-if active</span>
+            <button type="button" data-clear-scenarios>Clear assumptions</button>
+          </div>
+
+          <div
+            id="mobile-probability-balance"
+            class="probability-balance probability-balance-hero"
+          ></div>
+          <p class="balance-encoding">
+            <span>Mass = importance</span>
+            <span>Distance = chance</span>
+            <span>Tilt = expected balance</span>
+          </p>
+
+          <details class="balance-manifest" open>
+            <summary>Read every weight</summary>
+            <ol id="mobile-balance-legend" class="balance-legend"></ol>
+          </details>
         </section>
 
-        <p id="mobile-brief-reading" class="mobile-brief-reading">Add what matters to see the pull.</p>
+        <div class="assumption-mobile-verdict">
+          <p id="mobile-brief-reading" class="mobile-brief-reading">Add what matters to set the machine in motion.</p>
 
-        <div class="mobile-brief-actions">
-          <button class="primary-button" type="button" data-mobile-view-target="consequences">
-            Review what matters
-          </button>
-          <button class="mobile-brief-link" type="button" data-mobile-view-target="decision">
-            Change the decision
-          </button>
-          <button class="mobile-brief-link" type="button" data-mobile-view-target="analysis">
-            See the calculation
-          </button>
+          <div class="mobile-brief-actions">
+            <button class="primary-button" type="button" data-mobile-view-target="consequences">
+              Inspect the weights
+            </button>
+            <button class="mobile-brief-link" type="button" data-mobile-view-target="decision">
+              Change the decision
+            </button>
+            <button class="mobile-brief-link" type="button" data-mobile-view-target="analysis">
+              See every outcome
+            </button>
+          </div>
         </div>
       </section>
 
@@ -144,7 +166,7 @@
           <p id="scenario-heading" class="scenario-label">What-if layer</p>
           <p id="scenario-summary" class="scenario-summary">Using your saved estimates</p>
         </div>
-        <button id="clear-scenarios" class="scenario-clear" type="button" disabled>
+        <button id="clear-scenarios" class="scenario-clear" type="button" data-clear-scenarios disabled>
           Clear assumptions
         </button>
       </section>
@@ -161,39 +183,13 @@
             </output>
           </div>
 
-          <figure id="tally-trace-region" class="tally-trace-region">
-            <svg
-              id="tally-trace"
-              class="tally-trace"
-              viewBox="0 0 640 150"
-              role="img"
-              aria-labelledby="tally-trace-title tally-trace-description"
-              preserveAspectRatio="none"
-            >
-              <title id="tally-trace-title">Distribution of modeled outcomes</title>
-              <desc id="tally-trace-description">
-                Add consequences to see how often the weighted balance falls above or below zero.
-              </desc>
-              <g id="trace-axis-layer" class="trace-axis-layer" aria-hidden="true">
-                <line x1="20" y1="116" x2="620" y2="116"></line>
-                <line class="trace-zero" x1="320" y1="22" x2="320" y2="124"></line>
-              </g>
-              <g id="trace-baseline-layer" class="trace-baseline-layer" aria-hidden="true"></g>
-              <g
-                id="trace-distribution-layer"
-                class="trace-distribution-layer"
-                aria-hidden="true"
-              ></g>
-              <g id="trace-range-layer" class="trace-range-layer" aria-hidden="true"></g>
-              <g id="trace-expected-layer" class="trace-expected-layer" aria-hidden="true"></g>
-              <text id="trace-empty-label" class="trace-empty-label" x="320" y="72">
-                Add a consequence to draw the outcome map
-              </text>
-            </svg>
-            <figcaption class="trace-caption">
-              <span>Counts against</span>
-              <span>Zero</span>
-              <span>Supports</span>
+          <figure id="analysis-balance-region" class="analysis-balance-region">
+            <div
+              id="analysis-probability-balance"
+              class="probability-balance probability-balance-analysis"
+            ></div>
+            <figcaption class="balance-analysis-caption">
+              Exact outcomes cast the shadow below the beam. The highlighted span is the middle 80%.
             </figcaption>
           </figure>
 
