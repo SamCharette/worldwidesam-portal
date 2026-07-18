@@ -10,8 +10,8 @@
       content="A personal decision workbench for weighing possible outcomes."
     />
     <title>ProCon · Decision workbench</title>
-    <link rel="stylesheet" href="./styles.css?v=4" />
-    <script type="module" src="./app.js?v=4"></script>
+    <link rel="stylesheet" href="./styles.css?v=5" />
+    <script type="module" src="./app.js?v=5"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to the decision workbench</a>
@@ -49,36 +49,30 @@
         <h2 id="mobile-brief-question" tabindex="-1">What are you deciding?</h2>
         <p id="mobile-brief-comparison" class="mobile-brief-comparison"></p>
 
-        <figure class="mobile-pull-figure">
-          <div
-            id="mobile-pull-track"
-            class="mobile-pull-track"
-            role="img"
-            aria-label="Modeled support and resistance"
-          >
-            <div class="mobile-pull-half is-against">
-              <span class="mobile-pull-fill"></span>
+        <section class="mobile-force-map" aria-labelledby="mobile-force-map-heading">
+          <div class="mobile-force-heading">
+            <div>
+              <h3 id="mobile-force-map-heading">How the reasons pull</h3>
+              <p>Reach shows importance × chance</p>
             </div>
-            <div class="mobile-pull-half is-support">
-              <span class="mobile-pull-fill"></span>
-            </div>
-            <span class="mobile-pull-zero" aria-hidden="true"></span>
-          </div>
-          <figcaption>
-            <span><strong id="mobile-against-total">—</strong> resistance</span>
-            <span><strong id="mobile-support-total">—</strong> support</span>
-          </figcaption>
-        </figure>
-
-        <p id="mobile-brief-reading" class="mobile-brief-reading">Add what matters to see the pull.</p>
-
-        <section class="mobile-reasons" aria-labelledby="mobile-reasons-heading">
-          <div class="mobile-reasons-heading">
-            <h3 id="mobile-reasons-heading">What is shaping the result</h3>
             <span id="mobile-brief-factor-count">0 reasons</span>
           </div>
-          <ul id="mobile-brief-reasons"></ul>
+
+          <div class="mobile-force-totals" aria-label="Total modeled pull">
+            <span class="mobile-force-total">
+              <small id="mobile-against-label">Against</small>
+              <strong id="mobile-against-total">—</strong>
+            </span>
+            <span class="mobile-force-total">
+              <small id="mobile-support-label">For</small>
+              <strong id="mobile-support-total">—</strong>
+            </span>
+          </div>
+
+          <ol id="mobile-force-reasons" class="mobile-force-reasons"></ol>
         </section>
+
+        <p id="mobile-brief-reading" class="mobile-brief-reading">Add what matters to see the pull.</p>
 
         <div class="mobile-brief-actions">
           <button class="primary-button" type="button" data-mobile-view-target="consequences">

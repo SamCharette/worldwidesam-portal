@@ -144,9 +144,9 @@ check("a warm browser cache cannot mix modules from different ProCon releases", 
     expectedModules,
   );
   assert.deepEqual(
-    moduleRequests.filter(({ version }) => version !== "4"),
+    moduleRequests.filter(({ version }) => version !== "5"),
     [],
-    `Every loaded module must use release v4: ${JSON.stringify(moduleRequests)}`,
+    `Every loaded module must use release v5: ${JSON.stringify(moduleRequests)}`,
   );
   assert.deepEqual(errors, []);
   assert.equal(await page.locator("#mobile-decision-brief").isVisible(), true);
@@ -312,7 +312,13 @@ check("phone decision brief explains the model and opens focused editors", async
   assert.match(await brief.locator("#mobile-brief-question").textContent(), /Quit my job/);
   assert.match(await brief.locator("#mobile-brief-comparison").textContent(), /Yes.*No/);
   assert.match(await brief.locator("#mobile-brief-reading").textContent(), /lean away from Yes/);
-  assert.equal(await brief.locator("#mobile-brief-reasons li").count(), 3);
+  const forces = brief.locator("#mobile-force-reasons li");
+  assert.equal(await forces.count(), 5);
+  const reaches = await forces.evaluateAll((items) => items.map((item) =>
+    Number.parseFloat(item.style.getPropertyValue("--force-reach")),
+  ));
+  assert.equal(Math.max(...reaches), 100);
+  assert.ok(reaches.every((reach) => reach > 0 && reach <= 100));
   assert.match(await brief.locator("#mobile-support-total").textContent(), /^\+/);
   assert.match(await brief.locator("#mobile-against-total").textContent(), /^−/);
   assert.equal(await page.locator("#decision-region").isVisible(), false);

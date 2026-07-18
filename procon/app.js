@@ -1,4 +1,4 @@
-import { analyzeBaselineVsScenario } from "./model.js?v=4";
+import { analyzeBaselineVsScenario } from "./model.js?v=5";
 import {
   addFactor,
   addOption,
@@ -10,9 +10,9 @@ import {
   updateBaselineLabel,
   updateFactor,
   updateQuestion,
-} from "./state.js?v=4";
-import { loadDecision, saveDecision } from "./storage.js?v=4";
-import { bindMobileNavigation } from "./mobile-navigation.js?v=4";
+} from "./state.js?v=5";
+import { loadDecision, saveDecision } from "./storage.js?v=5";
+import { bindMobileNavigation } from "./mobile-navigation.js?v=5";
 import {
   announce,
   renderAnalysis,
@@ -22,7 +22,7 @@ import {
   resizeDecisionTitle,
   setStorageStatus,
   updateFactorCard,
-} from "./view.js?v=4";
+} from "./view.js?v=5";
 
 const loaded = loadDecision();
 let decision = loaded.decision;
