@@ -1,4 +1,4 @@
-import { analyzeBaselineVsScenario } from "./model.js?v=5";
+import { analyzeBaselineVsScenario } from "./model.js?v=6";
 import {
   addFactor,
   addOption,
@@ -10,9 +10,9 @@ import {
   updateBaselineLabel,
   updateFactor,
   updateQuestion,
-} from "./state.js?v=5";
-import { loadDecision, saveDecision } from "./storage.js?v=5";
-import { bindMobileNavigation } from "./mobile-navigation.js?v=5";
+} from "./state.js?v=6";
+import { loadDecision, saveDecision } from "./storage.js?v=6";
+import { bindMobileNavigation } from "./mobile-navigation.js?v=6";
 import {
   announce,
   renderAnalysis,
@@ -22,7 +22,7 @@ import {
   resizeDecisionTitle,
   setStorageStatus,
   updateFactorCard,
-} from "./view.js?v=5";
+} from "./view.js?v=6";
 
 const loaded = loadDecision();
 let decision = loaded.decision;
@@ -41,7 +41,13 @@ bindOptionEvents();
 bindFactorEvents();
 bindDialogEvents();
 bindMobileNavigation();
+setInitialManifestState();
 renderEverything();
+
+function setInitialManifestState() {
+  const manifest = document.querySelector(".balance-manifest");
+  if (manifest) manifest.open = !window.matchMedia("(max-width: 759px)").matches;
+}
 
 function bindDecisionEvents() {
   const title = document.getElementById("decision-title");
@@ -54,12 +60,17 @@ function bindDecisionEvents() {
       "Weights express personal importance. Probabilities estimate what happens if you choose an option.";
   });
 
-  document.getElementById("clear-scenarios").addEventListener("click", () => {
-    scenarios = {};
-    renderLedgerAndAnalysis();
-    document.getElementById("analysis-panel").focus({ preventScroll: true });
-    announce("What-if assumptions cleared. Saved probability estimates were not changed.");
-  });
+  for (const button of document.querySelectorAll("[data-clear-scenarios]")) {
+    button.addEventListener("click", () => {
+      scenarios = {};
+      renderLedgerAndAnalysis();
+      const focusTarget = window.matchMedia("(max-width: 759px)").matches
+        ? document.getElementById("mobile-brief-question")
+        : document.getElementById("analysis-panel");
+      focusTarget?.focus({ preventScroll: true });
+      announce("What-if assumptions cleared. Saved probability estimates were not changed.");
+    });
+  }
 }
 
 function bindOptionEvents() {

@@ -39,7 +39,7 @@ The primary server also exposes `/neon-cycle-grid/` as an exact reverse-proxy ro
 
 ### Direct-access prototypes
 
-`/procon/` is an intentionally unlisted decision-modeling prototype. It runs as static files on the existing portal origin, stores its editable decision only in that browser's local storage, and is not included in the Wonderlab or Orbit catalogs. Its independent-factor probability map is not a forecast; conditional dependency paths are reserved for a later model.
+`/procon/` is an intentionally unlisted decision-modeling prototype. It runs as static files on the existing portal origin, stores its editable decision only in that browser's local storage, and is not included in the Wonderlab or Orbit catalogs. Its Assumption Mobile makes the model literal: importance controls each disk's area, effective probability controls its lever distance, tilt shows expected balance, and exact outcomes form a discrete shadow beneath the beam. The independent-factor map is not a forecast; conditional dependency paths are reserved for a later model.
 
 ## Agent Authoring API
 
@@ -79,7 +79,7 @@ For visual changes, check both desktop and mobile widths because the first viewp
 ProCon's focused checks are:
 
 ```bash
-node --test tests/test_procon_model.mjs tests/test_procon_state.mjs
+node --test tests/test_procon_model.mjs tests/test_procon_state.mjs tests/test_procon_balance_geometry.mjs
 PROCON_BASE_URL=http://127.0.0.1:4178/procon/ node tests/verify_procon.mjs
 ```
 
