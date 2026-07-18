@@ -176,6 +176,24 @@ a { text-decoration: none; }
 .category-label small { display: block; margin-top: 7px; color: #626a69; font-size: 10px; line-height: 1.25; }
 .category-count { width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid #767e7c; border-radius: 50%; font: 900 10px/1 ui-monospace, monospace; }
 
+.curiosity-control { width: calc(100% - 22px); min-height: 88px; margin: 0 11px 7px; padding: 7px 8px; display: grid; grid-template-columns: 48px minmax(0,1fr) 27px; align-items: center; gap: 9px; border: 2px solid #6e7775; border-radius: 7px; background: #d2d0bd; color: var(--ink); text-align: left; box-shadow: inset 0 1px #fff, 0 3px 0 #69716f; transition: background .16s, transform .12s, box-shadow .12s; }
+.curiosity-control:hover { background: #e4e0ca; }
+.curiosity-control:active { transform: translateY(3px); box-shadow: inset 0 1px #fff, 0 1px 0 #69716f; }
+.curiosity-hardware { position: relative; width: 46px; height: 70px; overflow: hidden; border: 2px solid #4b5352; border-radius: 20px; background: #161b20; box-shadow: inset 0 6px 10px #000, 0 1px #fff; }
+.curiosity-hardware::after { content: ""; position: absolute; left: 17px; top: 10px; bottom: 9px; width: 8px; border: 1px solid #050708; border-radius: 999px; background: #050708; }
+.curiosity-stem { position: absolute; z-index: 1; left: 18px; top: 19px; width: 7px; height: 43px; border: 1px solid #474d4c; border-radius: 999px; background: linear-gradient(90deg,#8b9290,#eef0e8 48%,#747b79); transform-origin: 50% 90%; }
+.curiosity-knob { position: absolute; z-index: 2; left: 8px; top: 5px; width: 26px; height: 26px; border: 2px solid #68171d; border-radius: 50%; background: radial-gradient(circle at 35% 28%,#ff9b9b 0 9%,#e74450 14% 55%,#8b1d26 60% 100%); box-shadow: 0 3px 5px #000b; }
+.curiosity-control.pulled .curiosity-knob { animation: curiosity-knob-pull .46s cubic-bezier(.2,.78,.24,1); }
+.curiosity-control.pulled .curiosity-stem { animation: curiosity-stem-pull .46s cubic-bezier(.2,.78,.24,1); }
+@keyframes curiosity-knob-pull { 0%,100% { transform: translateY(0); } 48%,62% { transform: translateY(33px); } }
+@keyframes curiosity-stem-pull { 0%,100% { transform: translateY(0) scaleY(1); } 48%,62% { transform: translateY(18px) scaleY(.44); } }
+.curiosity-copy { min-width: 0; }
+.curiosity-copy small, .curiosity-copy b, .curiosity-copy span { display: block; }
+.curiosity-copy small { margin-bottom: 4px; color: #6f3531; font: 900 7px/1 ui-monospace,monospace; letter-spacing: .12em; }
+.curiosity-copy b { font-size: 12px; line-height: 1.05; text-transform: uppercase; }
+.curiosity-copy span { margin-top: 5px; color: #626a69; font-size: 8px; line-height: 1.2; }
+.curiosity-badge { width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid #767e7c; border-radius: 50%; background: #eef0e8; font: normal 950 13px/1 ui-monospace,monospace; }
+
 .index-key { width: calc(100% - 22px); min-height: 62px; margin: 3px 11px 12px; padding: 8px; display: grid; grid-template-columns: 38px 1fr auto; align-items: center; gap: 10px; border: 2px solid #6e7775; border-radius: 6px; background: #b9c0bd; color: var(--ink); text-align: left; box-shadow: inset 0 1px #f5f7f1; }
 .index-key:hover { background: #cbd1cd; }
 .index-key .keycap { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid #555d5b; border-radius: 4px; background: #eef0e8; box-shadow: 0 3px #656d6b; font-weight: 950; }

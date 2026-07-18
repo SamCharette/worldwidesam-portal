@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#f6f0df">
     <meta name="description" content="Explore the games, tools, tabletop helpers, and experiments made by Sam and Clawdia.">
     <title>Worldwide Sam — Saturday Wonderlab</title>
-    <link rel="stylesheet" href="/wonderlab/layout.css?v=20260716c">
-    <link rel="stylesheet" href="/wonderlab/theme.css?v=20260716c">
+    <link rel="stylesheet" href="/wonderlab/layout.css?v=20260717a">
+    <link rel="stylesheet" href="/wonderlab/theme.css?v=20260717a">
   </head>
   <body data-category="games" id="top">
     <a class="skip-link" href="#machine">Skip to the app browser</a>
@@ -75,6 +75,15 @@
           <div><p>ROOM SELECTOR</p><h2 id="routerTitle">Choose a workshop</h2></div>
         </header>
         <div class="category-controls" id="categoryControls" role="group" aria-label="App workshops"></div>
+        <button class="curiosity-control" id="curiosityLever" type="button" aria-label="Pull for something odd" aria-describedby="curiosityHelp">
+          <span class="curiosity-hardware" aria-hidden="true"><i class="curiosity-stem"></i><i class="curiosity-knob"></i></span>
+          <span class="curiosity-copy">
+            <small>UNPREDICTABLE INPUT</small>
+            <b>Pull for something odd</b>
+            <span id="curiosityHelp">Selects one. Opens nothing.</span>
+          </span>
+          <i class="curiosity-badge" aria-hidden="true">?</i>
+        </button>
         <button class="index-key" id="openDirectory" type="button">
           <span class="keycap" aria-hidden="true">/</span>
           <span><b>All experiments</b><small>Search the whole workshop</small></span>
@@ -157,6 +166,6 @@
       </div>
     </dialog>
 
-    <script type="module" src="/wonderlab/app.js?v=20260716c"></script>
+    <script type="module" src="/wonderlab/app.js?v=20260717a"></script>
   </body>
 </html>

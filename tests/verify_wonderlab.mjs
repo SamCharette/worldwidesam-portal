@@ -160,6 +160,49 @@ check('Enter opens only an available destination', async () => {
   await context.close();
 });
 
+check('the Curiosity Lever selects every public experiment without launching one', async () => {
+  const { context, page } = await newPage();
+  await page.addInitScript(() => {
+    Math.random = () => 0;
+    window.__wonderlabOpened = [];
+    window.open = (...args) => {
+      window.__wonderlabOpened.push(args);
+      return null;
+    };
+  });
+  await page.goto(candidateUrl({ search: '?links=public', hash: 'dungeon-desk' }), { waitUntil: 'domcontentloaded' });
+  await waitForApp(page, 'dungeon-desk', 'Dungeon Desk');
+
+  const lever = page.getByRole('button', { name: /Pull for something odd/i });
+  assert.equal(await lever.getAttribute('aria-describedby'), 'curiosityHelp');
+  assert.match(await page.locator('#curiosityHelp').textContent(), /Opens nothing/);
+  await lever.focus();
+
+  const selectedIds = [];
+  for (let index = 0; index < 14; index += 1) {
+    const previousHash = await page.evaluate(() => location.hash);
+    await lever.press('Enter');
+    await page.waitForFunction(
+      previous => location.hash !== previous && /READY$/.test(document.querySelector('#displayStatus')?.textContent || ''),
+      previousHash
+    );
+    selectedIds.push((await page.evaluate(() => location.hash)).slice(1));
+    assert.equal(await lever.evaluate(element => element === document.activeElement), true);
+  }
+
+  assert.equal(selectedIds.includes('dungeon-desk'), false);
+  assert.equal(new Set(selectedIds).size, 14);
+  assert.equal(await page.evaluate(() => window.__wonderlabOpened.length), 0);
+
+  const previousId = selectedIds.at(-2);
+  await page.goBack();
+  await page.waitForFunction(
+    expectedId => location.hash === `#${expectedId}` && history.state?.appId === expectedId,
+    previousId
+  );
+  await context.close();
+});
+
 check('Neon Cycle Grid uses its standalone routes in local and public modes', async () => {
   const { context, page } = await newPage();
   await page.goto(candidateUrl({ hash: 'neon-cycle-grid' }), { waitUntil: 'domcontentloaded' });
@@ -275,6 +318,14 @@ check('reduced motion removes the cartridge flight and commits immediately', asy
 
   await page.getByRole('button', { name: /Clawdtris/ }).click();
   await waitForApp(page, 'clawdtris', 'Clawdtris');
+  await page.waitForTimeout(20);
+  assert.equal(await page.locator('.flying-cartridge').count(), 0);
+  assert.equal(await page.locator('#machine').evaluate(element => element.classList.contains('routing')), false);
+  assert.equal(await page.locator('#machine').evaluate(element => element.classList.contains('cycling')), false);
+
+  const previousHash = await page.evaluate(() => location.hash);
+  await page.getByRole('button', { name: /Pull for something odd/i }).click();
+  await page.waitForFunction(previous => location.hash !== previous, previousHash);
   await page.waitForTimeout(20);
   assert.equal(await page.locator('.flying-cartridge').count(), 0);
   assert.equal(await page.locator('#machine').evaluate(element => element.classList.contains('routing')), false);

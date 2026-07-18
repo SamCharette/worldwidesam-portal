@@ -1,4 +1,5 @@
-import { CATEGORIES, appById, validateCatalog } from './catalog.js?v=20260716c';
+import { APPS, CATEGORIES, appById, validateCatalog } from './catalog.js?v=20260716c';
+import { createCuriosityBag } from './curiosity.js?v=20260717a';
 import { createSelectionState } from './state.js?v=20260716c';
 import { resolveAppUrl, resolveOrbitUrl } from './url-resolver.js?v=20260716c';
 import {
@@ -16,6 +17,7 @@ const select = selector => document.querySelector(selector);
 const elements = {
   machine: select('#machine'),
   categoryControls: select('#categoryControls'),
+  curiosityLever: select('#curiosityLever'),
   cartridgeStack: select('#cartridgeStack'),
   magazineCount: select('#magazineCount'),
   previousApp: select('#previousApp'),
@@ -50,6 +52,9 @@ const elements = {
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const selection = createSelectionState(window.location.hash);
+const curiosity = createCuriosityBag(
+  APPS.filter(app => resolveAppUrl(app)).map(app => app.id)
+);
 let routingTimer;
 let cyclingTimer;
 let flightAnimation;
@@ -132,6 +137,15 @@ function chooseApp(id, source = null, options = {}) {
   commitApp(app, { ...options, source });
 }
 
+function pullCuriosityLever() {
+  const appId = curiosity.next(selection.state.appId);
+  if (!appId) return;
+  elements.curiosityLever.classList.remove('pulled');
+  void elements.curiosityLever.offsetWidth;
+  elements.curiosityLever.classList.add('pulled');
+  chooseApp(appId);
+}
+
 function openDirectory() {
   directoryReturnFocus = elements.openDirectory;
   selection.state.directoryFilter = 'all';
@@ -166,6 +180,8 @@ function updateDirectoryResults() {
 
 elements.previousApp.addEventListener('click', () => commitApp(selection.move(-1)));
 elements.nextApp.addEventListener('click', () => commitApp(selection.move(1)));
+elements.curiosityLever.addEventListener('click', pullCuriosityLever);
+elements.curiosityLever.addEventListener('animationend', () => elements.curiosityLever.classList.remove('pulled'));
 elements.openDirectory.addEventListener('click', openDirectory);
 elements.closeDirectory.addEventListener('click', closeDirectory);
 elements.directorySearch.addEventListener('input', updateDirectoryResults);

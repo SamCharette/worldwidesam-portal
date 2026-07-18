@@ -292,6 +292,53 @@ html[data-theme="wonderlab"] .category-count {
   background: var(--wonder-sunflower);
 }
 
+html[data-theme="wonderlab"] .curiosity-control {
+  border: 3px solid var(--wonder-ink);
+  border-radius: 14px;
+  background: var(--wonder-ivory);
+  color: var(--wonder-ink);
+  box-shadow: inset 0 2px rgba(255,255,255,.9), 0 4px 0 #8094a5;
+}
+
+html[data-theme="wonderlab"] .curiosity-control:hover {
+  background: #fffef7;
+}
+
+html[data-theme="wonderlab"] .curiosity-hardware {
+  border: 3px solid var(--wonder-ink);
+  background: var(--wonder-cobalt);
+  box-shadow: inset 0 6px 0 rgba(20,45,82,.35), 0 2px 0 #fff;
+}
+
+html[data-theme="wonderlab"] .curiosity-hardware::after {
+  border-color: var(--wonder-ink);
+  background: var(--wonder-ink);
+}
+
+html[data-theme="wonderlab"] .curiosity-stem {
+  border-color: var(--wonder-ink);
+  background: linear-gradient(90deg,#c18b15,var(--wonder-sunflower) 48%,#9f7210);
+}
+
+html[data-theme="wonderlab"] .curiosity-knob {
+  border: 3px solid var(--wonder-ink);
+  background: radial-gradient(circle at 35% 28%,#fff 0 7%,#f46b5a 10% 38%,var(--wonder-tomato) 42% 68%,#a72c21 72% 100%);
+  box-shadow: 0 3px 0 var(--wonder-ink);
+}
+
+html[data-theme="wonderlab"] .curiosity-copy small {
+  color: #9f3025;
+}
+
+html[data-theme="wonderlab"] .curiosity-copy span {
+  color: #596981;
+}
+
+html[data-theme="wonderlab"] .curiosity-badge {
+  border: 2px solid var(--wonder-ink);
+  background: var(--wonder-sunflower);
+}
+
 html[data-theme="wonderlab"] .index-key {
   border: 2px solid var(--wonder-ink);
   border-radius: 12px;

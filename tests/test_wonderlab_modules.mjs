@@ -12,6 +12,7 @@ import {
   appsIn,
   validateCatalog
 } from '../wonderlab/catalog.js';
+import { createCuriosityBag } from '../wonderlab/curiosity.js';
 import { createSelectionState } from '../wonderlab/state.js';
 import { linkMode, resolveAppUrl, resolveOrbitUrl } from '../wonderlab/url-resolver.js';
 
@@ -150,4 +151,40 @@ test('selection state remembers a category selection and wraps arrow movement', 
   assert.equal(selection.selectCategory('not-a-category'), null);
   assert.equal(selection.selectApp('not-an-app'), null);
   assert.deepEqual(selection.state, snapshot);
+});
+
+test('the curiosity bag visits every alternative before repeating', () => {
+  const curiosity = createCuriosityBag(['alpha', 'bravo', 'charlie', 'delta'], { random: () => 0 });
+  let current = 'alpha';
+  const firstCycle = [];
+
+  for (let index = 0; index < 3; index += 1) {
+    const next = curiosity.next(current);
+    assert.notEqual(next, current);
+    firstCycle.push(next);
+    current = next;
+  }
+
+  assert.deepEqual(new Set(firstCycle), new Set(['bravo', 'charlie', 'delta']));
+  assert.ok(curiosity.next(current));
+});
+
+test('the curiosity bag handles empty and single-destination catalogs', () => {
+  assert.equal(createCuriosityBag([]).next(), null);
+  assert.equal(createCuriosityBag(['only']).next('only'), null);
+  assert.equal(createCuriosityBag(['only']).next('another'), 'only');
+  assert.throws(() => createCuriosityBag(['same', 'same']), /unique/);
+  assert.throws(() => createCuriosityBag(['a', 'b'], { random: () => 1 }).next(), /less than 1/);
+});
+
+test('curiosity eligibility follows public and local route availability', () => {
+  const publicLocation = at('https://worldwidesam.net/');
+  const localLocation = at('http://127.0.0.1:4179/');
+  const publicIds = APPS.filter(app => resolveAppUrl(app, publicLocation)).map(app => app.id);
+  const localIds = APPS.filter(app => resolveAppUrl(app, localLocation)).map(app => app.id);
+
+  assert.equal(publicIds.includes('dungeon-desk'), false);
+  assert.equal(publicIds.length, 14);
+  assert.equal(localIds.includes('dungeon-desk'), true);
+  assert.equal(localIds.length, 15);
 });
