@@ -102,6 +102,57 @@ check("starter model renders a truthful live probability map", async () => {
   await context.close();
 });
 
+check("a warm browser cache cannot mix modules from different ProCon releases", async () => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await routeLocalAssets(context);
+  await context.route("**/procon/view.js", async (route) => {
+    await route.fulfill({
+      body: 'throw new Error("stale unversioned view module used");',
+      contentType: "text/javascript",
+      headers: { "Cache-Control": "public, max-age=3600" },
+    });
+  });
+
+  const warmingPage = await context.newPage();
+  await warmingPage.goto(new URL("view.js", baseUrl).href, { waitUntil: "networkidle" });
+  await warmingPage.close();
+
+  const moduleRequests = [];
+  const page = await context.newPage();
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (url.pathname.startsWith("/procon/") && url.pathname.endsWith(".js")) {
+      moduleRequests.push({ path: url.pathname, version: url.searchParams.get("v") });
+    }
+  });
+  const errors = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await openApp(page);
+
+  const expectedModules = [
+    "app.js",
+    "chart.js",
+    "format.js",
+    "mobile-navigation.js",
+    "model.js",
+    "state.js",
+    "storage.js",
+    "view.js",
+  ];
+  assert.deepEqual(
+    [...new Set(moduleRequests.map(({ path: requestPath }) => path.basename(requestPath)))].sort(),
+    expectedModules,
+  );
+  assert.deepEqual(
+    moduleRequests.filter(({ version }) => version !== "4"),
+    [],
+    `Every loaded module must use release v4: ${JSON.stringify(moduleRequests)}`,
+  );
+  assert.deepEqual(errors, []);
+  assert.equal(await page.locator("#mobile-decision-brief").isVisible(), true);
+  await context.close();
+});
+
 check("weights and probabilities update the tally live and persist locally", async () => {
   const { context, page } = await newPage();
   await openApp(page);

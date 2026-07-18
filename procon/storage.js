@@ -1,4 +1,4 @@
-import { createSeedDecision, normalizeDecision } from "./state.js";
+import { createSeedDecision, normalizeDecision } from "./state.js?v=4";
 
 export const STORAGE_KEY = "procon:prototype:v1";
 
