@@ -264,6 +264,59 @@ check("starter model renders two truthful probability balances", async () => {
   await context.close();
 });
 
+check("legacy data transfer is explicit, nonce-bound, and leaves the old copy intact", async () => {
+  const { context, page } = await newPage();
+  await openApp(page);
+  await page.getByRole("button", { name: "Change the decision" }).click();
+  await page.locator("#decision-title").fill("A decision I want to keep");
+  const before = await page.evaluate(() => localStorage.getItem("procon:prototype:v1"));
+  assert.ok(before);
+  assert.equal(await page.locator("#copy-to-standalone").isEnabled(), true);
+
+  const result = await page.evaluate(() => {
+    const sent = [];
+    const target = new MessageChannel().port1;
+    Object.defineProperties(target, {
+      focus: { value() {} },
+      postMessage: { value(message, origin) {
+        sent.push({ message, origin });
+      } },
+    });
+    window.open = (url, name) => {
+      window.__legacyTransferOpen = { url, name };
+      return target;
+    };
+    document.getElementById("copy-to-standalone").click();
+    window.dispatchEvent(new MessageEvent("message", {
+      origin: "https://procon.worldwidesam.net",
+      source: target,
+      data: {
+        type: "procon:v2:ready",
+        handoffVersion: 1,
+        nonce: "abcdefghijklmnop",
+      },
+    }));
+    return { open: window.__legacyTransferOpen, sent };
+  });
+
+  assert.deepEqual(result.open, {
+    url: "https://procon.worldwidesam.net/",
+    name: "procon-standalone-transfer",
+  });
+  assert.equal(result.sent.length, 1);
+  assert.equal(result.sent[0].origin, "https://procon.worldwidesam.net");
+  assert.deepEqual(Object.keys(result.sent[0].message).sort(), [
+    "handoffVersion", "kind", "nonce", "payload",
+  ]);
+  assert.equal(result.sent[0].message.kind, "procon.prototype-v1");
+  assert.equal(result.sent[0].message.handoffVersion, 1);
+  assert.equal(result.sent[0].message.nonce, "abcdefghijklmnop");
+  assert.equal(result.sent[0].message.payload.decision.question, "A decision I want to keep");
+  assert.equal(await page.evaluate(() => localStorage.getItem("procon:prototype:v1")), before);
+  assert.match(await page.locator("#legacy-transfer-status").textContent(), /choose Add or Replace/);
+  await context.close();
+});
+
 check("a warm browser cache cannot mix modules from different ProCon releases", async () => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await routeLocalAssets(context);
@@ -296,6 +349,8 @@ check("a warm browser cache cannot mix modules from different ProCon releases", 
     "balance-geometry.js",
     "balance.js",
     "format.js",
+    "legacy-handoff.js",
+    "legacy-transfer.js",
     "mobile-navigation.js",
     "model.js",
     "state.js",
@@ -307,9 +362,9 @@ check("a warm browser cache cannot mix modules from different ProCon releases", 
     expectedModules,
   );
   assert.deepEqual(
-    moduleRequests.filter(({ version }) => version !== "6"),
+    moduleRequests.filter(({ version }) => version !== "7"),
     [],
-    `Every loaded module must use release v6: ${JSON.stringify(moduleRequests)}`,
+    `Every loaded module must use release v7: ${JSON.stringify(moduleRequests)}`,
   );
   assert.equal(moduleRequests.some(({ path: requestPath }) => path.basename(requestPath) === "chart.js"), false);
   assert.deepEqual(errors, []);
@@ -870,13 +925,14 @@ check("keyboard, labels, reduced motion, and mobile analysis controls remain usa
   await context.close();
 });
 
-check("ProCon stays absent from visible portal navigation", async () => {
+check("standalone ProCon is discoverable in the portal Tools catalog", async () => {
   const { context, page } = await newPage({ width: 1024, height: 900 });
-  const root = new URL("/", baseUrl);
+  const root = new URL("/#procon", baseUrl);
   await page.goto(root.href, { waitUntil: "networkidle" });
-  assert.equal(await page.locator('a[href*="procon"]').count(), 0);
+  await page.waitForFunction(() => document.querySelector("#appTitle")?.textContent === "ProCon");
+  assert.equal(await page.locator("#launchApp").getAttribute("href"), "https://procon.worldwidesam.net/");
   const catalog = await page.evaluate(async () => (await fetch("/wonderlab/catalog.js")).text());
-  assert.doesNotMatch(catalog, /procon/i);
+  assert.match(catalog, /https:\/\/procon\.worldwidesam\.net\//);
   await context.close();
 });
 

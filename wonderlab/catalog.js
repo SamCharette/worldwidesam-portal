@@ -70,6 +70,12 @@ export const APPS = Object.freeze([
     preview: preview('decision-please', 1280, 800)
   }),
   Object.freeze({
+    id: 'procon', name: 'ProCon', category: 'tools', kind: 'decision workbench', localPort: null,
+    publicUrl: 'https://procon.worldwidesam.net/',
+    summary: 'Map a personal decision with weighted consequences, explicit probabilities, exact outcomes, and reversible what-if assumptions.',
+    preview: preview('procon', 1280, 800)
+  }),
+  Object.freeze({
     id: 'rpg-library', name: 'RPG Library', category: 'tabletop', kind: 'library archive', localPort: 8099,
     publicUrl: 'https://rpgs.worldwidesam.net/',
     summary: 'Browse roleplaying games by feeling, mechanic, genre, or one familiar starting point.',
@@ -128,6 +134,6 @@ export function validateCatalog() {
     }
     ids.add(app.id);
   }
-  if (APPS.length !== 15) throw new Error(`Expected 15 apps, found ${APPS.length}`);
+  if (APPS.length !== 16) throw new Error(`Expected 16 apps, found ${APPS.length}`);
   return true;
 }
