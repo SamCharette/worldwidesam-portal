@@ -10,8 +10,9 @@
       content="A personal decision workbench for weighing possible outcomes."
     />
     <title>ProCon · Assumption mobile</title>
-    <link rel="stylesheet" href="./styles.css?v=6" />
-    <script type="module" src="./app.js?v=6"></script>
+    <link rel="stylesheet" href="./styles.css?v=7" />
+    <script type="module" src="./app.js?v=7"></script>
+    <script type="module" src="./legacy-transfer.js?v=7"></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to the decision workbench</a>
@@ -24,10 +25,27 @@
       <p id="storage-status" class="storage-status" role="status">Saved on this device</p>
     </header>
 
+    <section class="legacy-transfer" aria-labelledby="legacy-transfer-heading">
+      <div>
+        <p class="eyebrow">Standalone project</p>
+        <h2 id="legacy-transfer-heading">Continue in the new ProCon</h2>
+        <p>
+          Copy this browser’s saved prototype decision to the full app. Nothing here is deleted,
+          and the new app will ask before adding or replacing anything.
+        </p>
+      </div>
+      <div class="legacy-transfer-actions">
+        <button id="copy-to-standalone" class="secondary-button" type="button" disabled>
+          Copy saved decision
+        </button>
+        <p id="legacy-transfer-status" role="status">Checking this browser for saved data…</p>
+      </div>
+    </section>
+
     <noscript>
       <p class="noscript-note">
-        ProCon needs JavaScript to calculate and save your model. The decision question below
-        remains editable, but factors and what-if assumptions will not work.
+        ProCon needs JavaScript to calculate, save, or copy your model. You can still
+        <a href="https://procon.worldwidesam.net/">open the standalone ProCon</a>.
       </p>
     </noscript>
 

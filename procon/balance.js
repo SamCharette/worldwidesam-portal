@@ -1,5 +1,5 @@
-import { buildBalanceScene } from "./balance-geometry.js?v=6";
-import { formatPercent, formatRange, formatScore } from "./format.js?v=6";
+import { buildBalanceScene } from "./balance-geometry.js?v=7";
+import { formatPercent, formatRange, formatScore } from "./format.js?v=7";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const SCORE_DISPLAY_THRESHOLD = 0.05;

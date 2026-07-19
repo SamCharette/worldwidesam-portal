@@ -1,5 +1,5 @@
-import { renderBalanceLegend, renderProbabilityBalance } from "./balance.js?v=6";
-import { formatPercent, formatRange, formatScore, pluralize } from "./format.js?v=6";
+import { renderBalanceLegend, renderProbabilityBalance } from "./balance.js?v=7";
+import { formatPercent, formatRange, formatScore, pluralize } from "./format.js?v=7";
 
 export function renderDecisionHeader(decision, loadStatus = "restored") {
   const title = document.getElementById("decision-title");

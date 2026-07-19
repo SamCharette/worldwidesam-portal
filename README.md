@@ -37,9 +37,13 @@ Both landing pages render the latest-post teaser from the selected database. Hos
 
 The primary server also exposes `/neon-cycle-grid/` as an exact reverse-proxy route to the independently managed Neon Cycle Grid service on `127.0.0.1:4325`. This keeps the public game behind the portal's existing Cloudflare Access policy without exposing the shared game cabinet or repository files.
 
-### Direct-access prototypes
+### ProCon
 
-`/procon/` is an intentionally unlisted decision-modeling prototype. It runs as static files on the existing portal origin, stores its editable decision only in that browser's local storage, and is not included in the Wonderlab or Orbit catalogs. Its Assumption Mobile makes the model literal: importance controls each disk's area, effective probability controls its lever distance, tilt shows expected balance, and exact outcomes form a discrete shadow beneath the beam. The independent-factor map is not a forecast; conditional dependency paths are reserved for a later model.
+The standalone deterministic decision workbench is listed in the Tools room at `https://procon.worldwidesam.net/`. It stores decisions in that browser unless the user explicitly imports or exports data. The portal keeps the original `/procon/` prototype so existing origin-local data is not stranded. Its **Copy saved decision** control uses an exact-origin, nonce-bound `postMessage` handoff; the standalone app validates the v1 envelope and asks the user to Add or Replace. The old copy is never deleted automatically.
+
+The two runtimes are deliberately separate. This portal and its legacy `/procon/` route remain on `127.0.0.1:4178`; the standalone `procon.service` listens only on `127.0.0.1:5180` and is the origin behind `procon.worldwidesam.net`. Do not point the standalone hostname at the portal port or move either service to the other's port.
+
+ProCon performs arithmetic, fixed-template checks, sorting, and published numeric bands only. It does not call an AI or infer user intent. Conditional dependency paths remain future standalone work.
 
 ## Agent Authoring API
 
@@ -80,6 +84,7 @@ ProCon's focused checks are:
 
 ```bash
 node --test tests/test_procon_model.mjs tests/test_procon_state.mjs tests/test_procon_balance_geometry.mjs
+node --test tests/test_procon_handoff.mjs
 PROCON_BASE_URL=http://127.0.0.1:4178/procon/ node tests/verify_procon.mjs
 ```
 
