@@ -110,7 +110,7 @@ test('local routes use the current machine hostname and each destination port', 
   assert.equal(resolveAppUrl(appById('neon-cycle-grid'), lanLocation), 'http://192.168.1.99:4325/');
   assert.equal(resolveAppUrl(appById('decision-please'), lanLocation), 'http://192.168.1.99:5178/');
   assert.equal(resolveAppUrl(appById('procon'), lanLocation), 'https://procon.worldwidesam.net/');
-  assert.equal(resolveAppUrl(appById('idea-graph'), lanLocation), 'http://192.168.1.99:5181/');
+  assert.equal(resolveAppUrl(appById('idea-graph'), lanLocation), 'https://ideagraph.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('sudbury-regreening'), lanLocation), 'http://192.168.1.99:4326/');
   assert.equal(resolveAppUrl(appById('wasteland-map'), lanLocation), 'http://192.168.1.99:4179/wasteland-terminal-map/');
   assert.equal(resolveOrbitUrl(lanLocation), 'http://192.168.1.99:4179/orbit/');
@@ -118,7 +118,7 @@ test('local routes use the current machine hostname and each destination port', 
   const loopbackLocation = at('http://localhost:4179/');
   assert.equal(resolveAppUrl(appById('dungeon-desk'), loopbackLocation), 'http://127.0.0.1:5174/');
   assert.equal(resolveAppUrl(appById('neon-cycle-grid'), loopbackLocation), 'http://127.0.0.1:4325/');
-  assert.equal(resolveAppUrl(appById('idea-graph'), loopbackLocation), 'http://127.0.0.1:5181/');
+  assert.equal(resolveAppUrl(appById('idea-graph'), loopbackLocation), 'https://ideagraph.worldwidesam.net/');
   assert.equal(resolveOrbitUrl(loopbackLocation), 'http://localhost:4179/orbit/');
 });
 

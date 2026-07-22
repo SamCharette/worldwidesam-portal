@@ -76,7 +76,7 @@ export const APPS = Object.freeze([
     preview: preview('procon', 1280, 800)
   }),
   Object.freeze({
-    id: 'idea-graph', name: 'Idea Graph', category: 'tools', kind: 'visual thinking partner', localPort: 5181,
+    id: 'idea-graph', name: 'Idea Graph', category: 'tools', kind: 'visual thinking partner', localPort: null,
     publicUrl: 'https://ideagraph.worldwidesam.net/',
     summary: 'Begin with one thought, explore useful directions with an assistant, and preserve the shape and history of the idea as it grows.',
     preview: null

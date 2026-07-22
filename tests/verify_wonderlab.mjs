@@ -188,7 +188,7 @@ check('ProCon and Idea Graph stay discoverable in Tools with their established r
   await page.goto(candidateUrl({ hash: 'idea-graph' }), { waitUntil: 'domcontentloaded' });
   await waitForApp(page, 'idea-graph', 'Idea Graph');
   assert.equal(await page.locator('body').getAttribute('data-category'), 'tools');
-  assert.equal(await page.locator('#launchApp').getAttribute('href'), 'http://127.0.0.1:5181/');
+  assert.equal(await page.locator('#launchApp').getAttribute('href'), 'https://ideagraph.worldwidesam.net/');
   assert.equal(await page.locator('#previewMissing').isVisible(), true);
 
   await page.goto(candidateUrl({ search: '?links=public', hash: 'idea-graph' }), { waitUntil: 'domcontentloaded' });

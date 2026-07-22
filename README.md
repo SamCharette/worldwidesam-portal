@@ -49,7 +49,7 @@ ProCon performs arithmetic, fixed-template checks, sorting, and published numeri
 
 The visual thinking partner is listed in the Tools room at `https://ideagraph.worldwidesam.net/`. The portal links to the standalone app but does not proxy its browser-local graph data or its server-side assistant boundary.
 
-The runtimes remain separate: this portal listens on `127.0.0.1:4178`, while `idea-graph.service` listens only on its established `127.0.0.1:5181`. Local-mode portal links use port 5181 directly; public-mode links use the Access-gated hostname. Do not move either service or point the Idea Graph hostname at the portal port.
+The runtimes remain separate: this portal listens on `127.0.0.1:4178`, while `idea-graph.service` listens only on its established `127.0.0.1:5181`. Portal links always use the Access-gated hostname so a portal opened from another LAN device never receives an unreachable loopback-service link. Do not move either service, expose port 5181 to the LAN, or point the Idea Graph hostname at the portal port.
 
 ## Agent Authoring API
 
