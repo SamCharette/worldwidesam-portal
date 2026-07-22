@@ -220,8 +220,12 @@ check('the original Orbit fallback rebases assets and navigation to the portal r
   await page.getByRole('button', { name: /Tools/ }).evaluate(control => control.click());
   await page.waitForFunction(() => [...document.querySelectorAll('.planet-label')]
     .some(label => label.textContent.includes('ProCon')));
-  assert.equal(await page.locator('.planet-label').filter({ hasText: 'ProCon' }).count(), 1);
-  assert.equal(await page.locator('.planet-label').filter({ hasText: 'Idea Graph' }).count(), 1);
+  const proConLabel = page.locator('.planet-label').filter({ hasText: 'ProCon' });
+  const ideaGraphLabel = page.locator('.planet-label').filter({ hasText: 'Idea Graph' });
+  assert.equal(await proConLabel.count(), 1);
+  assert.equal(await proConLabel.getAttribute('href'), 'https://procon.worldwidesam.net/');
+  assert.equal(await ideaGraphLabel.count(), 1);
+  assert.equal(await ideaGraphLabel.getAttribute('href'), 'https://ideagraph.worldwidesam.net/');
   assert.equal(await page.locator('.planet-label').filter({ hasText: 'Sudbury Regreening Time Machine' }).count(), 1);
   assert.deepEqual(sameOriginFailures, []);
 
