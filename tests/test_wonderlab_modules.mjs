@@ -18,14 +18,14 @@ import { linkMode, resolveAppUrl, resolveOrbitUrl } from '../wonderlab/url-resol
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const at = value => new URL(value);
 
-test('the catalog has the agreed sixteen destinations and category balance', () => {
+test('the catalog has the agreed seventeen destinations and category balance', () => {
   assert.equal(validateCatalog(), true);
-  assert.equal(APPS.length, 16);
+  assert.equal(APPS.length, 17);
   assert.equal(new Set(APPS.map(app => app.id)).size, APPS.length);
   assert.deepEqual(CATEGORY_ORDER, ['games', 'tools', 'tabletop', 'work']);
   assert.deepEqual(
     Object.fromEntries(CATEGORY_ORDER.map(category => [category, appsIn(category).length])),
-    { games: 7, tools: 3, tabletop: 5, work: 1 }
+    { games: 7, tools: 4, tabletop: 5, work: 1 }
   );
 
   assert.deepEqual(
@@ -41,6 +41,7 @@ test('the catalog has the agreed sixteen destinations and category balance', () 
       'mission-control': 'Mission Control',
       'decision-please': 'Decision Please',
       procon: 'ProCon',
+      'sudbury-regreening': 'Sudbury Regreening Time Machine',
       'rpg-library': 'RPG Library',
       'ypsilon-overkill': 'Ypsilon Overkill',
       'marvel-champions': 'Marvel Champions Runner',
@@ -62,7 +63,7 @@ test('the catalog has the agreed sixteen destinations and category balance', () 
 
 test('captured previews have complete, non-empty 640px and 1280px WebP variants', () => {
   const appsWithoutPreview = APPS.filter(app => !app.preview).map(app => app.id);
-  assert.deepEqual(appsWithoutPreview, ['mission-control', 'ypsilon-overkill', 'foundry', 'eems']);
+  assert.deepEqual(appsWithoutPreview, ['mission-control', 'sudbury-regreening', 'ypsilon-overkill', 'foundry', 'eems']);
 
   for (const app of APPS.filter(app => app.preview)) {
     assert.match(app.preview.src, /^\/wonderlab\/assets\/previews\/[a-z0-9-]+-1280\.webp$/);
@@ -97,6 +98,7 @@ test('public routes preserve external URLs, root-relative routes, and local-only
   assert.equal(resolveAppUrl(appById('dungeon-desk'), publicLocation), null);
   assert.equal(resolveAppUrl(appById('neon-cycle-grid'), publicLocation), 'https://worldwidesam.net/neon-cycle-grid/');
   assert.equal(resolveAppUrl(appById('procon'), publicLocation), 'https://procon.worldwidesam.net/');
+  assert.equal(resolveAppUrl(appById('sudbury-regreening'), publicLocation), 'https://sudburyregreening.worldwidesam.net/');
   assert.equal(resolveOrbitUrl(publicLocation), 'https://worldwidesam.net/orbit/');
 });
 
@@ -106,6 +108,7 @@ test('local routes use the current machine hostname and each destination port', 
   assert.equal(resolveAppUrl(appById('neon-cycle-grid'), lanLocation), 'http://192.168.1.99:4325/');
   assert.equal(resolveAppUrl(appById('decision-please'), lanLocation), 'http://192.168.1.99:5178/');
   assert.equal(resolveAppUrl(appById('procon'), lanLocation), 'https://procon.worldwidesam.net/');
+  assert.equal(resolveAppUrl(appById('sudbury-regreening'), lanLocation), 'http://192.168.1.99:4326/');
   assert.equal(resolveAppUrl(appById('wasteland-map'), lanLocation), 'http://192.168.1.99:4179/wasteland-terminal-map/');
   assert.equal(resolveOrbitUrl(lanLocation), 'http://192.168.1.99:4179/orbit/');
 
@@ -147,8 +150,9 @@ test('selection state remembers a category selection and wraps arrow movement', 
   assert.equal(selection.selectCategory('tools').id, 'mission-control');
   assert.equal(selection.selectApp('decision-please').id, 'decision-please');
   assert.equal(selection.selectApp('procon').id, 'procon');
+  assert.equal(selection.selectApp('sudbury-regreening').id, 'sudbury-regreening');
   assert.equal(selection.selectCategory('games').id, 'clawdtris');
-  assert.equal(selection.selectCategory('tools').id, 'procon');
+  assert.equal(selection.selectCategory('tools').id, 'sudbury-regreening');
 
   const snapshot = { ...selection.state };
   assert.equal(selection.selectCategory('not-a-category'), null);
