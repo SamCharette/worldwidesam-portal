@@ -76,6 +76,18 @@ export const APPS = Object.freeze([
     preview: preview('procon', 1280, 800)
   }),
   Object.freeze({
+    id: 'idea-graph', name: 'Idea Graph', category: 'tools', kind: 'visual thinking partner', localPort: null,
+    publicUrl: 'https://ideagraph.worldwidesam.net/',
+    summary: 'Begin with one thought, explore useful directions with an assistant, and preserve the shape and history of the idea as it grows.',
+    preview: null
+  }),
+  Object.freeze({
+    id: 'sudbury-regreening', name: 'Sudbury Regreening Time Machine', category: 'tools', kind: 'environmental time machine', localPort: 4326,
+    publicUrl: 'https://sudburyregreening.worldwidesam.net/',
+    summary: 'Pair Greater Sudbury\u2019s recorded planting and liming work with Landsat-observed vegetation change across four decades.',
+    preview: null
+  }),
+  Object.freeze({
     id: 'rpg-library', name: 'RPG Library', category: 'tabletop', kind: 'library archive', localPort: 8099,
     publicUrl: 'https://rpgs.worldwidesam.net/',
     summary: 'Browse roleplaying games by feeling, mechanic, genre, or one familiar starting point.',
@@ -134,6 +146,6 @@ export function validateCatalog() {
     }
     ids.add(app.id);
   }
-  if (APPS.length !== 16) throw new Error(`Expected 16 apps, found ${APPS.length}`);
+  if (APPS.length !== 18) throw new Error(`Expected 18 apps, found ${APPS.length}`);
   return true;
 }
