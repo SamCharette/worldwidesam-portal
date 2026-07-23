@@ -37,6 +37,30 @@ Both landing pages render the latest-post teaser from the selected database. Hos
 
 The primary server also exposes `/neon-cycle-grid/` as an exact reverse-proxy route to the independently managed Neon Cycle Grid service on `127.0.0.1:4325`. This keeps the public game behind the portal's existing Cloudflare Access policy without exposing the shared game cabinet or repository files.
 
+### Private static sites
+
+The server can expose small, Access-protected static sites from the ignored
+runtime directory `data/private-sites/`. Private content must never be added to
+the repository's tracked public directories or its public GitHub mirror.
+
+Each private site lives in its own real (non-symlinked) directory with a
+`site.json` manifest. The manifest declares one lowercase route, the index
+asset, and an exact map of public URL paths to contained files. Only those
+manifest entries can be served. Hidden paths, traversal, ambiguous separators,
+directories, missing files, and symlink escapes are rejected.
+
+The route supports `GET` and `HEAD` only. It sends private/no-store and noindex
+headers, uses attachment disposition for declared downloads, and supports one
+bounded HTTP byte range so large audio can be streamed and sought safely.
+Override the runtime location with `--private-sites /path/to/private-sites`
+when mutable state is kept outside an immutable release.
+
+The portal binds to `127.0.0.1` by default so Access-protected content cannot
+be reached directly over LAN or Tailscale. An explicit `--host` override is
+required for any intentionally broader origin exposure. A private-sites
+override may live under the blocked `data/` tree or outside the portal root,
+but the server rejects locations inside a publicly served static directory.
+
 ### ProCon
 
 The standalone deterministic decision workbench is listed in the Tools room at `https://procon.worldwidesam.net/`. It stores decisions in that browser unless the user explicitly imports or exports data. The portal keeps the original `/procon/` prototype so existing origin-local data is not stranded. Its **Copy saved decision** control uses an exact-origin, nonce-bound `postMessage` handoff; the standalone app validates the v1 envelope and asks the user to Add or Replace. The old copy is never deleted automatically.

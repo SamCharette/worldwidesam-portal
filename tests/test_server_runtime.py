@@ -17,10 +17,14 @@ class ServerConfigurationTests(unittest.TestCase):
 
     def test_defaults_serve_wonderlab_on_the_existing_port(self) -> None:
         configuration = parse_server_configuration([], root=self.root)
-        self.assertEqual(configuration.host, "0.0.0.0")
+        self.assertEqual(configuration.host, "127.0.0.1")
         self.assertEqual(configuration.port, 4178)
         self.assertEqual(configuration.home_document, "wonderlab/index.html")
         self.assertEqual(configuration.database, self.root / "data" / "blog.sqlite3")
+        self.assertEqual(
+            configuration.private_sites,
+            self.root / "data" / "private-sites",
+        )
 
     def test_orbit_can_be_selected_for_an_independent_port_and_shared_database(self) -> None:
         shared_database = self.root / "shared" / "blog.sqlite3"
@@ -34,6 +38,8 @@ class ServerConfigurationTests(unittest.TestCase):
                 "index.html",
                 "--database",
                 str(shared_database),
+                "--private-sites",
+                "runtime/private-sites",
             ],
             root=self.root,
         )
@@ -41,6 +47,10 @@ class ServerConfigurationTests(unittest.TestCase):
         self.assertEqual(configuration.port, 4179)
         self.assertEqual(configuration.home_document, "index.html")
         self.assertEqual(configuration.database, shared_database)
+        self.assertEqual(
+            configuration.private_sites,
+            self.root / "runtime" / "private-sites",
+        )
 
     def test_relative_database_path_resolves_from_portal_root(self) -> None:
         configuration = parse_server_configuration(
@@ -58,6 +68,23 @@ class ServerConfigurationTests(unittest.TestCase):
         ):
             with self.subTest(arguments=arguments), redirect_stderr(StringIO()), self.assertRaises(SystemExit):
                 parse_server_configuration(arguments, root=self.root)
+
+    def test_private_sites_cannot_overlap_public_static_directories(self) -> None:
+        for private_sites in (
+            "assets/private-sites",
+            "procon/private-sites",
+            "wasteland-terminal-map/private-sites",
+            "wonderlab/private-sites",
+        ):
+            with (
+                self.subTest(private_sites=private_sites),
+                redirect_stderr(StringIO()),
+                self.assertRaises(SystemExit),
+            ):
+                parse_server_configuration(
+                    ["--private-sites", private_sites],
+                    root=self.root,
+                )
 
 
 if __name__ == "__main__":
