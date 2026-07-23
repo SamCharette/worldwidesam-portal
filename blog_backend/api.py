@@ -15,6 +15,13 @@ from .neon_proxy import (
     request_neon,
 )
 from .notifications import queue_and_deliver, retry_notification
+from .private_static import (
+    PrivateStaticRegistry,
+    PrivateStaticSite,
+    RangeNotSatisfiable,
+    copy_bounded,
+    parse_single_range,
+)
 from .public_static import resolve_public_file
 from .rendering import render_home, render_index, render_post
 from .storage import BlogStore
@@ -26,6 +33,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     home_document = "index.html"
     neon_upstream_host = NEON_UPSTREAM_HOST
     neon_upstream_port = NEON_UPSTREAM_PORT
+    private_sites = PrivateStaticRegistry.empty()
 
     _DYNAMIC_CACHE_CONTROL = "no-store, max-age=0"
     _SHORT_STATIC_CACHE_CONTROL = "public, max-age=3600"
@@ -48,6 +56,13 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     def _handle_get(self, head_only: bool) -> None:
         self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
+        private_site = self.private_sites.site_for_request(self.path)
+        if private_site is not None:
+            if path == private_site.route:
+                self._send_redirect(f"{private_site.route}/", head_only=head_only)
+                return
+            self._send_private_file(private_site, head_only=head_only)
+            return
         if path == "/":
             index_path = resolve_public_file(
                 self.root,
@@ -137,6 +152,9 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     def do_POST(self) -> None:
         self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
+        if self.private_sites.site_for_request(self.path) is not None:
+            self._send_private_method_not_allowed()
+            return
         if path == NEON_PUBLIC_PREFIX or path.startswith(f"{NEON_PUBLIC_PREFIX}/"):
             self._send_neon_method_not_allowed()
             return
@@ -208,6 +226,9 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     def do_PATCH(self) -> None:
         self._cache_control = self._DYNAMIC_CACHE_CONTROL
         path = urlparse(self.path).path
+        if self.private_sites.site_for_request(self.path) is not None:
+            self._send_private_method_not_allowed()
+            return
         if path == NEON_PUBLIC_PREFIX or path.startswith(f"{NEON_PUBLIC_PREFIX}/"):
             self._send_neon_method_not_allowed()
             return
@@ -231,6 +252,15 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
             self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
             return
         self._send_json(self._post_json(post, include_review_status=True))
+
+    def do_PUT(self) -> None:
+        self._handle_unsupported_method()
+
+    def do_DELETE(self) -> None:
+        self._handle_unsupported_method()
+
+    def do_OPTIONS(self) -> None:
+        self._handle_unsupported_method()
 
     def _authenticated_author(self) -> str | None:
         return authenticate(self.root, self.headers.get("Authorization"))
@@ -302,6 +332,98 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
             if not head_only:
                 self.copyfile(source, self.wfile)
 
+    def _send_private_file(
+        self,
+        site: PrivateStaticSite,
+        *,
+        head_only: bool = False,
+    ) -> None:
+        asset = site.resolve(self.path)
+        if asset is None:
+            self._send_not_found(head_only=head_only)
+            return
+        try:
+            source, stat = site.open_asset(asset)
+        except OSError:
+            self._send_not_found(head_only=head_only)
+            return
+
+        with source:
+            try:
+                byte_range = (
+                    None
+                    if head_only
+                    else parse_single_range(self.headers.get("Range"), stat.st_size)
+                )
+            except RangeNotSatisfiable:
+                self._send_private_range_not_satisfiable(stat.st_size)
+                return
+
+            self._cache_control = self._DYNAMIC_CACHE_CONTROL
+            if byte_range is None:
+                status = HTTPStatus.OK
+                content_length = stat.st_size
+            else:
+                status = HTTPStatus.PARTIAL_CONTENT
+                content_length = byte_range.length
+
+            self.send_response(status)
+            self.send_header("Content-Type", asset.content_type)
+            self.send_header("Content-Length", str(content_length))
+            self.send_header("Last-Modified", self.date_time_string(stat.st_mtime))
+            self.send_header("Accept-Ranges", "bytes")
+            if byte_range is not None:
+                self.send_header(
+                    "Content-Range",
+                    f"bytes {byte_range.start}-{byte_range.end}/{stat.st_size}",
+                )
+            if asset.download_name is not None:
+                self.send_header(
+                    "Content-Disposition",
+                    f'attachment; filename="{asset.download_name}"',
+                )
+            self._send_private_security_headers()
+            self.end_headers()
+            if head_only:
+                return
+            try:
+                if byte_range is None:
+                    copy_bounded(
+                        source,
+                        self.wfile,
+                        start=0,
+                        length=stat.st_size,
+                    )
+                else:
+                    copy_bounded(
+                        source,
+                        self.wfile,
+                        start=byte_range.start,
+                        length=byte_range.length,
+                    )
+            except (BrokenPipeError, ConnectionResetError):
+                return
+
+    def _send_private_range_not_satisfiable(self, size: int) -> None:
+        self._cache_control = self._DYNAMIC_CACHE_CONTROL
+        self.send_response(HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE)
+        self.send_header("Content-Range", f"bytes */{size}")
+        self.send_header("Accept-Ranges", "bytes")
+        self.send_header("Content-Length", "0")
+        self._send_private_security_headers()
+        self.end_headers()
+
+    def _send_private_security_headers(self) -> None:
+        self.send_header("X-Robots-Tag", "noindex, nofollow, noarchive")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'self'; base-uri 'none'; form-action 'none'; "
+            "frame-ancestors 'none'; object-src 'none'; "
+            "font-src 'self'; media-src 'self'; script-src 'self'; style-src 'self'",
+        )
+
     def _send_neon(self, head_only: bool = False) -> None:
         try:
             response = request_neon(
@@ -342,6 +464,23 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(encoded)))
         self.end_headers()
         self.wfile.write(encoded)
+
+    def _send_private_method_not_allowed(self) -> None:
+        encoded = b"Method not allowed\n"
+        self.send_response(HTTPStatus.METHOD_NOT_ALLOWED)
+        self.send_header("Allow", "GET, HEAD")
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(encoded)))
+        self._send_private_security_headers()
+        self.end_headers()
+        self.wfile.write(encoded)
+
+    def _handle_unsupported_method(self) -> None:
+        self._cache_control = self._DYNAMIC_CACHE_CONTROL
+        if self.private_sites.site_for_request(self.path) is not None:
+            self._send_private_method_not_allowed()
+            return
+        self.send_error(HTTPStatus.NOT_IMPLEMENTED)
 
     def _send_redirect(self, location: str, head_only: bool = False) -> None:
         encoded = b"Redirecting\n"
