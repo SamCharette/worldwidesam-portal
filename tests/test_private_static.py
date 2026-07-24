@@ -329,6 +329,157 @@ class PrivateStaticHttpTests(unittest.TestCase):
                 site.open_asset(asset)
 
 
+class PublicHostStaticHttpTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.tempdir = tempfile.TemporaryDirectory()
+        cls.portal_root = Path(cls.tempdir.name)
+        (cls.portal_root / "index.html").write_text(
+            "<!doctype html><title>Portal</title>",
+            encoding="utf-8",
+        )
+        _write_private_site(
+            cls.portal_root,
+            directory="soundexperiment",
+            route="/soundexperiment",
+        )
+        cls.private_sites_root = cls.portal_root / "data" / "private-sites"
+        cls.server, cls.thread = _start_test_server(
+            cls.portal_root,
+            cls.private_sites_root,
+        )
+        cls.host, cls.port = cls.server.server_address
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.server.shutdown()
+        cls.server.server_close()
+        cls.thread.join(timeout=5)
+        cls.tempdir.cleanup()
+
+    def request(
+        self,
+        path: str,
+        *,
+        method: str = "GET",
+        host: str = "soundexperiment.worldwidesam.net",
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, dict[str, str], bytes]:
+        request_headers = {"Host": host}
+        request_headers.update(headers or {})
+        connection = http.client.HTTPConnection(self.host, self.port, timeout=5)
+        self.addCleanup(connection.close)
+        connection.request(method, path, headers=request_headers)
+        response = connection.getresponse()
+        return response.status, dict(response.getheaders()), response.read()
+
+    def test_exact_public_host_serves_only_manifest_assets(self) -> None:
+        status, headers, body = self.request("/")
+        self.assertEqual(status, 200)
+        self.assertIn(b"Family memory", body)
+        self.assertEqual(headers["Content-Type"], "text/html; charset=utf-8")
+        self.assertEqual(headers["Cache-Control"], "public, max-age=3600")
+        self.assertNotIn("X-Robots-Tag", headers)
+        self.assertEqual(headers["Referrer-Policy"], "no-referrer")
+        self.assertEqual(headers["X-Content-Type-Options"], "nosniff")
+        self.assertIn("frame-ancestors 'none'", headers["Content-Security-Policy"])
+
+        status, headers, body = self.request("/styles.css")
+        self.assertEqual(status, 200)
+        self.assertEqual(headers["Content-Type"], "text/css; charset=utf-8")
+        self.assertEqual(body, b"body { color: navy; }")
+
+        status, headers, body = self.request(
+            "/audio/listen.flac",
+            host="SOUNDEXPERIMENT.WORLDWIDESAM.NET:443",
+            headers={"Range": "bytes=2-5"},
+        )
+        self.assertEqual(status, 206)
+        self.assertEqual(headers["Content-Type"], "audio/flac")
+        self.assertEqual(headers["Content-Range"], "bytes 2-5/10")
+        self.assertEqual(body, b"2345")
+
+        for path in (
+            "/api/blog/posts",
+            "/blog/",
+            "/server.py",
+            "/site.json",
+            "/soundexperiment/",
+            "/audio/listen.flac;ignored",
+            "/../index.html",
+        ):
+            with self.subTest(path=path):
+                status, _, body = self.request(path)
+                self.assertEqual(status, 404)
+                self.assertEqual(body, b"Not found\n")
+
+    def test_public_host_does_not_change_the_portal_or_allow_mutations(self) -> None:
+        status, _, body = self.request("/", host="worldwidesam.net")
+        self.assertEqual(status, 200)
+        self.assertIn(b"Portal", body)
+
+        connection = http.client.HTTPConnection(self.host, self.port, timeout=5)
+        self.addCleanup(connection.close)
+        connection.putrequest("GET", "/api/blog/posts", skip_host=True)
+        connection.putheader("Host", "worldwidesam.net")
+        connection.putheader("Host", "soundexperiment.worldwidesam.net")
+        connection.endheaders()
+        response = connection.getresponse()
+        self.assertEqual(response.status, 400)
+        response.read()
+
+        status, _, body = self.request(
+            "/",
+            host="soundexperiment.worldwidesam.net.",
+        )
+        self.assertEqual(status, 200)
+        self.assertIn(b"Family memory", body)
+
+        for invalid_host in (
+            "soundexperiment.worldwidesam.net:invalid",
+            "soundexperiment.worldwidesam.net,worldwidesam.net",
+        ):
+            with self.subTest(invalid_host=invalid_host):
+                status, _, _ = self.request("/", host=invalid_host)
+                self.assertEqual(status, 400)
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            portal_root = Path(tempdir)
+            (portal_root / "index.html").write_text(
+                "<!doctype html><title>Portal</title>",
+                encoding="utf-8",
+            )
+            empty_sites = portal_root / "data" / "private-sites"
+            empty_sites.mkdir(parents=True)
+            server, thread = _start_test_server(portal_root, empty_sites)
+            connection = http.client.HTTPConnection(*server.server_address, timeout=5)
+            try:
+                connection.request(
+                    "GET",
+                    "/",
+                    headers={"Host": "soundexperiment.worldwidesam.net"},
+                )
+                response = connection.getresponse()
+                self.assertEqual(response.status, 404)
+                self.assertEqual(response.read(), b"Not found\n")
+            finally:
+                connection.close()
+                server.shutdown()
+                server.server_close()
+                thread.join(timeout=5)
+
+        for method in ("POST", "PATCH", "PUT", "DELETE", "OPTIONS"):
+            with self.subTest(method=method):
+                status, headers, body = self.request(
+                    "/audio/listen.flac",
+                    method=method,
+                )
+                self.assertEqual(status, 405)
+                self.assertEqual(headers["Allow"], "GET, HEAD")
+                self.assertNotIn("X-Robots-Tag", headers)
+                self.assertEqual(body, b"Method not allowed\n")
+
+
 class PrivateStaticConfigurationTests(unittest.TestCase):
     def test_range_parser_returns_none_without_a_header(self) -> None:
         self.assertIsNone(parse_single_range(None, 10))

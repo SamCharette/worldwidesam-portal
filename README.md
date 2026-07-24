@@ -61,6 +61,13 @@ required for any intentionally broader origin exposure. A private-sites
 override may live under the blocked `data/` tree or outside the portal root,
 but the server rejects locations inside a publicly served static directory.
 
+The exact host `soundexperiment.worldwidesam.net` is the sole public
+virtual-host exception. It maps root-relative requests to the
+`/soundexperiment` manifest site before any portal, blog, API, or proxy
+routing. Missing and unlisted assets fail closed with a generic 404. The
+Cloudflare published application points that hostname to the existing
+loopback-only portal origin without changing Access on `worldwidesam.net`.
+
 ### ProCon
 
 The standalone deterministic decision workbench is listed in the Tools room at `https://procon.worldwidesam.net/`. It stores decisions in that browser unless the user explicitly imports or exports data. The portal keeps the original `/procon/` prototype so existing origin-local data is not stranded. Its **Copy saved decision** control uses an exact-origin, nonce-bound `postMessage` handoff; the standalone app validates the v1 envelope and asks the user to Add or Replace. The old copy is never deleted automatically.
