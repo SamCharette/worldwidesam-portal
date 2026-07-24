@@ -405,6 +405,7 @@ class PublicHostStaticHttpTests(unittest.TestCase):
             "/server.py",
             "/site.json",
             "/soundexperiment/",
+            "/audio/listen.flac;ignored",
             "/../index.html",
         ):
             with self.subTest(path=path):
@@ -416,6 +417,31 @@ class PublicHostStaticHttpTests(unittest.TestCase):
         status, _, body = self.request("/", host="worldwidesam.net")
         self.assertEqual(status, 200)
         self.assertIn(b"Portal", body)
+
+        connection = http.client.HTTPConnection(self.host, self.port, timeout=5)
+        self.addCleanup(connection.close)
+        connection.putrequest("GET", "/api/blog/posts", skip_host=True)
+        connection.putheader("Host", "worldwidesam.net")
+        connection.putheader("Host", "soundexperiment.worldwidesam.net")
+        connection.endheaders()
+        response = connection.getresponse()
+        self.assertEqual(response.status, 400)
+        response.read()
+
+        status, _, body = self.request(
+            "/",
+            host="soundexperiment.worldwidesam.net.",
+        )
+        self.assertEqual(status, 200)
+        self.assertIn(b"Family memory", body)
+
+        for invalid_host in (
+            "soundexperiment.worldwidesam.net:invalid",
+            "soundexperiment.worldwidesam.net,worldwidesam.net",
+        ):
+            with self.subTest(invalid_host=invalid_host):
+                status, _, _ = self.request("/", host=invalid_host)
+                self.assertEqual(status, 400)
 
         with tempfile.TemporaryDirectory() as tempdir:
             portal_root = Path(tempdir)

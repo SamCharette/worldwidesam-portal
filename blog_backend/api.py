@@ -4,7 +4,7 @@ import json
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, urlparse, urlsplit
 
 from .auth import authenticate
 from .neon_proxy import (
@@ -41,6 +41,26 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     _DYNAMIC_CACHE_CONTROL = "no-store, max-age=0"
     _SHORT_STATIC_CACHE_CONTROL = "public, max-age=3600"
     _VERSIONED_STATIC_CACHE_CONTROL = "public, max-age=31536000, immutable"
+
+    def parse_request(self) -> bool:
+        if not super().parse_request():
+            return False
+        host_headers = self.headers.get_all("Host", [])
+        if len(host_headers) != 1:
+            self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                "Ambiguous Host header",
+            )
+            return False
+        normalized_host = self._normalize_host_header(host_headers[0])
+        if normalized_host is None:
+            self.send_error(
+                HTTPStatus.BAD_REQUEST,
+                "Invalid Host header",
+            )
+            return False
+        self._request_hostname = normalized_host
+        return True
 
     def end_headers(self) -> None:
         cache_control = getattr(self, "_cache_control", self._DYNAMIC_CACHE_CONTROL)
@@ -369,7 +389,7 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
     ) -> None:
         site = self.private_sites.site_for_request(f"{site_route}/")
         try:
-            path = urlparse(self.path).path
+            path = urlsplit(self.path).path
         except ValueError:
             path = ""
         if site is None or site.route != site_route or not path.startswith("/"):
@@ -552,25 +572,52 @@ class BlogRequestHandler(SimpleHTTPRequestHandler):
         self.send_error(HTTPStatus.NOT_IMPLEMENTED)
 
     def _public_static_site_route(self) -> str | None:
-        raw_host = self.headers.get("Host")
-        if raw_host is None:
+        return self.public_static_hosts.get(self._request_hostname)
+
+    @staticmethod
+    def _normalize_host_header(value: str) -> str | None:
+        raw_host = value.strip()
+        if not raw_host:
             return None
-        normalized_host = raw_host.strip().casefold()
-        for hostname, site_route in self.public_static_hosts.items():
-            if normalized_host == hostname:
-                return site_route
-            prefix = f"{hostname}:"
-            if not normalized_host.startswith(prefix):
-                continue
-            port = normalized_host.removeprefix(prefix)
-            if (
-                len(port) <= 5
-                and port.isascii()
-                and port.isdecimal()
-                and 1 <= int(port) <= 65535
-            ):
-                return site_route
-        return None
+        try:
+            parsed = urlsplit(f"//{raw_host}")
+            hostname = parsed.hostname
+            _ = parsed.port
+        except ValueError:
+            return None
+        if (
+            hostname is None
+            or parsed.path
+            or parsed.query
+            or parsed.fragment
+            or parsed.username is not None
+            or parsed.password is not None
+            or raw_host.endswith(":")
+        ):
+            return None
+        hostname = hostname.removesuffix(".").casefold()
+        if ":" in hostname:
+            return hostname if raw_host.startswith("[") else None
+        if (
+            not hostname
+            or len(hostname) > 253
+            or any(
+                not character.isascii()
+                or not (character.isalnum() or character in ".-")
+                for character in hostname
+            )
+        ):
+            return None
+        labels = hostname.split(".")
+        if any(
+            not label
+            or len(label) > 63
+            or label.startswith("-")
+            or label.endswith("-")
+            for label in labels
+        ):
+            return None
+        return hostname
 
     def _send_redirect(self, location: str, head_only: bool = False) -> None:
         encoded = b"Redirecting\n"
