@@ -64,6 +64,12 @@ export const APPS = Object.freeze([
     preview: null
   }),
   Object.freeze({
+    id: 'traceglass', name: 'Traceglass', category: 'tools', kind: 'request observatory', localPort: 5182,
+    publicUrl: 'http://clawdia.tailfe8cfa.ts.net:5182/',
+    summary: 'Watch one public website request unfold through DNS, TLS, redirects, response evidence, and inert dependency declarations.',
+    preview: null
+  }),
+  Object.freeze({
     id: 'decision-please', name: 'Decision Please', category: 'tools', kind: 'choice engine', localPort: 5178,
     publicUrl: 'https://decisions.worldwidesam.net/',
     summary: 'Turn a pile of options into a decision with structured ballots and a clear next move.',
@@ -146,6 +152,6 @@ export function validateCatalog() {
     }
     ids.add(app.id);
   }
-  if (APPS.length !== 18) throw new Error(`Expected 18 apps, found ${APPS.length}`);
+  if (APPS.length !== 19) throw new Error(`Expected 19 apps, found ${APPS.length}`);
   return true;
 }
