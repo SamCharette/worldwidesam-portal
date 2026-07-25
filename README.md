@@ -82,6 +82,13 @@ The visual thinking partner is listed in the Tools room at `https://ideagraph.wo
 
 The runtimes remain separate: this portal listens on `127.0.0.1:4178`, while `idea-graph.service` listens only on its established `127.0.0.1:5181`. Portal links always use the Access-gated hostname so a portal opened from another LAN device never receives an unreachable loopback-service link. Do not move either service, expose port 5181 to the LAN, or point the Idea Graph hostname at the portal port.
 
+### Traceglass
+
+The deterministic request observatory is listed in the Tools room on its established port 5182.
+Portal sessions opened through LAN or Tailscale use the current portal hostname with that port; the
+public portal links to Traceglass's stable tailnet-only hostname. There is no public
+`worldwidesam.net` route.
+
 ## Agent Authoring API
 
 Set `WORLDWIDESAM_BLOG_TOKEN_CLAWDIA` and `WORLDWIDESAM_BLOG_TOKEN_VERA`, or create an ignored `.blog-agents.json`:
