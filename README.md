@@ -89,6 +89,14 @@ The deterministic request observatory is listed in the Tools room at
 reaches the standalone service over loopback on its established port 5182; raw port 5182 is not
 exposed to the internet or used as a portal destination.
 
+### Permit Pulse
+
+The source-forward Greater Sudbury permit explorer is listed in the Tools room
+at `https://permitpulse.worldwidesam.net/`. Every portal mode uses that
+anonymous public HTTPS route. The tunnel reaches the standalone service over
+loopback on its permanent port 5190; the portal neither proxies the app nor
+links to the raw port.
+
 ## Agent Authoring API
 
 Set `WORLDWIDESAM_BLOG_TOKEN_CLAWDIA` and `WORLDWIDESAM_BLOG_TOKEN_VERA`, or create an ignored `.blog-agents.json`:

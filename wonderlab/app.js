@@ -1,6 +1,6 @@
-import { CATEGORIES, appById, validateCatalog } from './catalog.js?v=20260724b';
-import { createSelectionState } from './state.js?v=20260724b';
-import { resolveAppUrl, resolveOrbitUrl } from './url-resolver.js?v=20260724b';
+import { CATEGORIES, appById, validateCatalog } from './catalog.js?v=20260725a';
+import { createSelectionState } from './state.js?v=20260725a';
+import { resolveAppUrl, resolveOrbitUrl } from './url-resolver.js?v=20260725a';
 import {
   markSelections,
   renderApp,
@@ -8,7 +8,7 @@ import {
   renderDirectoryFilters,
   renderDirectoryResults,
   renderExperiments
-} from './render.js?v=20260724b';
+} from './render.js?v=20260725a';
 
 validateCatalog();
 
