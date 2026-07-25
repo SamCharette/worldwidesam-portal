@@ -77,7 +77,7 @@ check('directory search, filters, keyboard navigation, and history stay in sync'
   const search = page.getByRole('searchbox', { name: 'Find an experiment' });
   assert.equal(await dialog.isVisible(), true);
   assert.equal(await search.evaluate(element => element === document.activeElement), true);
-  assert.equal(await page.locator('.directory-item').count(), 19);
+  assert.equal(await page.locator('.directory-item').count(), 20);
 
   await page.getByRole('button', { name: 'Tabletop', exact: true }).click();
   assert.equal(await page.locator('.directory-item').count(), 5);
@@ -177,7 +177,7 @@ check('Neon Cycle Grid uses its standalone routes in local and public modes', as
   await context.close();
 });
 
-check('ProCon, Idea Graph, and Traceglass stay discoverable in Tools with their established routes', async () => {
+check('ProCon, Idea Graph, Traceglass, and Permit Pulse stay discoverable in Tools with their established routes', async () => {
   const { context, page } = await newPage();
 
   await page.goto(candidateUrl({ search: '?links=public', hash: 'procon' }), { waitUntil: 'domcontentloaded' });
@@ -200,6 +200,12 @@ check('ProCon, Idea Graph, and Traceglass stay discoverable in Tools with their 
   assert.equal(await page.locator('body').getAttribute('data-category'), 'tools');
   assert.equal(await page.locator('#launchApp').getAttribute('href'), 'https://traceglass.worldwidesam.net/');
   assert.equal(await page.locator('#previewMissing').isVisible(), true);
+
+  await page.goto(candidateUrl({ search: '?links=public', hash: 'permit-pulse' }), { waitUntil: 'domcontentloaded' });
+  await waitForApp(page, 'permit-pulse', 'Permit Pulse');
+  assert.equal(await page.locator('body').getAttribute('data-category'), 'tools');
+  assert.equal(await page.locator('#launchApp').getAttribute('href'), 'https://permitpulse.worldwidesam.net/');
+  assert.equal(await page.locator('#previewMissing').isVisible(), true);
   await context.close();
 });
 
@@ -218,23 +224,26 @@ check('the original Orbit fallback rebases assets and navigation to the portal r
   assert.equal(response?.ok(), true);
   assert.equal(await page.title(), 'Worldwide Sam Orbit');
   assert.equal(await page.locator('link[rel="stylesheet"]').evaluate(link => link.href), `${baseUrl.origin}/styles.css?v=16`);
-  assert.equal(await page.locator('script[type="module"]').evaluate(script => script.src), `${baseUrl.origin}/app.js?v=26`);
+  assert.equal(await page.locator('script[type="module"]').evaluate(script => script.src), `${baseUrl.origin}/app.js?v=27`);
   assert.equal(await page.locator('.sun-card img').evaluate(image => image.currentSrc), `${baseUrl.origin}/assets/clawdia-mission-hero-card.png`);
   assert.ok(await page.locator('.sun-card img').evaluate(image => image.naturalWidth > 0));
   await page.waitForFunction(() => document.querySelector('#appCount')?.textContent !== '--');
-  assert.equal(await page.locator('#appCount').textContent(), '19');
+  assert.equal(await page.locator('#appCount').textContent(), '20');
   await page.getByRole('button', { name: /Tools/ }).evaluate(control => control.click());
   await page.waitForFunction(() => [...document.querySelectorAll('.planet-label')]
     .some(label => label.textContent.includes('ProCon')));
   const proConLabel = page.locator('.planet-label').filter({ hasText: 'ProCon' });
   const ideaGraphLabel = page.locator('.planet-label').filter({ hasText: 'Idea Graph' });
   const traceglassLabel = page.locator('.planet-label').filter({ hasText: 'Traceglass' });
+  const permitPulseLabel = page.locator('.planet-label').filter({ hasText: 'Permit Pulse' });
   assert.equal(await proConLabel.count(), 1);
   assert.equal(await proConLabel.getAttribute('href'), 'https://procon.worldwidesam.net/');
   assert.equal(await ideaGraphLabel.count(), 1);
   assert.equal(await ideaGraphLabel.getAttribute('href'), 'https://ideagraph.worldwidesam.net/');
   assert.equal(await traceglassLabel.count(), 1);
   assert.equal(await traceglassLabel.getAttribute('href'), 'https://traceglass.worldwidesam.net/');
+  assert.equal(await permitPulseLabel.count(), 1);
+  assert.equal(await permitPulseLabel.getAttribute('href'), 'https://permitpulse.worldwidesam.net/');
   assert.equal(await page.locator('.planet-label').filter({ hasText: 'Sudbury Regreening Time Machine' }).count(), 1);
   assert.deepEqual(sameOriginFailures, []);
 
@@ -367,12 +376,13 @@ check('the no-JavaScript fallback keeps every destination discoverable', async (
 
   const fallback = page.locator('.no-script');
   assert.equal(await fallback.isVisible(), true);
-  assert.equal(await fallback.locator('li').count(), 20);
+  assert.equal(await fallback.locator('li').count(), 21);
   assert.match(await fallback.textContent(), /Dungeon Desk \(local network only\)/);
   assert.equal(await fallback.locator('a[href="/neon-cycle-grid/"]').count(), 1);
   assert.equal(await fallback.locator('a[href="https://procon.worldwidesam.net/"]').count(), 1);
   assert.equal(await fallback.locator('a[href="https://ideagraph.worldwidesam.net/"]').count(), 1);
   assert.equal(await fallback.locator('a[href="https://sudburyregreening.worldwidesam.net/"]').count(), 1);
+  assert.equal(await fallback.locator('a[href="https://permitpulse.worldwidesam.net/"]').count(), 1);
   assert.equal(await fallback.locator('a[href="https://traceglass.worldwidesam.net/"]').count(), 1);
   assert.equal(await fallback.locator('a[href="https://games.worldwidesam.net/"]').count(), 0);
   assert.equal(await fallback.locator('a[href="/blog/"]').count(), 1);

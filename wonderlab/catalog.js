@@ -94,6 +94,12 @@ export const APPS = Object.freeze([
     preview: null
   }),
   Object.freeze({
+    id: 'permit-pulse', name: 'Permit Pulse', category: 'tools', kind: 'permit activity explorer', localPort: null,
+    publicUrl: 'https://permitpulse.worldwidesam.net/',
+    summary: 'Explore where Greater Sudbury permit activity concentrated, how permit categories changed, and which areas broke from their own history.',
+    preview: null
+  }),
+  Object.freeze({
     id: 'rpg-library', name: 'RPG Library', category: 'tabletop', kind: 'library archive', localPort: 8099,
     publicUrl: 'https://rpgs.worldwidesam.net/',
     summary: 'Browse roleplaying games by feeling, mechanic, genre, or one familiar starting point.',
@@ -152,6 +158,6 @@ export function validateCatalog() {
     }
     ids.add(app.id);
   }
-  if (APPS.length !== 19) throw new Error(`Expected 19 apps, found ${APPS.length}`);
+  if (APPS.length !== 20) throw new Error(`Expected 20 apps, found ${APPS.length}`);
   return true;
 }
