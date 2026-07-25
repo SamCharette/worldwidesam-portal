@@ -1,4 +1,4 @@
-import { APPS, CATEGORIES, CATEGORY_ORDER, appsIn } from './catalog.js?v=20260724a';
+import { APPS, CATEGORIES, CATEGORY_ORDER, appsIn } from './catalog.js?v=20260724b';
 
 export function renderCategories(container, state, onSelect) {
   container.innerHTML = CATEGORY_ORDER.map(key => {

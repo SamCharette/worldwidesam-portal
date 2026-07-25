@@ -64,8 +64,8 @@ export const APPS = Object.freeze([
     preview: null
   }),
   Object.freeze({
-    id: 'traceglass', name: 'Traceglass', category: 'tools', kind: 'request observatory', localPort: 5182,
-    publicUrl: 'http://clawdia.tailfe8cfa.ts.net:5182/',
+    id: 'traceglass', name: 'Traceglass', category: 'tools', kind: 'request observatory', localPort: null,
+    publicUrl: 'https://traceglass.worldwidesam.net/',
     summary: 'Watch one public website request unfold through DNS, TLS, redirects, response evidence, and inert dependency declarations.',
     preview: null
   }),
