@@ -102,7 +102,7 @@ test('public routes preserve external URLs, root-relative routes, and local-only
   assert.equal(resolveAppUrl(appById('procon'), publicLocation), 'https://procon.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('idea-graph'), publicLocation), 'https://ideagraph.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('sudbury-regreening'), publicLocation), 'https://sudburyregreening.worldwidesam.net/');
-  assert.equal(resolveAppUrl(appById('traceglass'), publicLocation), 'http://clawdia.tailfe8cfa.ts.net:5182/');
+  assert.equal(resolveAppUrl(appById('traceglass'), publicLocation), 'https://traceglass.worldwidesam.net/');
   assert.equal(resolveOrbitUrl(publicLocation), 'https://worldwidesam.net/orbit/');
 });
 
@@ -111,7 +111,7 @@ test('local routes use the current machine hostname and each destination port', 
   assert.equal(resolveAppUrl(appById('dungeon-desk'), lanLocation), 'http://192.168.1.99:5174/');
   assert.equal(resolveAppUrl(appById('neon-cycle-grid'), lanLocation), 'http://192.168.1.99:4325/');
   assert.equal(resolveAppUrl(appById('decision-please'), lanLocation), 'http://192.168.1.99:5178/');
-  assert.equal(resolveAppUrl(appById('traceglass'), lanLocation), 'http://192.168.1.99:5182/');
+  assert.equal(resolveAppUrl(appById('traceglass'), lanLocation), 'https://traceglass.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('procon'), lanLocation), 'https://procon.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('idea-graph'), lanLocation), 'https://ideagraph.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('sudbury-regreening'), lanLocation), 'http://192.168.1.99:4326/');
@@ -121,7 +121,7 @@ test('local routes use the current machine hostname and each destination port', 
   const loopbackLocation = at('http://localhost:4179/');
   assert.equal(resolveAppUrl(appById('dungeon-desk'), loopbackLocation), 'http://127.0.0.1:5174/');
   assert.equal(resolveAppUrl(appById('neon-cycle-grid'), loopbackLocation), 'http://127.0.0.1:4325/');
-  assert.equal(resolveAppUrl(appById('traceglass'), loopbackLocation), 'http://127.0.0.1:5182/');
+  assert.equal(resolveAppUrl(appById('traceglass'), loopbackLocation), 'https://traceglass.worldwidesam.net/');
   assert.equal(resolveAppUrl(appById('idea-graph'), loopbackLocation), 'https://ideagraph.worldwidesam.net/');
   assert.equal(resolveOrbitUrl(loopbackLocation), 'http://localhost:4179/orbit/');
 });

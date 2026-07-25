@@ -84,10 +84,10 @@ The runtimes remain separate: this portal listens on `127.0.0.1:4178`, while `id
 
 ### Traceglass
 
-The deterministic request observatory is listed in the Tools room on its established port 5182.
-Portal sessions opened through LAN or Tailscale use the current portal hostname with that port; the
-public portal links to Traceglass's stable tailnet-only hostname. There is no public
-`worldwidesam.net` route.
+The deterministic request observatory is listed in the Tools room at
+`https://traceglass.worldwidesam.net/`. Every portal mode uses that public HTTPS route. The tunnel
+reaches the standalone service over loopback on its established port 5182; raw port 5182 is not
+exposed to the internet or used as a portal destination.
 
 ## Agent Authoring API
 
