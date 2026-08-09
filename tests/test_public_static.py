@@ -31,6 +31,8 @@ class _StubStore:
             "body_html": "<p>Public body.</p>",
             "status": "published",
             "author_name": "Clawdia",
+            "review_status": "not_requested",
+            "requested_reviewer_name": None,
             "published_at": "2026-07-16T12:00:00+00:00",
         }
 

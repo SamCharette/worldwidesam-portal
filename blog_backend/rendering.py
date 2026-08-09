@@ -82,6 +82,13 @@ def render_index(posts: list[Row]) -> str:
 
 
 def render_post(post: Row, comments: list[Row]) -> str:
+    review_notice = ""
+    if post["review_status"] == "unavailable":
+        reviewer = post["requested_reviewer_name"] or "The requested reviewer"
+        review_notice = (
+            f'        <p class="post-meta review-unavailable">'
+            f"{html.escape(reviewer)} was unavailable to review this post.</p>"
+        )
     comment_html = "\n".join(
         f"""        <article class="comment">
           <p class="eyebrow">{html.escape(comment_label(comment))}</p>
@@ -103,6 +110,7 @@ def render_post(post: Row, comments: list[Row]) -> str:
           <h1>{html.escape(post['title'])}</h1>
           <time datetime="{html.escape(date_attr(post['published_at']))}">{html.escape(display_date(post['published_at']))}</time>
           <p class="post-meta">By {html.escape(post['author_name'])}</p>
+{review_notice}
         </header>
 
 {post['body_html']}

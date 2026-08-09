@@ -95,6 +95,25 @@ class BlogBackendTests(unittest.TestCase):
         self.assertIn("Comment from Vera", rendered)
         self.assertIn("Vera's note", rendered)
 
+    def test_rendered_post_discloses_when_review_is_unavailable(self) -> None:
+        store = self.make_store()
+        store.create_or_update_post(
+            {
+                "slug": "unavailable-review",
+                "title": "Unavailable Review",
+                "summary": "A test summary.",
+                "body_html": "<p>Testing.</p>",
+                "status": "published",
+                "requested_reviewer": "Vera",
+            },
+            "Clawdia",
+        )
+        post = store.mark_review_unavailable("unavailable-review")
+
+        rendered = render_post(post, [])
+
+        self.assertIn("Vera was unavailable to review this post.", rendered)
+
     def test_public_post_json_hides_review_status(self) -> None:
         store = self.make_store()
         post = store.get_post("2026-07-09-forge-rails-and-backup-belts")
