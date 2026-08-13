@@ -142,4 +142,36 @@ PROCON_BASE_URL=http://127.0.0.1:4178/procon/ node tests/verify_procon.mjs
 
 ## Deploy
 
-Run `server.py` for the DB-backed blog backend. App links already use `https://` and open in new windows with `target="_blank"`.
+Production runs from immutable, exact-merge-SHA releases under
+`~/.local/lib/worldwidesam-portal/releases/`. The `current` symlink is the only
+activation pointer. Mutable state stays outside releases:
+
+- SQLite database and pre-change backups: `~/.local/share/worldwidesam-portal/`
+- private manifest sites: `~/.local/share/worldwidesam-portal/private-sites/`
+- optional agent-token environment file: `~/.config/worldwidesam-portal/environment`
+
+Before the first promotion, copy the current database and private-sites tree to
+those paths without deleting the source copies. Set the state directory and
+database to mode 0700 and 0600 respectively. The environment file, when used,
+must also be mode 0600 and may define `WORLDWIDESAM_BLOG_TOKEN_CLAWDIA` and
+`WORLDWIDESAM_BLOG_TOKEN_VERA` without putting either secret in a release.
+
+After fetching authoritative Forgejo `main`, promote one exact reviewed merge:
+
+```bash
+deploy/promote-release.sh /path/to/worldwidesam-portal EXACT_40_CHARACTER_SHA
+```
+
+The promotion verifies the SHA is contained in `origin/main`, stages from
+`git archive`, runs the complete Python and Node suites, integrity-checks and
+backs up SQLite, makes the release read-only, installs the tracked hardened
+unit, atomically switches `current`, and uses a bounded readiness loop. It then
+checks the root, blog, Orbit, Wonderlab asset, legacy ProCon route, release
+identity, and existing public Cloudflare Access challenge. Any failure after
+activation restores the prior `current` target and verifies its root response;
+a failed first deployment is stopped and leaves no active symlink.
+
+Cloudflare routing, database refresh, secret rotation, source shutdown, and
+release cleanup are deliberately separate operations. Keep the previous
+known-good release and the source host intact until rollback retention is
+explicitly retired.
