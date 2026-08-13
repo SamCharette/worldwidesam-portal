@@ -9,6 +9,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.promotion_harness import PromotionHarness
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -41,6 +43,7 @@ class DeploymentContractTests(unittest.TestCase):
             'merge-base --is-ancestor "$release_sha" origin/main',
             "release already exists; refusing to trust or overwrite it",
             'chmod -R a-w "$staging_path"',
+            'mv -T "$staging_path" "$release_path"',
             'mv -Tf "$current_link.next" "$current_link"',
             'systemctl --user show --property MainPID --value',
             "ss -H -ltnp 'sport = :4178'",
@@ -120,137 +123,68 @@ class DeploymentContractTests(unittest.TestCase):
             self.assertIn("release already exists", result.stderr)
             self.assertFalse(marker.exists())
 
-    def test_failed_first_activation_restores_absent_service_state(self) -> None:
+    def test_atomic_publication_cannot_nest_into_a_racing_release(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            repository = root / "repository"
-            release_root = root / "release-root"
-            state_root = root / "state"
-            fake_bin = root / "bin"
-            fake_state = root / "fake-systemd"
-            repository.mkdir()
-            (repository / "tests").mkdir()
-            shutil.copytree(ROOT / "deploy", repository / "deploy")
-            (repository / "server.py").write_text("print('fixture')\n")
-            (repository / "tests/test_smoke.py").write_text(
-                "import unittest\n\n"
-                "class SmokeTest(unittest.TestCase):\n"
-                "    def test_fixture(self):\n"
-                "        self.assertTrue(True)\n"
-            )
-            (repository / "tests/test_smoke.mjs").write_text(
-                'import test from "node:test";\n'
-                'test("fixture", () => {});\n'
-            )
-            state_root.mkdir()
-            (state_root / "private-sites").mkdir()
-            with sqlite3.connect(state_root / "blog.sqlite3") as connection:
-                connection.execute("CREATE TABLE posts (title TEXT NOT NULL)")
-            fake_bin.mkdir()
-            fake_state.mkdir()
-            systemctl = fake_bin / "systemctl"
-            systemctl.write_text(
-                "#!/bin/bash\n"
-                "set -eu\n"
-                'state=$FAKE_SYSTEMD_STATE\n'
-                'printf "%s\\n" "$*" >> "$state/log"\n'
-                'if [[ ${1:-} == --user ]]; then shift; fi\n'
-                'command=${1:-}; shift || true\n'
-                'case "$command" in\n'
-                '  is-active) test -f "$state/active" ;;\n'
-                '  is-enabled) test -f "$state/enabled" ;;\n'
-                '  show) cat "$state/pid" ;;\n'
-                '  daemon-reload) : ;;\n'
-                '  enable) touch "$state/enabled" ;;\n'
-                '  restart)\n'
-                '    if [[ -f $state/pid ]]; then kill "$(cat "$state/pid")" 2>/dev/null || true; fi\n'
-                '    target=$(readlink -f "$WORLDWIDESAM_PORTAL_RELEASE_ROOT/current")\n'
-                '    (cd "$target" && exec sleep 60) &\n'
-                '    printf "%s\\n" "$!" > "$state/pid"\n'
-                '    touch "$state/active"\n'
-                '    ;;\n'
-                '  disable|stop)\n'
-                '    if [[ -f $state/pid ]]; then kill "$(cat "$state/pid")" 2>/dev/null || true; fi\n'
-                '    rm -f "$state/pid" "$state/active"\n'
-                '    [[ $command == stop ]] || rm -f "$state/enabled"\n'
-                '    ;;\n'
-                '  *) exit 2 ;;\n'
-                "esac\n"
-            )
-            systemctl.chmod(0o755)
-            fake_curl = fake_bin / "curl"
-            fake_curl.write_text("#!/bin/sh\nexit 22\n")
-            fake_curl.chmod(0o755)
-            fake_ss = fake_bin / "ss"
-            fake_ss.write_text(
-                "#!/bin/bash\n"
-                'pid=$(cat "$FAKE_SYSTEMD_STATE/pid")\n'
-                'printf "LISTEN 0 511 127.0.0.1:4178 0.0.0.0:* users:((\\\"python3\\\",pid=%s,fd=3))\\n" "$pid"\n'
-            )
-            fake_ss.chmod(0o755)
-            subprocess.run(
-                ["git", "init", "-b", "main"],
-                cwd=repository,
-                check=True,
-                capture_output=True,
-            )
-            subprocess.run(["git", "add", "."], cwd=repository, check=True)
-            subprocess.run(
-                [
-                    "git",
-                    "-c",
-                    "user.name=Test",
-                    "-c",
-                    "user.email=test@example.invalid",
-                    "commit",
-                    "-m",
-                    "fixture",
-                ],
-                cwd=repository,
-                check=True,
-                capture_output=True,
-            )
-            release_sha = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                cwd=repository,
-                check=True,
-                capture_output=True,
-                text=True,
-            ).stdout.strip()
-            subprocess.run(
-                ["git", "remote", "add", "origin", str(repository)],
-                cwd=repository,
-                check=True,
-            )
-            unit_path = root / "portal.service"
-            environment = os.environ | {
-                "PATH": f"{fake_bin}:{os.environ['PATH']}",
-                "FAKE_SYSTEMD_STATE": str(fake_state),
-                "WORLDWIDESAM_PORTAL_RELEASE_ROOT": str(release_root),
-                "WORLDWIDESAM_PORTAL_STATE_ROOT": str(state_root),
-                "WORLDWIDESAM_PORTAL_UNIT_PATH": str(unit_path),
-                "WORLDWIDESAM_PORTAL_READINESS_ATTEMPTS": "1",
-                "WORLDWIDESAM_PORTAL_READINESS_INTERVAL": "0",
-            }
+            staging = root / "staging"
+            release = root / "release"
+            staging.mkdir()
+            release.mkdir()
+            (staging / "verified").write_text("verified\n")
+            (release / "tampered").write_text("tampered\n")
             result = subprocess.run(
-                [
-                    "bash",
-                    str(ROOT / "deploy/promote-release.sh"),
-                    str(repository),
-                    release_sha,
-                ],
-                env=environment,
+                ["mv", "-T", str(staging), str(release)],
                 capture_output=True,
                 text=True,
             )
             self.assertNotEqual(result.returncode, 0)
-            self.assertFalse((release_root / "current").exists())
-            self.assertFalse(unit_path.exists())
-            self.assertFalse((fake_state / "active").exists())
-            self.assertFalse((fake_state / "enabled").exists())
-            service_log = (fake_state / "log").read_text()
-            self.assertIn("restart worldwidesam-portal.service", service_log)
-            self.assertIn("disable --now worldwidesam-portal.service", service_log)
+            self.assertEqual((release / "tampered").read_text(), "tampered\n")
+            self.assertFalse((release / "staging").exists())
+
+    def test_failed_first_activation_restores_absent_service_state(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            harness = PromotionHarness(Path(directory), ROOT)
+            try:
+                result = harness.run("curl")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((harness.release_root / "current").exists())
+                self.assertFalse(harness.unit_path.exists())
+                self.assertFalse((harness.fake_state / "active").exists())
+                self.assertFalse((harness.fake_state / "enabled").exists())
+            finally:
+                harness.close()
+
+    def test_failed_upgrade_restores_prior_release_unit_and_state(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            harness = PromotionHarness(Path(directory), ROOT, previous=True)
+            try:
+                result = harness.run("curl")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(
+                    (harness.release_root / "current").resolve(),
+                    harness.previous_release,
+                )
+                self.assertEqual(harness.unit_path.read_text(), "previous-unit\n")
+                self.assertTrue((harness.fake_state / "active").exists())
+                self.assertTrue((harness.fake_state / "enabled").exists())
+                service_log = (harness.fake_state / "log").read_text()
+                self.assertGreaterEqual(
+                    service_log.count("restart worldwidesam-portal.service"), 2
+                )
+            finally:
+                harness.close()
+
+    def test_wrong_pid_cwd_or_listener_cannot_pass_readiness(self) -> None:
+        for failure_mode in ("pid", "cwd", "listener"):
+            with self.subTest(failure_mode=failure_mode):
+                with tempfile.TemporaryDirectory() as directory:
+                    harness = PromotionHarness(Path(directory), ROOT)
+                    try:
+                        result = harness.run(failure_mode)
+                        self.assertNotEqual(result.returncode, 0)
+                        self.assertFalse((harness.release_root / "current").exists())
+                    finally:
+                        harness.close()
 
     def test_backup_is_integrity_checked_and_private(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

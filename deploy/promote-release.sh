@@ -56,6 +56,17 @@ cleanup() {
   rm -f -- "$unit_backup"
 }
 
+wait_for_runtime() {
+  expected_release=$1
+  for _attempt in $(seq 1 "$readiness_attempts"); do
+    if verify_runtime "$expected_release" && curl --fail --silent --show-error --max-time 5 http://127.0.0.1:4178/ >/dev/null; then
+      return 0
+    fi
+    sleep "$readiness_interval"
+  done
+  return 1
+}
+
 rollback() {
   if [[ $mutation_started -ne 1 ]]; then
     return
@@ -80,19 +91,18 @@ rollback() {
   fi
   if [[ $was_active -eq 1 ]]; then
     systemctl --user restart "$service_name"
-    rollback_pid=$(systemctl --user show --property MainPID --value "$service_name")
-    test -n "$rollback_pid"
-    test "$(readlink -f "/proc/$rollback_pid/cwd")" = "$previous_target"
+    wait_for_runtime "$previous_target"
   else
     systemctl --user stop "$service_name" >/dev/null 2>&1 || true
   fi
 }
 
 verify_runtime() {
+  expected_release=$1
   systemctl --user is-active --quiet "$service_name" || return 1
   runtime_pid=$(systemctl --user show --property MainPID --value "$service_name")
   [[ $runtime_pid =~ ^[1-9][0-9]*$ ]] || return 1
-  [[ $(readlink -f "/proc/$runtime_pid/cwd") == "$release_path" ]] || return 1
+  [[ $(readlink -f "/proc/$runtime_pid/cwd") == "$expected_release" ]] || return 1
   mapfile -t listeners < <(ss -H -ltnp 'sport = :4178')
   [[ ${#listeners[@]} -eq 1 ]] || return 1
   [[ ${listeners[0]} == *"127.0.0.1:4178"* ]] || return 1
@@ -116,7 +126,7 @@ python3 "$staging_path/deploy/backup_database.py" \
   "$database" "$backup_directory" "$release_sha"
 
 chmod -R a-w "$staging_path"
-mv "$staging_path" "$release_path"
+mv -T "$staging_path" "$release_path"
 staging_path=""
 
 if [[ -L $current_link ]]; then
@@ -142,15 +152,7 @@ mv -Tf "$current_link.next" "$current_link"
 systemctl --user enable "$service_name"
 systemctl --user restart "$service_name"
 
-ready=0
-for _attempt in $(seq 1 "$readiness_attempts"); do
-  if verify_runtime && curl --fail --silent --show-error --max-time 5 http://127.0.0.1:4178/ >/dev/null; then
-    ready=1
-    break
-  fi
-  sleep "$readiness_interval"
-done
-test "$ready" -eq 1
+wait_for_runtime "$release_path"
 
 for route in / /blog/ /orbit/ /wonderlab/app.js /procon/; do
   curl --fail --silent --show-error --max-time 10 "http://127.0.0.1:4178$route" >/dev/null
