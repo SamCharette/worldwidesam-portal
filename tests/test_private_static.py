@@ -44,7 +44,11 @@ def _write_private_site(
         "index.html": b"<!doctype html><title>Family memory</title>",
         "styles.css": b"body { color: navy; }",
         "audio/listen.flac": b"0123456789",
+        "audio/listen.m4a": b"m4a-media",
+        "captions/service.srt": b"1\n00:00:00,000 --> 00:00:01,000\nWelcome\n",
         "downloads/archive.wav": b"archive master",
+        "images/poster.jpg": b"jpeg-poster",
+        "video/service.mp4": b"mp4-media",
     }
     for name, contents in files.items():
         path = site_root / name
@@ -57,6 +61,8 @@ def _write_private_site(
             "index.html": {"file": "index.html"},
             "styles.css": {"file": "styles.css"},
             "audio/listen.flac": {"file": "audio/listen.flac"},
+            "audio/listen.m4a": {"file": "audio/listen.m4a"},
+            "captions/service.srt": {"file": "captions/service.srt"},
             "downloads/Family-Memory.flac": {
                 "file": "audio/listen.flac",
                 "download_name": "Family-Memory.flac",
@@ -65,6 +71,8 @@ def _write_private_site(
                 "file": "downloads/archive.wav",
                 "download_name": "Family-Memory-Archive.wav",
             },
+            "images/poster.jpg": {"file": "images/poster.jpg"},
+            "video/service.mp4": {"file": "video/service.mp4"},
         },
     }
     (site_root / "site.json").write_text(
@@ -165,6 +173,37 @@ class PrivateStaticHttpTests(unittest.TestCase):
             headers["Content-Disposition"],
             'attachment; filename="Family-Memory.flac"',
         )
+
+    def test_memorial_media_types_and_ranges_are_supported(self) -> None:
+        cases = (
+            ("/family-memory/images/poster.jpg", "image/jpeg", b"jpeg-poster"),
+            ("/family-memory/audio/listen.m4a", "audio/mp4", b"m4a-media"),
+            ("/family-memory/video/service.mp4", "video/mp4", b"mp4-media"),
+            (
+                "/family-memory/captions/service.srt",
+                "application/x-subrip; charset=utf-8",
+                b"1\n00:00:00,000 --> 00:00:01,000\nWelcome\n",
+            ),
+        )
+        for path, expected_type, expected_body in cases:
+            with self.subTest(path=path):
+                status, headers, body = self.request(path)
+                self.assertEqual(status, 200)
+                self.assertEqual(headers["Content-Type"], expected_type)
+                self.assertEqual(body, expected_body)
+
+        for path, expected_body in (
+            ("/family-memory/audio/listen.m4a", b"4a-"),
+            ("/family-memory/video/service.mp4", b"p4-"),
+        ):
+            with self.subTest(range_path=path):
+                status, headers, body = self.request(
+                    path,
+                    headers={"Range": "bytes=1-3"},
+                )
+                self.assertEqual(status, 206)
+                self.assertEqual(headers["Content-Range"], "bytes 1-3/9")
+                self.assertEqual(body, expected_body)
 
     def test_single_bounded_ranges_support_audio_seeking(self) -> None:
         cases = (
